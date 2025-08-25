@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'app_core',
     'app_colaboradores',
     'app_epis',
-    'app_entregas'
+    'app_entregas',
     'app_relatorios',
 ]
 
