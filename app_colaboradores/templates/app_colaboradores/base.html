@@ -1,0 +1,25 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Colaboradores{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'app_colaboradores/css/main.css' %}">
+</head>
+<body>
+  <header>
+    <h1>Colaboradores</h1>
+    <nav>
+      <a href="/">Início</a>
+      <!-- futuros links do módulo -->
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{% static 'app_colaboradores/js/main.js' %}"></script>
+</body>
+</html>
