@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     # Apps do projeto
     'app_core',
     'app_colaboradores',
+    'app_epis',
+    'app_entregas'
+    'app_relatorios',
 ]
 
 MIDDLEWARE = [
