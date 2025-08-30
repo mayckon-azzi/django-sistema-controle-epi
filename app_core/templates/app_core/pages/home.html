@@ -1,28 +1,27 @@
-{% extends "app_core/partials/base.html" %}
-{% block title %}Home - Sistema EPI{% endblock %}
-{% block content %}
-  <h2>Home</h2>
-  <p>Escolha um módulo:</p>
+{% extends "app_core/partials/base.html" %} {% block title %}Home - Sistema
+EPI{% endblock %} {% block content %}
+<h2>Home</h2>
+<p>Escolha um módulo:</p>
 
-  <div class="cards">
-    <a class="card" href="{% url 'app_colaboradores:lista' %}">
-      <h3>Colaboradores</h3>
-      <p>Cadastro e listagem de colaboradores.</p>
-    </a>
+<div class="cards">
+  <a class="card" href="{% url 'app_colaboradores:lista' %}">
+    <h3>Colaboradores</h3>
+    <p>Cadastro e listagem de colaboradores.</p>
+  </a>
 
-    <a class="card" href="{% url 'app_epis:lista' %}">
-      <h3>EPIs</h3>
-      <p>Catálogo de EPIs com filtros.</p>
-    </a>
+  <a class="card" href="{% url 'app_epis:lista' %}">
+    <h3>EPIs</h3>
+    <p>Catálogo de EPIs com filtros.</p>
+  </a>
 
-    <a class="card" href="{% url 'app_entregas:lista' %}">
-      <h3>Entregas</h3>
-      <p>Histórico de entregas por colaborador/EPI.</p>
-    </a>
+  <a class="card" href="{% url 'app_entregas:lista' %}">
+    <h3>Entregas</h3>
+    <p>Histórico de entregas por colaborador/EPI.</p>
+  </a>
 
-    <a class="card" href="{% url 'app_relatorios:index' %}">
-      <h3>Relatórios</h3>
-      <p>Relatórios por período, colaborador e EPI.</p>
-    </a>
-  </div>
+  <a class="card" href="{% url 'app_relatorios:index' %}">
+    <h3>Relatórios</h3>
+    <p>Relatórios por período, colaborador e EPI.</p>
+  </a>
+</div>
 {% endblock %}
