@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}App Colaboradores{% endblock %}</title>
+    <link
+      rel="stylesheet"
+      href="{% static 'app_colaboradores/css/app.css' %}"
+    />
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="container nav-content">
+        <a href="{% url 'app_colaboradores:lista' %}" class="brand"
+          >Controle de EPIs</a
+        >
+        <nav class="nav-links">
+          <a href="{% url 'app_colaboradores:lista' %}">Colaboradores</a>
+          <a href="{% url 'app_colaboradores:criar' %}">Novo</a>
+          {% if request.user.is_authenticated %}
+          <span class="nav-user">Olá, {{ request.user.username }}</span>
+          <a class="btn secondary" href="{% url 'app_colaboradores:sair' %}"
+            >Sair</a
+          >
+          {% else %}
+          <a class="btn" href="{% url 'app_colaboradores:entrar' %}">Entrar</a>
+          <a class="btn outline" href="{% url 'app_colaboradores:registrar' %}"
+            >Cadastrar</a
+          >
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">{% block content %}{% endblock %}</main>
+
+    <footer class="footer">
+      <div class="container">
+        <small>© {{ now|date:"Y" }} EPI Manager</small>
+      </div>
+    </footer>
+  </body>
+</html>

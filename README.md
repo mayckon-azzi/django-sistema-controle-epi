@@ -1,7 +1,6 @@
 # Sistema de Controle de EPI
 
-Sistema web desenvolvido em **Django + Python** para gerenciar o ciclo de vida dos **EPIs (Equipamentos de Proteção Individual)** em uma organização.  
-O sistema permite que **colaboradores**, **almoxarifes** e **administradores** solicitem, entreguem, cadastrem e acompanhem a distribuição de EPIs.
+Sistema web desenvolvido em Django + Python para gerenciar o ciclo de vida dos EPIs (Equipamentos de Proteção Individual) por meio de solicitações, empréstimos (entregas) e recebimentos (devoluções), garantindo rastreabilidade, conformidade e controle de estoque.
 
 ---
 
@@ -19,19 +18,20 @@ O sistema permite que **colaboradores**, **almoxarifes** e **administradores** s
   - [Requisitos Não Funcionais (RNF)](#requisitos-não-funcionais-rnf)
   - [Regras de Negócio (RN)](#regras-de-negócio-rn)
 - [Instalação e Execução](#instalação-e-execução)
-- [Próximos Passos](#próximos-passos)
+- [Estilos e UI](#estilos-e-ui)
+
 
 ---
 
 ## Visão Geral
 
-O sistema foi projetado para **controlar a distribuição de EPIs**, garantindo rastreabilidade e organização.  
-De forma simplificada, ele permite:
+O sistema permite:
 
-- Cadastro de tipos de EPIs com validade, vida útil e estoque.
-- Solicitação de EPIs por parte dos colaboradores.
-- Registro de entregas feitas pelo almoxarife.
-- Relatórios básicos para acompanhamento da distribuição.
+- Solicitação de empréstimos de EPIs por colaboradores.
+- Cadastro e manutenção de tipos de EPIs e estoque pelos almoxarifes.
+- Registro de empréstimos (entregas) e recebimentos (devoluções).
+- Relatórios de empréstimos por colaborador, por EPI e por período.
+- Atualização automática do estoque após cada movimentação (entrega/recebimento).
 
 [🔝 Voltar ao Índice](#indice)
 
@@ -39,20 +39,20 @@ De forma simplificada, ele permite:
 
 ## Perfis de Usuário
 
-- **Administrador**
+- Administrador
 
   - Gerencia usuários e acessos.
   - Acompanha relatórios globais.
 
-- **Almoxarife**
+- Almoxarife
 
-  - Cadastra EPIs.
-  - Atende solicitações de entrega.
-  - Controla o estoque.
+  - Cadastra tipos de EPIs e gerencia estoque.
+  - Atende solicitações de empréstimo (entrega).
+  - Registra recebimentos (devoluções) de EPIs.
 
-- **Colaborador**
-  - Solicita EPIs necessários para sua função.
-  - Consulta histórico de solicitações e entregas.
+- Colaborador
+  - Solicita empréstimos de EPIs necessários.
+  - Consulta histórico e status das solicitações e empréstimos.
 
 [🔝 Voltar ao Índice](#indice)
 
@@ -64,25 +64,24 @@ De forma simplificada, ele permite:
 
 - Criar e editar tipos de EPIs.
 - Informações: nome, categoria, tamanhos, validade, vida útil, foto.
-- Controle de **estoque disponível**.
+- Controle de estoque disponível.
 
-### Solicitação de EPIs (Colaborador)
+### Solicitação de Empréstimos (Colaborador)
 
-- Solicitação feita via painel.
-- Acompanha o status (**pendente** ou **atendida**).
+- Solicitar EPI e quantidade via painel.
+- Acompanhar status: pendente, atendida, recusada (opcional).
 
-### Entrega de EPIs (Almoxarife)
+### Empréstimos e Recebimentos (Almoxarife)
 
-- Visualiza solicitações pendentes.
-- Registra a entrega realizada.
-- Estoque é atualizado automaticamente.
+- Visualizar solicitações pendentes e atender com entrega.
+- Registrar recebimento (devolução) de EPIs emprestados.
+- Estoque atualizado automaticamente a cada operação.
 
 ### Relatórios
 
-- Por **colaborador**: histórico de entregas realizadas.
-- Por **EPI**: quantidades entregues e saldo em estoque.
-- Por **período/data**: total entregue em um intervalo definido.
-- Exportação simples (CSV/PDF opcional).
+- Por colaborador: empréstimos ativos e histórico.
+- Por EPI: quantidades emprestadas e devolvidas; saldo em estoque.
+- Por período: total de empréstimos/recebimentos no intervalo.
 
 [🔝 Voltar ao Índice](#indice)
 
@@ -90,10 +89,10 @@ De forma simplificada, ele permite:
 
 ## Fluxo de Funcionamento
 
-1. **Colaborador** acessa o sistema e solicita um EPI.
-2. **Almoxarife** recebe a solicitação, confirma a entrega e atualiza o estoque.
-3. O sistema registra a movimentação e mantém o histórico.
-4. **Administrador ou gestor** pode gerar relatórios filtrados (por colaborador, EPI ou período).
+1. Colaborador solicita o empréstimo de um EPI.
+2. Almoxarife atende a solicitação e realiza a entrega (empréstimo).
+3. Após uso, o colaborador devolve o EPI e o almoxarife registra o recebimento.
+4. O sistema atualiza o estoque e mantém o histórico para relatórios.
 
 [🔝 Voltar ao Índice](#indice)
 
@@ -101,16 +100,21 @@ De forma simplificada, ele permite:
 
 ## Modelos de Dados
 
-Estrutura inicial de tabelas no Django:
+- TipoEPI
 
-- **TipoEPI**  
-  Nome, categoria, tamanho, validade, vida útil, foto, quantidade em estoque.
+  - Nome, categoria, tamanho, validade, vida útil, foto, quantidade_estoque.
 
-- **SolicitacaoEPI**  
-  Colaborador, EPI solicitado, quantidade, data, status (pendente/atendida).
+- SolicitacaoEmprestimo
 
-- **EntregaEPI**  
-  Solicitação vinculada, almoxarife responsável, data da entrega, quantidade.
+  - Colaborador, EPI, quantidade, data_solicitacao, status (pendente/atendida/recusada).
+
+- EmprestimoEPI
+  - Solicitação vinculada, almoxarife responsável, data_entrega, quantidade, data_prevista_devolucao (opcional), data_recebimento (quando devolvido), status (ativo/devolvido).
+
+Observações:
+
+- Estoque decrementa na entrega e incrementa no recebimento.
+- Regras impedem estoque negativo.
 
 [🔝 Voltar ao Índice](#indice)
 
@@ -118,12 +122,17 @@ Estrutura inicial de tabelas no Django:
 
 ## Telas Mínimas
 
-- **Login/Logout** (autenticação padrão Django).
-- **Dashboard** por perfil:
-  - Colaborador → solicitações e histórico.
-  - Almoxarife → cadastro de EPIs, solicitações pendentes, estoque.
-  - Administrador → relatórios e gestão de usuários.
-- **Relatórios** → filtros por colaborador, EPI ou período.
+- Home/Inicio/Dashboard
+[Home page](docs/home-page.jpg)
+- Login/Logout (autenticação Django).
+[Tela de login](docs/tela-login.jpg)
+[Tela de cadastro](docs/tela-cadastro.jpg)
+- Dashboard por perfil:
+  - Colaborador: criar solicitações, acompanhar status, histórico.
+  - Almoxarife: cadastro de EPIs, solicitações pendentes, empréstimos ativos, registrar recebimentos, estoque.
+  - Administrador: relatórios e gestão de usuários.
+[Tela da Lista de Solicitações](docs/lista-solicitacoes.jpg)
+- Relatórios: filtros por colaborador, EPI ou período.
 
 [🔝 Voltar ao Índice](#indice)
 
@@ -133,11 +142,11 @@ Estrutura inicial de tabelas no Django:
 
 ### Caso de Uso
 
-![Diagrama de Caso de Uso](docs/diagrama-caso-uso.jpg)
+[Diagrama de Caso de Uso](docs/diagrama-caso-uso.jpg)
 
 ### Entidades e Relacionamento
 
-![Diagrama de Caso de Uso](docs/diagrama-entidade-relacionamento.png)
+[Diagrama DER](docs/diagrama-der.jpg)
 
 [🔝 Voltar ao Índice](#indice)
 
@@ -147,26 +156,25 @@ Estrutura inicial de tabelas no Django:
 
 ### Requisitos Funcionais (RF)
 
-1. O sistema deve permitir que **colaboradores** solicitem EPIs.
-2. O sistema deve permitir que **almoxarifes** cadastrem tipos de EPIs.
-3. O sistema deve permitir que **almoxarifes** registrem a entrega de EPIs.
-4. O sistema deve gerar relatórios de entregas por colaborador, por EPI e por período.
+1. O sistema deve permitir que colaboradores solicitem empréstimos de EPIs.
+2. O sistema deve permitir que almoxarifes cadastrem tipos de EPIs.
+3. O sistema deve permitir que almoxarifes registrem a entrega e recebimento de EPIs emprestados.
+4. O sistema deve gerar relatórios de empréstimos por colaborador, por EPI e por período.
 5. O sistema deve atualizar automaticamente o estoque após cada entrega.
 
 ### Requisitos Não Funcionais (RNF)
 
-1. O sistema deve ser desenvolvido em **Django + Python**.
+1. O sistema deve ser desenvolvido em Django + Python.
 2. O banco de dados deve ser relacional (SQLite ou MySQL).
 3. O sistema deve possuir autenticação baseada em usuários do Django.
 4. O sistema deve possuir interface web responsiva e simples.
-5. O sistema deve permitir exportação de relatórios em CSV ou PDF.
 
 ### Regras de Negócio (RN)
 
-1. Cada entrega de EPI deve estar vinculada a uma solicitação feita por um colaborador.
+1. Cada empréstimo de EPI deve estar vinculado a uma solicitação feita por um colaborador.
 2. O estoque não pode ser negativo após uma entrega.
-3. Apenas **almoxarifes** podem registrar entregas de EPIs.
-4. Apenas **administradores** podem cadastrar e gerenciar usuários.
+3. Apenas almoxarifes podem registrar entregas de EPIs.
+4. Apenas administradores podem cadastrar e gerenciar usuários.
 5. Um colaborador só pode solicitar EPIs previamente cadastrados no sistema.
 
 [🔝 Voltar ao Índice](#indice)
@@ -215,19 +223,7 @@ python manage.py runserver
 
 ---
 
-## Próximos Passos
-
-- Documentar **Casos de Uso** detalhados.
-- Criar os diagramas (**Casos de Uso** e **DER**).
-- Implementar os primeiros testes automatizados.
-- Adicionar relatórios exportáveis (**CSV/PDF**).
-
-[🔝 Voltar ao Índice](#indice)
-
----
-
 ## Estilos e UI
-
 O frontend utiliza uma estilização moderna e clean com CSS dividido por responsabilidade:
 
 - static/css/reset.css, variables.css, base.css, layout.css, components.css

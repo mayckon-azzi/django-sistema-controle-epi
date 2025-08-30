@@ -1,0 +1,60 @@
+{% extends "app_colaboradores/partials/base.html" %} 
+{% load static %} 
+{% block title%}Cadastrar{% endblock %} 
+{% block content %}
+<div class="card narrow">
+  <div class="card-header">
+    <h2>Criar Conta</h2>
+  </div>
+  <div class="card-body">
+    {% if erro_banco %}
+    <div
+      class="alert error"
+      style="
+        border: 1px solid #fecaca;
+        background: #fee2e2;
+        color: #7f1d1d;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+      "
+    >
+      {{ erro_banco }}
+    </div>
+    {% endif %}
+    <form method="post" class="form-grid">
+      {% csrf_token %} {{ form.non_field_errors }}
+      <div class="form-control">
+        <label>Usuário</label>
+        {{ form.username }} {{ form.username.errors }}
+      </div>
+      <div class="form-control">
+        <label>E-mail</label>
+        {{ form.email }} {{ form.email.errors }}
+      </div>
+      <div class="form-control">
+        <label>Nome</label>
+        {{ form.nome }} {{ form.nome.errors }}
+      </div>
+      <div class="form-control">
+        <label>Matrícula</label>
+        {{ form.matricula }} {{ form.matricula.errors }}
+      </div>
+      <div class="form-control">
+        <label>Senha</label>
+        {{ form.password1 }} {{ form.password1.errors }}
+      </div>
+      <div class="form-control">
+        <label>Confirmar Senha</label>
+        {{ form.password2 }} {{ form.password2.errors }}
+      </div>
+      <div class="actions">
+        <a class="btn outline" href="{% url 'app_colaboradores:entrar' %}"
+          >Cancelar</a
+        >
+        <button class="btn" type="submit">Cadastrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
