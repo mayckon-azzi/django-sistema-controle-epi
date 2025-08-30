@@ -142,11 +142,11 @@ Observações:
 
 ### Caso de Uso
 
-[Diagrama de Caso de Uso](docs/diagrama-caso-uso.jpg)
+![Diagrama de Caso de Uso](docs/diagrama-caso-uso.jpg)
 
 ### Entidades e Relacionamento
 
-[Diagrama DER](docs/diagrama-der.jpg)
+![Diagrama de Caso de Uso](docs/diagrama-entidade-relacionamento.png)
 
 [🔝 Voltar ao Índice](#indice)
 
