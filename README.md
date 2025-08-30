@@ -142,7 +142,7 @@ Observações:
 
 ### Caso de Uso
 
-![Diagrama de Caso de Uso](docs/diagrama-caso-uso.jpg)
+![Diagrama de Caso de Uso](<img width="1361" height="1052" alt="Image" src="https://github.com/user-attachments/assets/6e62a4ff-3ba8-4a50-8138-20a1140a3ec9" />)
 
 ### Entidades e Relacionamento
 
