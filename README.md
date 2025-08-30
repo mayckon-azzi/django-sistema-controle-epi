@@ -123,15 +123,15 @@ Observações:
 ## Telas Mínimas
 
 - Home/Inicio/Dashboard
-[Home page](docs/home-page.jpg)
+![Home page](docs/home-page.jpg)
 - Login/Logout (autenticação Django).
-[Tela de login](docs/tela-login.jpg)
-[Tela de cadastro](docs/tela-cadastro.jpg)
+![Tela de login](docs/tela-login.jpg)
+![Tela de cadastro](docs/tela-cadastro.jpg)
 - Dashboard por perfil:
   - Colaborador: criar solicitações, acompanhar status, histórico.
   - Almoxarife: cadastro de EPIs, solicitações pendentes, empréstimos ativos, registrar recebimentos, estoque.
   - Administrador: relatórios e gestão de usuários.
-[Tela da Lista de Solicitações](docs/lista-solicitacoes.jpg)
+![Tela da Lista de Solicitações](docs/lista-solicitacoes.jpg)
 - Relatórios: filtros por colaborador, EPI ou período.
 
 [🔝 Voltar ao Índice](#indice)
@@ -142,11 +142,11 @@ Observações:
 
 ### Caso de Uso
 
-[Diagrama de Caso de Uso](docs/diagrama-caso-uso.jpg)
+![Diagrama de Caso de Uso](docs/diagrama-caso-uso.jpg)
 
 ### Entidades e Relacionamento
 
-[Diagrama DER](docs/diagrama-der.jpg)
+![Diagrama DER](docs/diagrama-der.jpg)
 
 [🔝 Voltar ao Índice](#indice)
 
