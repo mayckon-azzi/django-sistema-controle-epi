@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Sistema EPI{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'app_core/css/main.css' %}" />
+    <link rel="stylesheet" href="{% static 'app_core/css/main.css' %}?v=h2" />
     {% block extra_css %}{% endblock %}
   </head>
   <body>
@@ -19,6 +19,27 @@
         <a href="{% url 'app_relatorios:index' %}">Relatórios</a>
       </nav>
     </header>
+    {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+      <div class="message {{ message.tags }}">
+        <span>{{ message }}</span>
+        <button
+          type="button"
+          class="close"
+          aria-label="Fechar"
+          onclick="this.parentElement.remove()"
+        >
+          ×
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <section class="pagebar">
+      <h2>{% block page_title %}{% endblock %}</h2>
+      <div class="breadcrumb">{% block breadcrumb %}{% endblock %}</div>
+    </section>
 
     <main>{% block content %}{% endblock %}</main>
 

@@ -1,6 +1,17 @@
-{% extends "app_epis/partials/base.html" %}
+{% extends "app_core/partials/base.html" %}
+{% load static %}
+
 {% block title %}Lista de EPIs{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'app_epis/css/main.css' %}">
+{% endblock %}
+
 {% block content %}
   <h2>Lista de EPIs</h2>
   <p>Em breve: tabela com filtros.</p>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'app_epis/js/main.js' %}"></script>
 {% endblock %}
