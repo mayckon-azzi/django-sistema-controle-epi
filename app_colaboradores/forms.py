@@ -6,7 +6,18 @@ from .models import Colaborador
 class ColaboradorForm(forms.ModelForm):
 	class Meta:
 		model = Colaborador
-		fields = ['nome', 'email', 'matricula', 'cargo', 'setor', 'telefone', 'ativo']
+		fields = ['nome','email','matricula','cargo','setor','telefone','ativo']
+		widgets = {
+				"nome": forms.TextInput(attrs={"placeholder": "Nome completo"}),
+				"email": forms.EmailInput(attrs={"placeholder": "email@empresa.com"}),
+				"matricula": forms.TextInput(attrs={"placeholder": "Ex.: C123"}),
+				"cargo": forms.TextInput(attrs={"placeholder": "Opcional"}),
+				"setor": forms.TextInput(attrs={"placeholder": "Opcional"}),
+				"telefone": forms.TextInput(attrs={"placeholder": "Opcional"}),
+		}
+		
+	def clean_matricula(self):
+			return self.cleaned_data["matricula"].strip().upper()
 
 class RegisterForm(UserCreationForm):
 	email = forms.EmailField(required=True)
@@ -20,11 +31,10 @@ class RegisterForm(UserCreationForm):
 	def save(self, commit=True):
 		user = super().save(commit=commit)
 		if commit:
-			Colaborador.objects.create(
-				user=user,
-				nome=self.cleaned_data['nome'],
-				email=self.cleaned_data['email'],
-				matricula=self.cleaned_data['matricula'],
-				ativo=True,
-			)
+				Colaborador.objects.create(
+						nome=self.cleaned_data['nome'],
+						email=self.cleaned_data['email'],
+						matricula=self.cleaned_data['matricula'],
+						ativo=True,
+				)
 		return user
