@@ -9,19 +9,7 @@
   --red: #dc2626;
   --green: #16a34a;
 }
-* {
-  box-sizing: border-box;
-}
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font: 14px/1.5 system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-}
-a {
-  text-decoration: none;
-  color: var(--blue);
-}
+
 .container {
   max-width: 1100px;
   margin: 0 auto;

@@ -1,55 +1,87 @@
 {% load static %}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}Sistema EPI{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'app_core/css/main.css' %}?v=h2" />
-    {% block extra_css %}
-    {% endblock %}
-  </head>
-  <body>
-    <header>
-      <h1 class="site-title">Sistema EPI</h1>
-      <nav class="nav">
-        <a href="{% url 'app_core:home' %}">Início</a>
-        <a href="{% url 'app_colaboradores:lista' %}">Colaboradores</a>
-        <a href="{% url 'app_epis:lista' %}">EPIs</a>
-        <a href="{% url 'app_entregas:lista' %}">Entregas</a>
-        <a href="{% url 'app_relatorios:index' %}">Relatórios</a>
-      </nav>
-    </header>
-    {% if messages %}
-    <div class="messages">
-      {% for message in messages %}
-      <div class="message {{ message.tags }}">
-        <span>{{ message }}</span>
-        <button
-          type="button"
-          class="close"
-          aria-label="Fechar"
-          onclick="this.parentElement.remove()"
-        >
-          ×
-        </button>
-      </div>
-      {% endfor %}
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Sistema EPI{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'app_core/css/main.css' %}?v=ui2">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Topbar: logo + usuário -->
+  <header class="topbar">
+    <div class="left">
+      <button class="sidebar-toggle" aria-label="Abrir menu" onclick="toggleSidebar()">☰</button>
+      <a class="brand" href="{% url 'app_core:home' %}">
+        <img class="logo" src="{% static 'app_core/img/logo.svg' %}" alt="Logo">
+        <span class="brand-name">Sistema EPI</span>
+      </a>
     </div>
-    {% endif %}
-    <section class="pagebar">
-      <h2>{% block page_title %}{% endblock %}</h2>
-      <div class="breadcrumb">{% block breadcrumb %}{% endblock %}</div>
-    </section>
+    <div class="topbar-right">
+      {% if request.user.is_authenticated %}
+        <span class="user">{{ request.user.get_full_name|default:request.user.username }}</span>
+        <form class="logout-form" method="post" action="{% url 'app_colaboradores:sair' %}">
+        {% csrf_token %}
+        <button class="link-logout" type="submit" title="Sair">Sair</button>
+      </form>
+      {% else %}
+        <a class="link" href="{% url 'app_colaboradores:entrar' %}">Entrar</a>
+      {% endif %}
+    </div>
+  </header>
 
-    <main>{% block content %}{% endblock %}</main>
-
-    <script src="{% static 'app_core/js/main.js' %}"></script>
-    {% block extra_js %}{% endblock %}
-    <footer class="footer">
-      <div class="container">
-        <small>© 2025 — Sistema de Controle de EPI</small>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" data-collapsible>
+      <div class="sidebar-head">
+        <button class="collapse-btn" aria-label="Recolher/Expandir menu" aria-expanded="true" onclick="toggleSidebarCollapse()"> ‹ </button>
       </div>
-    </footer>
-  </body>
+      <nav class="sidenav">
+        {% with ns=request.resolver_match.namespace %}
+          <a class="item {% if ns == 'app_core' %}active{% endif %}" href="{% url 'app_core:home' %}" title="Início"><span class="label">Início</span></a>
+          <a class="item {% if ns == 'app_colaboradores' %}active{% endif %}" href="{% url 'app_colaboradores:lista' %}" title="Colaboradores"><span class="label">Colaboradores</span></a>
+          <a class="item {% if ns == 'app_epis' %}active{% endif %}" href="{% url 'app_epis:lista' %}" title="EPIs"><span class="label">EPIs</span></a>
+          <a class="item {% if ns == 'app_entregas' %}active{% endif %}" href="{% url 'app_entregas:lista' %}" title="Entregas"><span class="label">Entregas</span></a>
+          <a class="item {% if ns == 'app_relatorios' %}active{% endif %}" href="{% url 'app_relatorios:index' %}" title="Relatórios"><span class="label">Relatórios</span></a>
+        {% endwith %}
+      </nav>
+    </aside>
+
+    <!-- Conteúdo -->
+    <section class="content">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="message {{ message.tags }}">
+              <span>{{ message }}</span>
+              <button type="button" class="close" aria-label="Fechar" onclick="this.parentElement.remove()">×</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <section class="pagebar">
+        <h2>{% block page_title %}{% endblock %}</h2>
+        <div class="breadcrumb">{% block breadcrumb %}{% endblock %}</div>
+      </section>
+
+      <main id="main">
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="footer">
+        <div class="container">
+          <small>© 2025 — Sistema de Controle de EPI</small>
+        </div>
+      </footer>
+    </section>
+  </div>
+
+  <script src="{% static 'app_core/js/main.js' %}?v=ui2"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+<a class="skip-link" href="#main">Pular para o conteúdo</a>
 </html>
