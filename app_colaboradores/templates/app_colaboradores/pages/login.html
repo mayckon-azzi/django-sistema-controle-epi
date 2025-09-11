@@ -1,6 +1,9 @@
 {% extends "app_colaboradores/partials/base.html" %}
 {% load static %}
 {% block title %}Entrar{%  endblock %}
+{% block extra_css %}
+  {% comment %} <link rel="stylesheet" href="{% static 'app_colaboradores/css/login.css' %}"> {% endcomment %}
+{% endblock %}
 {% block content %}
 <div class="card narrow">
   <div class="card-header">
