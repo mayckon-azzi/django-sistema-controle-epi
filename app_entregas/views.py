@@ -1,16 +1,18 @@
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import Entrega
+from .models import Solicitacao
 from app_colaboradores.models import Colaborador
 from app_epis.models import EPI
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.contrib import messages
-from .forms import EntregaForm
 from django.views.generic import UpdateView, DeleteView, DetailView
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.views.generic import ListView
+from django.shortcuts import redirect
+from .forms import SolicitacaoForm
 
 
 def lista(request):
@@ -19,7 +21,7 @@ def lista(request):
     epi_id = request.GET.get("epi", "")
     status = request.GET.get("status", "")
 
-    qs = Entrega.objects.select_related("colaborador", "epi", "epi__categoria")
+    qs = Solicitacao.objects.select_related("colaborador", "epi", "epi__categoria")
 
     if q:
         qs = qs.filter(
@@ -49,14 +51,14 @@ def lista(request):
         "status": status,
         "colaboradores": Colaborador.objects.all().only("id", "nome"),
         "epis": EPI.objects.all().only("id", "nome"),
-        "statuses": Entrega.Status.choices,
+        "statuses": Solicitacao.Status.choices,
     }
     return render(request, "app_entregas/pages/list.html", context)
 
 class CriarEntregaView(LoginRequiredMixin, CreateView):
     login_url = reverse_lazy('app_colaboradores:entrar')
-    model = Entrega
-    form_class = EntregaForm
+    model = Solicitacao
+    form_class = SolicitacaoForm
     template_name = 'app_entregas/pages/form.html'
     success_url = reverse_lazy('app_entregas:lista')
 
@@ -67,8 +69,8 @@ class CriarEntregaView(LoginRequiredMixin, CreateView):
     
 class AtualizarEntregaView(LoginRequiredMixin, UpdateView):
     login_url = reverse_lazy('app_colaboradores:entrar')
-    model = Entrega
-    form_class = EntregaForm
+    model = Solicitacao
+    form_class = SolicitacaoForm
     template_name = 'app_entregas/pages/form.html'
     success_url = reverse_lazy('app_entregas:lista')
 
@@ -79,7 +81,7 @@ class AtualizarEntregaView(LoginRequiredMixin, UpdateView):
 
 class ExcluirEntregaView(LoginRequiredMixin, DeleteView):
     login_url = reverse_lazy('app_colaboradores:entrar')
-    model = Entrega
+    model = Solicitacao
     template_name = 'app_entregas/pages/confirm_delete.html'
     success_url = reverse_lazy('app_entregas:lista')
 
@@ -89,6 +91,36 @@ class ExcluirEntregaView(LoginRequiredMixin, DeleteView):
     
 class DetalheEntregaView(LoginRequiredMixin, DetailView):
     login_url = reverse_lazy('app_colaboradores:entrar')
-    model = Entrega
+    model = Solicitacao
     template_name = 'app_entregas/pages/detail.html'
     context_object_name = 'entrega'
+
+class CriarSolicitacaoView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    permission_required = "app_entregas.add_solicitacao"
+    raise_exception = True
+    model = Solicitacao
+    form_class = SolicitacaoForm
+    template_name = "app_entregas/pages/solicitacao_form.html"
+    success_url = reverse_lazy("app_entregas:minhas_solicitacoes")
+
+    def dispatch(self, request, *args, **kwargs):
+        # precisa ter Colaborador vinculado e ativo
+        if not hasattr(request.user, "colaborador") or not request.user.colaborador.ativo:
+            messages.error(request, "Sua conta não está vinculada a um Colaborador ativo.")
+            return redirect("app_core:home")
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.colaborador = self.request.user.colaborador
+        messages.success(self.request, "Solicitação enviada com sucesso.")
+        return super().form_valid(form)
+
+class MinhasSolicitacoesView(LoginRequiredMixin, ListView):
+    template_name = "app_entregas/pages/solicitacao_list.html"
+    context_object_name = "solicitacoes"
+    paginate_by = 10
+
+    def get_queryset(self):
+        if not hasattr(self.request.user, "colaborador"):
+            return Solicitacao.objects.none()
+        return Solicitacao.objects.filter(colaborador=self.request.user.colaborador).select_related("epi")

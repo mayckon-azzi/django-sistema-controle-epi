@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import Entrega
+from .models import Solicitacao
 
-@admin.register(Entrega)
-class EntregaAdmin(admin.ModelAdmin):
+@admin.register(Solicitacao)
+class SolicitacaoAdmin(admin.ModelAdmin):
     list_display = ("data_entrega", "colaborador", "epi", "quantidade", "status")
     list_filter = ("status", "epi__categoria")
     search_fields = ("colaborador__nome", "colaborador__email", "colaborador__matricula",
