@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import EPI, CategoriaEPI
@@ -7,6 +7,8 @@ from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from .forms import EPIForm
+from django.views.generic import UpdateView, DeleteView
+from django.db.models import ProtectedError
 
 def lista(request):
     q = request.GET.get("q", "").strip()
@@ -42,3 +44,31 @@ class CriarEPIView(LoginRequiredMixin, CreateView):
         resp = super().form_valid(form)
         messages.success(self.request, "EPI criado com sucesso.")
         return resp
+    
+class AtualizarEPIView(LoginRequiredMixin, UpdateView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    model = EPI
+    form_class = EPIForm
+    template_name = 'app_epis/pages/form.html'
+    success_url = reverse_lazy('app_epis:lista')
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        messages.success(self.request, "EPI atualizado com sucesso.")
+        return resp
+
+class ExcluirEPIView(LoginRequiredMixin, DeleteView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    model = EPI
+    template_name = 'app_epis/pages/confirm_delete.html'
+    success_url = reverse_lazy('app_epis:lista')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        try:
+            resp = super().delete(request, *args, **kwargs)
+            messages.success(self.request, "EPI excluído com sucesso.")
+            return resp
+        except ProtectedError:
+            messages.error(self.request, "Não é possível excluir este EPI porque há entregas associadas.")
+            return redirect(self.success_url)
