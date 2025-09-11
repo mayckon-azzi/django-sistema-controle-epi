@@ -1,11 +1,11 @@
 {% extends "app_core/partials/base.html" %}
 {% load static %}
-
-{% block title %}Nova Entrega{% endblock %}
+{% block title %}{% if view.object %}Editar Entrega{% else %}Nova Entrega{% endif %}{% endblock %}
 {% block page_title %}Entregas{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'app_core:home' %}">Início</a> ›
-  <a href="{% url 'app_entregas:lista' %}">Entregas</a> › Nova
+  <a href="{% url 'app_entregas:lista' %}">Entregas</a> ›
+  {% if view.object %}Editar{% else %}Nova{% endif %}
 {% endblock %}
 
 {% block extra_css %}

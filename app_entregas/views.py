@@ -9,6 +9,7 @@ from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from .forms import EntregaForm
+from django.views.generic import UpdateView, DeleteView, DetailView
 
 
 def lista(request):
@@ -62,3 +63,31 @@ class CriarEntregaView(LoginRequiredMixin, CreateView):
         resp = super().form_valid(form)
         messages.success(self.request, "Entrega registrada com sucesso.")
         return resp
+    
+class AtualizarEntregaView(LoginRequiredMixin, UpdateView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    model = Entrega
+    form_class = EntregaForm
+    template_name = 'app_entregas/pages/form.html'
+    success_url = reverse_lazy('app_entregas:lista')
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        messages.success(self.request, "Entrega atualizada com sucesso.")
+        return resp
+
+class ExcluirEntregaView(LoginRequiredMixin, DeleteView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    model = Entrega
+    template_name = 'app_entregas/pages/confirm_delete.html'
+    success_url = reverse_lazy('app_entregas:lista')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Entrega excluída com sucesso.")
+        return super().delete(request, *args, **kwargs)
+    
+class DetalheEntregaView(LoginRequiredMixin, DetailView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    model = Entrega
+    template_name = 'app_entregas/pages/detail.html'
+    context_object_name = 'entrega'

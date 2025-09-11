@@ -65,9 +65,9 @@
               {% else %}<span class="badge">Cancelado</span>{% endif %}
             </td>
             <td class="actions">
-              <a class="btn small" href="#">Detalhes</a>
-              <a class="btn small" href="#">Editar</a>
-              <a class="btn small danger" href="#">Excluir</a>
+              <a class="btn small" href="{% url 'app_entregas:detalhe' e.pk %}">Detalhes</a>
+              <a class="btn small" href="{% url 'app_entregas:editar' e.pk %}">Editar</a>
+              <a class="btn small danger" href="{% url 'app_entregas:excluir' e.pk %}">Excluir</a>
             </td>
           </tr>
           {% endfor %}
