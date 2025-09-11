@@ -2,6 +2,11 @@ from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import EPI, CategoriaEPI
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
+from django.contrib import messages
+from .forms import EPIForm
 
 def lista(request):
     q = request.GET.get("q", "").strip()
@@ -25,3 +30,15 @@ def lista(request):
         "categorias": CategoriaEPI.objects.all(),
     }
     return render(request, "app_epis/pages/list.html", context)
+
+class CriarEPIView(LoginRequiredMixin, CreateView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    model = EPI
+    form_class = EPIForm
+    template_name = 'app_epis/pages/form.html'
+    success_url = reverse_lazy('app_epis:lista')
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        messages.success(self.request, "EPI criado com sucesso.")
+        return resp

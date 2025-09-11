@@ -5,4 +5,5 @@ app_name = "app_epis"
 
 urlpatterns = [
     path("", views.lista, name="lista"),
+    path("novo/", views.CriarEPIView.as_view(), name="criar"),
 ]
