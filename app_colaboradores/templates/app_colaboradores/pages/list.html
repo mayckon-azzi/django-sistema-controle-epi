@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block title %}Lista de Colaboradores{% endblock %}
+{% block page_title %}Colaboradores{% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Colaboradores{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'app_colaboradores/css/main.css' %}">
@@ -10,8 +12,7 @@
 {% block content %}
 <div class="card">
   <div class="card-header">
-    <h2>Lista de Colaboradores</h2>
-    <form method="get" class="search-form">
+      <form method="get" class="search-form">
       <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nome, e-mail ou matrícula" />
       <button class="btn" type="submit">Buscar</button>
       <a class="btn outline" href="{% url 'app_colaboradores:criar' %}">Novo Colaborador</a>

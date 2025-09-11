@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block title %}Relatórios{% endblock %}
+{% block page_title %}Relatórios{% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Relatórios{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'app_relatorios/css/main.css' %}">

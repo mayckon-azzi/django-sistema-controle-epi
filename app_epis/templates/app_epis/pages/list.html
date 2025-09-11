@@ -2,14 +2,79 @@
 {% load static %}
 
 {% block title %}Lista de EPIs{% endblock %}
+{% block page_title %}EPIs{% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › EPIs{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'app_epis/css/main.css' %}">
 {% endblock %}
 
 {% block content %}
-  <h2>Lista de EPIs</h2>
-  <p>Em breve: tabela com filtros.</p>
+<div class="card">
+  <div class="card-header">
+    <h2>Lista de EPIs</h2>
+    <form method="get" class="search-form" style="display:flex; gap:8px; align-items:center;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nome, código ou categoria" />
+      <select name="categoria">
+        <option value="">-- Categoria --</option>
+        {% for c in categorias %}
+          <option value="{{ c.id }}" {% if categoria_id|default:'' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nome }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn" type="submit">Buscar</button>
+      <a class="btn outline" href="#">Novo EPI</a>
+    </form>
+  </div>
+
+  <div class="card-body">
+    {% if epis %}
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Tamanho</th>
+            <th>Status</th>
+            <th class="actions">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in epis %}
+          <tr>
+            <td>{{ e.codigo }}</td>
+            <td>{{ e.nome }}</td>
+            <td>{{ e.categoria.nome }}</td>
+            <td>{{ e.tamanho|default:"-" }}</td>
+            <td>{% if e.ativo %}<span class="badge success">Ativo</span>{% else %}<span class="badge">Inativo</span>{% endif %}</td>
+            <td class="actions">
+              <a class="btn small" href="#">Editar</a>
+              <a class="btn small danger" href="#">Excluir</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?q={{ q }}&categoria={{ categoria_id }}&page={{ page_obj.previous_page_number }}">« Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?q={{ q }}&categoria={{ categoria_id }}&page={{ page_obj.next_page_number }}">Próxima »</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% else %}
+      <p>Nenhum EPI encontrado.</p>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
