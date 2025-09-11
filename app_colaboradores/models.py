@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 class Colaborador(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name="colaborador")
     nome = models.CharField(max_length=120)
     email = models.EmailField(unique=True)
     matricula = models.CharField(max_length=30, unique=True)

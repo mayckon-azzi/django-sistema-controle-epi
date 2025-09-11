@@ -10,6 +10,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from .forms import EntregaForm
 from django.views.generic import UpdateView, DeleteView, DetailView
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
 def lista(request):

@@ -22,7 +22,9 @@
         {% endfor %}
       </select>
       <button class="btn" type="submit">Buscar</button>
-      <a class="btn outline" href="{% url 'app_epis:criar' %}">Novo EPI</a>
+      {% if perms.app_epis.add_epi %}
+        <a class="btn outline" href="{% url 'app_epis:criar' %}">Novo EPI</a>
+      {% endif %}
     </form>
   </div>
 
@@ -49,8 +51,12 @@
             <td>{{ e.tamanho|default:"-" }}</td>
             <td>{% if e.ativo %}<span class="badge success">Ativo</span>{% else %}<span class="badge">Inativo</span>{% endif %}</td>
             <td class="actions">
-              <a class="btn small" href="{% url 'app_epis:editar' e.pk %}">Editar</a>
-              <a class="btn small danger" href="{% url 'app_epis:excluir' e.pk %}">Excluir</a>
+              {% if perms.app_epis.change_epi %}
+                <a class="btn small" href="{% url 'app_epis:editar' e.pk %}">Editar</a>
+              {% endif %}
+              {% if perms.app_epis.delete_epi %}
+                <a class="btn small danger" href="{% url 'app_epis:excluir' e.pk %}">Excluir</a>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}

@@ -9,6 +9,7 @@ from django.contrib import messages
 from .forms import EPIForm
 from django.views.generic import UpdateView, DeleteView
 from django.db.models import ProtectedError
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 def lista(request):
     q = request.GET.get("q", "").strip()
@@ -33,7 +34,9 @@ def lista(request):
     }
     return render(request, "app_epis/pages/list.html", context)
 
-class CriarEPIView(LoginRequiredMixin, CreateView):
+class CriarEPIView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    permission_required = "app_epis.add_epi"
+    raise_exception = True
     login_url = reverse_lazy('app_colaboradores:entrar')
     model = EPI
     form_class = EPIForm
@@ -45,7 +48,9 @@ class CriarEPIView(LoginRequiredMixin, CreateView):
         messages.success(self.request, "EPI criado com sucesso.")
         return resp
     
-class AtualizarEPIView(LoginRequiredMixin, UpdateView):
+class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    permission_required = "app_epis.change_epi"
+    raise_exception = True
     login_url = reverse_lazy('app_colaboradores:entrar')
     model = EPI
     form_class = EPIForm
@@ -57,7 +62,9 @@ class AtualizarEPIView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, "EPI atualizado com sucesso.")
         return resp
 
-class ExcluirEPIView(LoginRequiredMixin, DeleteView):
+class ExcluirEPIView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    permission_required = "app_epis.delete_epi"
+    raise_exception = True
     login_url = reverse_lazy('app_colaboradores:entrar')
     model = EPI
     template_name = 'app_epis/pages/confirm_delete.html'

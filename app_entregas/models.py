@@ -3,9 +3,11 @@ from django.utils import timezone
 
 class Entrega(models.Model):
     class Status(models.TextChoices):
-        ENTREGUE = "ENTREGUE", "Entregue"
-        DEVOLVIDO = "DEVOLVIDO", "Devolvido"
-        CANCELADO = "CANCELADO", "Cancelado"
+        PENDENTE = "PENDENTE", "Pendente"
+        APROVADA = "APROVADA", "Aprovada"
+        REPROVADA = "REPROVADA", "Reprovada"
+        ATENDIDA = "ATENDIDA", "Atendida"
+        CANCELADA = "CANCELADA", "Cancelada"
 
     colaborador = models.ForeignKey(
         "app_colaboradores.Colaborador", on_delete=models.PROTECT, related_name="entregas"
@@ -15,14 +17,13 @@ class Entrega(models.Model):
     )
     data_entrega = models.DateTimeField(default=timezone.now)
     quantidade = models.PositiveIntegerField(default=1)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ENTREGUE)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDENTE)
     observacao = models.CharField(max_length=255, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["-data_entrega"]
+        ordering = ["-criado_em"]
 
     def __str__(self):
-        return f"{self.epi} → {self.colaborador} ({self.quantidade})"
+        return f"{self.colaborador} - {self.epi} ({self.quantidade})"

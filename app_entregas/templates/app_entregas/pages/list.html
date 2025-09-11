@@ -34,7 +34,9 @@
         {% endfor %}
       </select>
       <button class="btn" type="submit">Filtrar</button>
-      <a class="btn outline" href="{% url 'app_entregas:criar' %}">Nova Entrega</a>
+      {% if perms.app_entregas.add_entrega %}
+        <a class="btn outline" href="{% url 'app_entregas:criar' %}">Nova Entrega</a>
+      {% endif %}
     </form>
   </div>
 
@@ -66,8 +68,12 @@
             </td>
             <td class="actions">
               <a class="btn small" href="{% url 'app_entregas:detalhe' e.pk %}">Detalhes</a>
-              <a class="btn small" href="{% url 'app_entregas:editar' e.pk %}">Editar</a>
-              <a class="btn small danger" href="{% url 'app_entregas:excluir' e.pk %}">Excluir</a>
+              {% if perms.app_entregas.change_entrega %}
+                <a class="btn small" href="{% url 'app_entregas:editar' e.pk %}">Editar</a>
+              {% endif %}
+              {% if perms.app_entregas.delete_entrega %}
+                <a class="btn small danger" href="{% url 'app_entregas:excluir' e.pk %}">Excluir</a>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}

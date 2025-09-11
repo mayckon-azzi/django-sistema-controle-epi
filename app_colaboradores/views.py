@@ -9,6 +9,8 @@ from .models import Colaborador
 from .forms import ColaboradorForm, RegisterForm
 from django.db.utils import OperationalError, ProgrammingError  
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+
 
 # Create your views here.
 # def lista(request):
@@ -95,6 +97,7 @@ class ExcluirColaboradorView(LoginRequiredMixin, DeleteView):
 		messages.success(self.request, "Colaborador excluído com sucesso.")
 		return super().delete(request, *args, **kwargs)
 
+@staff_member_required(login_url="app_colaboradores:entrar")
 def registrar(request):
 	erro_banco = None
 	if request.method == 'POST':
