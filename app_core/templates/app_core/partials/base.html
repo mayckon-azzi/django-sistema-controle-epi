@@ -6,9 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}Sistema EPI{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'app_core/css/main.css' %}" />
+    {% block extra_css %}{% endblock %}
   </head>
   <body>
     <header>
+      <h1 class="site-title">Sistema EPI</h1>
       <nav class="nav">
         <a href="{% url 'app_core:home' %}">Início</a>
         <a href="{% url 'app_colaboradores:lista' %}">Colaboradores</a>
@@ -21,5 +23,6 @@
     <main>{% block content %}{% endblock %}</main>
 
     <script src="{% static 'app_core/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
   </body>
 </html>
