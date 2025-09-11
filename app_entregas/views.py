@@ -4,6 +4,12 @@ from django.db.models import Q
 from .models import Entrega
 from app_colaboradores.models import Colaborador
 from app_epis.models import EPI
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import CreateView
+from django.urls import reverse_lazy
+from django.contrib import messages
+from .forms import EntregaForm
+
 
 def lista(request):
     q = request.GET.get("q", "").strip()
@@ -44,3 +50,15 @@ def lista(request):
         "statuses": Entrega.Status.choices,
     }
     return render(request, "app_entregas/pages/list.html", context)
+
+class CriarEntregaView(LoginRequiredMixin, CreateView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    model = Entrega
+    form_class = EntregaForm
+    template_name = 'app_entregas/pages/form.html'
+    success_url = reverse_lazy('app_entregas:lista')
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        messages.success(self.request, "Entrega registrada com sucesso.")
+        return resp
