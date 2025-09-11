@@ -1,0 +1,19 @@
+{% extends "app_core/partials/base.html" %}
+{% block title %}Excluir EPI{% endblock %}
+{% block page_title %}EPIs{% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › <a href="{% url 'app_epis:lista' %}">EPIs</a> › Excluir{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header"><h2>Excluir EPI</h2></div>
+  <div class="card-body">
+    <p>Tem certeza que deseja excluir o EPI <strong>{{ object.nome }}</strong> ({{ object.codigo }})?</p>
+    <form method="post" style="display:flex; gap:8px;">
+      {% csrf_token %}
+      <a class="btn outline" href="{% url 'app_epis:lista' %}">Cancelar</a>
+      <button class="btn danger" type="submit">Excluir</button>
+    </form>
+    <p style="margin-top:10px; opacity:.8;">Obs.: não é possível excluir se houver entregas vinculadas (regra de proteção).</p>
+  </div>
+</div>
+{% endblock %}

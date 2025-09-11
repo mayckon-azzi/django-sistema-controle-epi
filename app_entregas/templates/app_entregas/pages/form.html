@@ -1,0 +1,64 @@
+{% extends "app_core/partials/base.html" %}
+{% load static %}
+{% block title %}{% if view.object %}Editar Entrega{% else %}Nova Entrega{% endif %}{% endblock %}
+{% block page_title %}Entregas{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_entregas/css/main.css' %}">
+{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'app_core:home' %}">Início</a> ›
+  <a href="{% url 'app_entregas:lista' %}">Entregas</a> ›
+  {% if view.object %}Editar{% else %}Nova{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header"><h2>Nova Entrega</h2></div>
+  <div class="card-body">
+    <form method="post" style="display:grid; gap:12px;">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div style="display:grid; gap:12px; grid-template-columns: 1fr 1fr;">
+        <div>
+          <label>Colaborador</label>
+          <input type="text" placeholder="Filtrar colaborador..." oninput="filterSelect('id_colaborador', this.value)">
+          {{ form.colaborador }} {{ form.colaborador.errors }}
+        </div>
+        <div>
+          <label>EPI</label>
+          <input type="text" placeholder="Filtrar EPI..." oninput="filterSelect('id_epi', this.value)">
+          {{ form.epi }} {{ form.epi.errors }}
+        </div>
+      </div>
+
+      <div style="display:grid; gap:12px; grid-template-columns: 1fr 1fr;">
+        <div>
+          <label>Quantidade</label>
+          {{ form.quantidade }} {{ form.quantidade.errors }}
+        </div>
+        <div>
+          <label>Status</label>
+          {{ form.status }} {{ form.status.errors }}
+        </div>
+      </div>
+
+      <div>
+        <label>Observação</label>
+        {{ form.observacao }} {{ form.observacao.errors }}
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <a class="btn outline" href="{% url 'app_entregas:lista' %}">Cancelar</a>
+        <button class="btn" type="submit">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'app_entregas/js/main.js' %}"></script>
+{% endblock %}

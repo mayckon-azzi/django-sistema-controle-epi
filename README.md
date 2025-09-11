@@ -148,6 +148,7 @@ Observações:
 
 ![Diagrama DER](docs/diagrama-der.jpg)
 
+
 [🔝 Voltar ao Índice](#indice)
 
 ---

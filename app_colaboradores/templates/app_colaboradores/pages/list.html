@@ -1,35 +1,32 @@
-{% extends "app_colaboradores/partials/base.html" %} {% block title %}Lista de
-Colaboradores{% endblock %} {% block content %}
+{% extends "app_core/partials/base.html" %}
+{% load static %}
+
+{% block title %}Lista de Colaboradores{% endblock %}
+{% block page_title %}Colaboradores{% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Colaboradores{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_colaboradores/css/app.css' %}">
+{% endblock %}
+
+{% block content %}
 <div class="card">
   <div class="card-header">
-    <h2>Lista de Colaboradores</h2>
-    <form method="get" class="search-form">
-      <input
-        type="text"
-        name="q"
-        value="{{ request.GET.q }}"
-        placeholder="Buscar por nome, e-mail ou matrícula"
-      />
+      <form method="get" class="search-form">
+      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nome, e-mail ou matrícula" />
       <button class="btn" type="submit">Buscar</button>
-      <a class="btn outline" href="{% url 'app_colaboradores:criar' %}"
-        >Novo Colaborador</a
-      >
+      <a class="btn outline" href="{% url 'app_colaboradores:criar' %}">Novo Colaborador</a>
     </form>
   </div>
+
   <div class="card-body">
     {% if colaboradores %}
     <div class="table-responsive">
       <table class="table">
         <thead>
           <tr>
-            <th>Nome</th>
-            <th>E-mail</th>
-            <th>Matrícula</th>
-            <th>Cargo</th>
-            <th>Setor</th>
-            <th>Telefone</th>
-            <th>Status</th>
-            <th class="actions">Ações</th>
+            <th>Nome</th><th>E-mail</th><th>Matrícula</th><th>Cargo</th>
+            <th>Setor</th><th>Telefone</th><th>Status</th><th class="actions">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -42,23 +39,12 @@ Colaboradores{% endblock %} {% block content %}
             <td>{{ c.setor|default:"-" }}</td>
             <td>{{ c.telefone|default:"-" }}</td>
             <td>
-              {% if c.ativo %}
-              <span class="badge success">Ativo</span>
-              {% else %}
-              <span class="badge">Inativo</span>
-              {% endif %}
+              {% if c.ativo %}<span class="badge success">Ativo</span>
+              {% else %}<span class="badge">Inativo</span>{% endif %}
             </td>
             <td class="actions">
-              <a
-                class="btn small"
-                href="{% url 'app_colaboradores:editar' c.pk %}"
-                >Editar</a
-              >
-              <a
-                class="btn small danger"
-                href="{% url 'app_colaboradores:excluir' c.pk %}"
-                >Excluir</a
-              >
+              <a class="btn small" href="{% url 'app_colaboradores:editar' c.pk %}">Editar</a>
+              <a class="btn small danger" href="{% url 'app_colaboradores:excluir' c.pk %}">Excluir</a>
             </td>
           </tr>
           {% endfor %}
@@ -66,25 +52,24 @@ Colaboradores{% endblock %} {% block content %}
       </table>
     </div>
     {% else %}
-    <p>Nenhum colaborador encontrado.</p>
-    {% endif %} {% if is_paginated %}
+      <p>Nenhum colaborador encontrado.</p>
+    {% endif %}
+
+    {% if is_paginated %}
     <div class="pagination">
       {% if page_obj.has_previous %}
-      <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}"
-        >« Anterior</a
-      >
+        <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">« Anterior</a>
       {% endif %}
-      <span
-        >Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages
-        }}</span
-      >
+      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
       {% if page_obj.has_next %}
-      <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}"
-        >Próxima »</a
-      >
+        <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Próxima »</a>
       {% endif %}
     </div>
     {% endif %}
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'app_colaboradores/js/main.js' %}"></script>
 {% endblock %}

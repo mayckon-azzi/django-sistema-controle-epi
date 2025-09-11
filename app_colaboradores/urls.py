@@ -14,7 +14,7 @@ app_name = "app_colaboradores"
 urlpatterns = [
     # Autenticação
     path("login/", EntrarView.as_view(), name="entrar"),
-    path("sair/", LogoutView.as_view(next_page="app_colaboradores:entrar"), name="sair"),
+    path("sair/", LogoutView.as_view(next_page="app_core:home"), name="sair"),
     path("registrar/", registrar, name="registrar"),
     # CRUD Colaboradores
     path("", ListaColaboradoresView.as_view(), name="lista"),

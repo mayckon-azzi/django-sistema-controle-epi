@@ -1,0 +1,25 @@
+{% extends "app_core/partials/base.html" %}
+{% block title %}Excluir Entrega{% endblock %}
+{% block page_title %}Entregas{% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › <a href="{% url 'app_entregas:lista' %}">Entregas</a> › Excluir{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header"><h2>Excluir Entrega</h2></div>
+  <div class="card-body">
+    <p>Tem certeza que deseja excluir esta entrega?</p>
+    <ul>
+      <li><strong>Data:</strong> {{ object.data_entrega|date:"d/m/Y H:i" }}</li>
+      <li><strong>Colaborador:</strong> {{ object.colaborador.nome }}</li>
+      <li><strong>EPI:</strong> {{ object.epi.nome }}</li>
+      <li><strong>Quantidade:</strong> {{ object.quantidade }}</li>
+      <li><strong>Status:</strong> {{ object.get_status_display }}</li>
+    </ul>
+    <form method="post" style="display:flex; gap:8px;">
+      {% csrf_token %}
+      <a class="btn outline" href="{% url 'app_entregas:lista' %}">Cancelar</a>
+      <button class="btn danger" type="submit">Excluir</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

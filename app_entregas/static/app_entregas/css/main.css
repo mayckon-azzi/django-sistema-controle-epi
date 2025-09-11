@@ -1,1 +1,12 @@
+/* Filtros dos selects */
+label + input[placeholder^="Filtrar"] {
+  width: 100%;
+  margin: 6px 0 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(0,0,0,.2);
+  border-radius: 8px;
+}
 
+.select-tall { 
+  height: 220px; 
+}

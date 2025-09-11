@@ -1,13 +1,28 @@
-{% extends "app_colaboradores/partials/base.html" %}
+{% extends "app_core/partials/base.html" %}
+{% load static %}
+
 {% block title %}{{view.object|default_if_none:"Novo" }} Colaborador{% endblock %}
-{% block content%}
+{% block page_title %}Colaboradores{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'app_core:home' %}">Início</a> ›
+  <a href="{% url 'app_colaboradores:lista' %}">Colaboradores</a> ›
+  {{ view.object|yesno:"Editar,Novo" }}
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_colaboradores/css/app.css' %}">
+{% endblock %}
+
+{% block content %}
 <div class="card">
   <div class="card-header">
     <h2>{% if view.object %}Editar{% else %}Novo{% endif %} Colaborador</h2>
   </div>
   <div class="card-body">
     <form method="post" class="form-grid">
-      {% csrf_token %} {{ form.non_field_errors }}
+      {% csrf_token %}
+      {{ form.non_field_errors }}
       <div class="grid-2">
         <div class="form-control">
           <label>Nome</label>
@@ -40,12 +55,14 @@
         </div>
       </div>
       <div class="actions">
-        <a class="btn outline" href="{% url 'app_colaboradores:lista' %}"
-          >Cancelar</a
-        >
+        <a class="btn outline" href="{% url 'app_colaboradores:lista' %}">Cancelar</a>
         <button class="btn" type="submit">Salvar</button>
       </div>
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'app_colaboradores/js/main.js' %}"></script>
 {% endblock %}

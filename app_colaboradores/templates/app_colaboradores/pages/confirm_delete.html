@@ -1,13 +1,17 @@
-{% extends "app_colaboradores/partials/base.html" %} {% block title %}Excluir
-Colaborador{% endblock %} {% block content %}
+{% extends "app_core/partials/base.html" %} 
+{% load static %}
+{% block title %}Excluir Colaborador{% endblock %} 
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'app_colaboradores/css/app.css' %}">
+{% endblock %}
+{% block content %}
 <div class="card">
   <div class="card-header">
     <h2>Excluir Colaborador</h2>
   </div>
   <div class="card-body">
     <p>
-      Tem certeza que deseja excluir <strong>{{ object.nome }}</strong> ({{
-      object.matricula }})?
+      Tem certeza que deseja excluir <strong>{{ object.nome }}</strong> ({{ object.matricula }})?
     </p>
     <form method="post">
       {% csrf_token %}
