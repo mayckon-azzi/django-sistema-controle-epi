@@ -1,18 +1,23 @@
-<header class="navbar navbar-expand bg-white border-bottom px-3">
-  <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'app_core:home' %}">
-    <img src="{% static 'img/logo.png' %}" alt="Logo" height="24">
-    <span class="fw-semibold">Sistema EPI</span>
-  </a>
+{% load static %}
+<header class="topbar navbar navbar-light bg-white border-bottom fixed-top px-3">
+  <div class="d-flex align-items-center gap-2">
+    <a class="navbar-brand d-flex align-items-center gap-2 mb-0" href="{% url 'app_core:home' %}">
+      <img src="{% static 'img/logo.png' %}" alt="Logo" height="24">
+      <span class="fw-semibold d-none d-sm-inline">Sistema EPI</span>
+    </a>
+  </div>
 
   <div class="ms-auto d-flex align-items-center gap-3">
     {% if request.user.is_authenticated %}
-      <span class="text-muted small">{{ request.user.get_full_name|default:request.user.username }}</span>
-      <form method="post" action="{% url 'app_colaboradores:sair' %}">
+      <span class="text-muted small d-none d-md-inline">
+        {{ request.user.get_full_name|default:request.user.username }}
+      </span>
+      <form method="post" action="{% url 'app_colaboradores:sair' %}" class="mb-0">
         {% csrf_token %}
         <button class="btn btn-sm btn-outline-secondary" type="submit">Sair</button>
       </form>
     {% else %}
-      <a class="btn btn-sm btn-outline-primary" href="{% url 'app_colaboradores:entrar' %}">Entrar</a>
+      <a class="btn btn-sm btn-primary" href="{% url 'app_colaboradores:entrar' %}">Entrar</a>
     {% endif %}
   </div>
 </header>

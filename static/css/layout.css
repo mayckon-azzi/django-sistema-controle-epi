@@ -1,0 +1,172 @@
+:root {
+  --topbar-h: 56px;
+  --sb-collapsed: 84px;
+  --sb-expanded: 320px;
+  --sb-bg: rgba(18, 18, 22, 0.92);
+}
+
+html,
+body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* ============ Topbar ============ */
+.topbar {
+  height: var(--topbar-h);
+  z-index: 1030;
+}
+
+/* ============ Sidebar ============ */
+.app-sidebar {
+  position: fixed;
+  top: var(--topbar-h);
+  left: 0;
+  height: calc(100vh - var(--topbar-h));
+  width: var(--sb-collapsed);
+  background: var(--sb-bg);
+  color: #fff;
+  z-index: 1020;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.2s ease;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(4px);
+}
+
+.app-sidebar:hover {
+  width: var(--sb-expanded);
+  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.25);
+}
+
+.menu-title {
+  height: 64px;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cfd3d8;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+}
+.menu-title i {
+  margin-right: 0.5rem;
+}
+
+.app-sidebar:not(:hover) .menu-title .label {
+  display: none;
+}
+
+.app-sidebar .nav {
+  padding: 0.5rem;
+}
+
+.app-sidebar .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #e7e7e7;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background 0.15s ease-in-out;
+}
+
+.app-sidebar .nav-link i {
+  min-width: 1.25rem;
+  text-align: center;
+  font-size: 1.2rem;
+}
+
+.app-sidebar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.app-sidebar .nav-link.active {
+  background: rgba(99, 102, 241, 0.35);
+  color: #fff;
+}
+
+.app-sidebar .label {
+  white-space: nowrap;
+}
+
+.app-sidebar:not(:hover) .label {
+  display: none;
+}
+
+.btn-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.btn-toggle .chevron {
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.menu-footer {
+  margin-top: auto;
+  padding: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.menu-footer .logout-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.6rem;
+  padding: 0.95rem 1rem; 
+  font-weight: 600; 
+}
+
+.menu-footer .logout-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ============ Conteúdo ============ */
+.app-content {
+  margin-left: var(--sb-collapsed);
+  padding-top: calc(var(--topbar-h) + 0.25rem);
+  min-height: calc(100vh - var(--topbar-h));
+}
+
+.app-content > .container-fluid {
+  padding-right: clamp(0.75rem, 1.5vw, 1.25rem);
+}
+
+/* Responsivo */
+@media (max-width: 1200px) {
+  :root {
+    --sb-expanded: 280px;
+  }
+}
+
+/* === Submenus: esconder quando a sidebar está fechada === */
+.app-sidebar:not(:hover) .collapse,
+.app-sidebar:not(:hover) .collapse.show,
+.app-sidebar:not(:hover) .sub {
+  display: none !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none; /* evita cliques fantasmas */
+}
+
+/* Quando a sidebar estiver aberta (hover), mostra só os que estiverem "show" */
+.app-sidebar:hover .collapse.show {
+  display: block !important;
+  height: auto !important;
+  overflow: visible !important;
+  pointer-events: auto;
+}
+
