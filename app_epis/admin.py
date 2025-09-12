@@ -7,7 +7,7 @@ class CategoriaEPIAdmin(admin.ModelAdmin):
 
 @admin.register(EPI)
 class EPIAdmin(admin.ModelAdmin):
-    list_display = ("codigo", "nome", "categoria", "tamanho", "ativo")
+    list_display = ("codigo", "nome", "estoque", "categoria", "tamanho", "ativo")
     search_fields = ("codigo", "nome", "categoria__nome")
     list_filter = ("ativo", "categoria", "tamanho")
     list_per_page = 20

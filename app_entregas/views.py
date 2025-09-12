@@ -11,11 +11,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.views.generic import (
     CreateView, UpdateView, DeleteView, DetailView, ListView
 )
-
 from .models import Solicitacao, Entrega
 from app_colaboradores.models import Colaborador
 from app_epis.models import EPI
 from .forms import SolicitacaoForm, EntregaForm
+from django.db import transaction
+from django.core.exceptions import ValidationError
+from .services import movimenta_por_entrega, movimenta_por_exclusao
 
 
 def lista(request):
@@ -70,10 +72,15 @@ class CriarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     success_url = reverse_lazy("app_entregas:lista")
 
     def form_valid(self, form):
-        resp = super().form_valid(form)
+        try:
+            with transaction.atomic():
+                resp = super().form_valid(form)   # salva self.object
+                movimenta_por_entrega(self.object, antiga=None)
+        except ValidationError as ex:
+            form.add_error(None, ex.message)
+            return self.form_invalid(form)
         messages.success(self.request, "Entrega registrada com sucesso.")
         return resp
-
 
 class AtualizarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     permission_required = "app_entregas.change_entrega"
@@ -85,7 +92,14 @@ class AtualizarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVi
     success_url = reverse_lazy("app_entregas:lista")
 
     def form_valid(self, form):
-        resp = super().form_valid(form)
+        antiga = Entrega.objects.get(pk=self.get_object().pk)
+        try:
+            with transaction.atomic():
+                resp = super().form_valid(form)  # salva self.object atualizada
+                movimenta_por_entrega(self.object, antiga=antiga)
+        except ValidationError as ex:
+            form.add_error(None, ex.message)
+            return self.form_invalid(form)
         messages.success(self.request, "Entrega atualizada com sucesso.")
         return resp
 
@@ -99,9 +113,15 @@ class ExcluirEntregaView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
     success_url = reverse_lazy("app_entregas:lista")
 
     def delete(self, request, *args, **kwargs):
-        messages.success(self.request, "Entrega excluída com sucesso.")
-        return super().delete(request, *args, **kwargs)
-
+        self.object = self.get_object()
+        try:
+            with transaction.atomic():
+                movimenta_por_exclusao(self.object)
+                messages.success(self.request, "Entrega excluída com sucesso.")
+                return super().delete(request, *args, **kwargs)
+        except ValidationError as ex:
+            messages.error(self.request, ex.message)
+            return redirect(self.success_url)
 
 class DetalheEntregaView(LoginRequiredMixin, DetailView):
     login_url = reverse_lazy("app_colaboradores:entrar")
@@ -159,7 +179,14 @@ class SolicitacoesGerenciarView(LoginRequiredMixin, PermissionRequiredMixin, Lis
         if status in {"PENDENTE", "APROVADA"}:
             qs = qs.filter(status=status)
         return qs.order_by("-criado_em")
-
+    
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        # status permitidos para o filtro do almoxarife
+        ctx["statuses_manage"] = ["PENDENTE", "APROVADA"]
+        # status atualmente selecionado no filtro (com default)
+        ctx["status_selected"] = self.request.GET.get("status") or "PENDENTE"
+        return ctx
 
 @require_POST
 @permission_required("app_entregas.change_solicitacao", raise_exception=True)
@@ -190,30 +217,32 @@ def reprovar_solicitacao(request, pk):
 @login_required
 @permission_required("app_entregas.change_solicitacao", raise_exception=True)
 def atender_solicitacao(request, pk):
-    s = get_object_or_404(
-        Solicitacao.objects.select_related("colaborador", "epi"), pk=pk
-    )
+    s = get_object_or_404(Solicitacao.objects.select_related("colaborador", "epi"), pk=pk)
     if s.status not in {Solicitacao.Status.APROVADA, Solicitacao.Status.PENDENTE}:
         messages.warning(request, "Apenas solicitações PENDENTES/APROVADAS podem ser atendidas.")
         return redirect("app_entregas:solicitacoes_gerenciar")
 
     if request.method == "POST":
-        e = Entrega.objects.create(
-            colaborador=s.colaborador,
-            epi=s.epi,
-            quantidade=s.quantidade,
-            status=Entrega.Status.ENTREGUE,
-            observacao=f"Atendida a solicitação #{s.pk}",
-            data_entrega=timezone.now(),
-            solicitacao=s,
-        )
-        s.status = Solicitacao.Status.ATENDIDA
-        s.save(update_fields=["status"])
+        try:
+            with transaction.atomic():
+                e = Entrega.objects.create(
+                    colaborador=s.colaborador,
+                    epi=s.epi,
+                    quantidade=s.quantidade,
+                    status=Entrega.Status.ENTREGUE,
+                    observacao=f"Atendida a solicitação #{s.pk}",
+                    data_entrega=timezone.now(),
+                    solicitacao=s,
+                )
+                movimenta_por_entrega(e, antiga=None)
+                s.status = Solicitacao.Status.ATENDIDA
+                s.save(update_fields=["status"])
+        except ValidationError as ex:
+            messages.error(request, f"Não foi possível atender: {ex.message}")
+            return redirect("app_entregas:solicitacoes_gerenciar")
+
         messages.success(request, f"Solicitação atendida. Entrega #{e.pk} criada.")
         return redirect("app_entregas:lista")
 
-    return render(
-        request,
-        "app_entregas/pages/solicitacao_atender_confirm.html",
-        {"s": s},
-    )
+    return render(request, "app_entregas/pages/solicitacao_atender_confirm.html", {"s": s})
+

@@ -6,10 +6,7 @@ class EntregaForm(forms.ModelForm):
     class Meta:
         model = Entrega
         fields = ["colaborador", "epi", "quantidade", "status", "observacao"]
-        widgets = {
-            "quantidade": forms.NumberInput(attrs={"min": 1}),
-            "observacao": forms.TextInput(attrs={"placeholder": "Opcional"}),
-        }
+        widgets = {"quantidade": forms.NumberInput(attrs={"min": 1})}
 
     def clean_quantidade(self):
         q = self.cleaned_data["quantidade"]
@@ -23,7 +20,6 @@ class EntregaForm(forms.ModelForm):
         epi = cleaned.get("epi")
         status = cleaned.get("status")
         obs = (cleaned.get("observacao") or "").strip()
-
         if status == Entrega.Status.DEVOLVIDO and not obs:
             self.add_error("observacao", "Informe o motivo/observação para devolução.")
         if colab and not colab.ativo:

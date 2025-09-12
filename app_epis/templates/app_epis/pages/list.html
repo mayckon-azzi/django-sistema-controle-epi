@@ -36,6 +36,7 @@
           <tr>
             <th>Código</th>
             <th>Nome</th>
+            <th>Estoque</th>
             <th>Categoria</th>
             <th>Tamanho</th>
             <th>Status</th>
@@ -47,6 +48,7 @@
           <tr>
             <td>{{ e.codigo }}</td>
             <td>{{ e.nome }}</td>
+            <td>{{ e.estoque }}</td>
             <td>{{ e.categoria.nome }}</td>
             <td>{{ e.tamanho|default:"-" }}</td>
             <td>{% if e.ativo %}<span class="badge success">Ativo</span>{% else %}<span class="badge">Inativo</span>{% endif %}</td>

@@ -9,8 +9,8 @@
     <h2>Solicitações</h2>
     <form method="get" style="display:flex; gap:8px;">
       <select name="status">
-        {% for st in "PENDENTE,APROVADA".split(",") %}
-          <option value="{{ st }}" {% if request.GET.status|default:"PENDENTE" == st %}selected{% endif %}>
+        {% for st in statuses_manage %}
+          <option value="{{ st }}" {% if status_selected == st %}selected{% endif %}>
             {{ st|title }}
           </option>
         {% endfor %}
