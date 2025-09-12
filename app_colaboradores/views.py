@@ -40,7 +40,15 @@ class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListVi
                 Q(nome__icontains=q) | Q(email__icontains=q) |
                 Q(matricula__icontains=q) | Q(cargo__icontains=q) | Q(setor__icontains=q)
             )
-        return qs
+        return qs.order_by('nome','id')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        params = self.request.GET.copy()
+        params.pop("page", None)
+        ctx["q"] = self.request.GET.get("q", "")
+        ctx["base_query"] = params.urlencode()  
+        return ctx
 
 # CRIAR
 class CriarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):

@@ -76,11 +76,13 @@ class ListaEPIView(LoginRequiredMixin, ListView):
                 ("estoque","Estoque ↑"), ("-estoque","Estoque ↓"),
                 ("categoria","Categoria"), ("codigo","Código"),
             ],
-            "has_filters": getattr(self, "has_filters", False),   # >>> NOVO
+            "has_filters": getattr(self, "has_filters", False),  
         })
+        params = self.request.GET.copy()
+        params.pop("page", None)          
+        ctx["base_query"] = params.urlencode()  
         return ctx
-
-
+        
 # ===== CRUD =====
 class CriarEPIView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "app_epis.add_epi"

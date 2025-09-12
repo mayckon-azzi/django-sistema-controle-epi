@@ -1,75 +1,98 @@
 {% extends "app_core/partials/base.html" %}
-{% load static %}
-
-{% block title %}Lista de Colaboradores{% endblock %}
+{% block title %}Colaboradores{% endblock %}
 {% block page_title %}Colaboradores{% endblock %}
 {% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Colaboradores{% endblock %}
 
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'app_colaboradores/css/app.css' %}">
-{% endblock %}
-
 {% block content %}
 <div class="card">
-  <div class="card-header">
-      <form method="get" class="search-form">
-      <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nome, e-mail ou matrícula" />
-      <button class="btn" type="submit">Buscar</button>
-      <a class="btn outline" href="{% url 'app_colaboradores:criar' %}">Novo Colaborador</a>
-    </form>
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <h2 class="m-0 fs-5">Colaboradores</h2>
+    {% if perms.app_colaboradores.add_colaborador %}
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'app_colaboradores:criar' %}">Novo Colaborador</a>
+    {% endif %}
   </div>
 
   <div class="card-body">
-    {% if colaboradores %}
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Nome</th><th>E-mail</th><th>Matrícula</th><th>Cargo</th>
-            <th>Setor</th><th>Telefone</th><th>Status</th><th class="actions">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for c in colaboradores %}
-          <tr>
-            <td>{{ c.nome }}</td>
-            <td>{{ c.email }}</td>
-            <td>{{ c.matricula }}</td>
-            <td>{{ c.cargo|default:"-" }}</td>
-            <td>{{ c.setor|default:"-" }}</td>
-            <td>{{ c.telefone|default:"-" }}</td>
-            <td>
-              {% if c.ativo %}<span class="badge success">Ativo</span>
-              {% else %}<span class="badge">Inativo</span>{% endif %}
-            </td>
-            <td class="actions">
-              <a class="btn small" href="{% url 'app_colaboradores:editar' c.pk %}">Editar</a>
-              <a class="btn small danger" href="{% url 'app_colaboradores:excluir' c.pk %}">Excluir</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-      <p>Nenhum colaborador encontrado.</p>
-    {% endif %}
+    <form method="get" class="row g-2 align-items-end mb-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label">Buscar</label>
+        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Nome, e-mail, matrícula, cargo ou setor">
+      </div>
+      <div class="col-12 col-md-auto">
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+        <a class="btn btn-outline-secondary" href="{% url 'app_colaboradores:lista' %}">Limpar</a>
+      </div>
+    </form>
 
-    {% if is_paginated %}
-    <div class="pagination">
-      {% if page_obj.has_previous %}
-        <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}">« Anterior</a>
+    {% if colaboradores %}
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Matrícula</th>
+              <th>Cargo</th>
+              <th>Setor</th>
+              <th>Telefone</th>
+              <th>Status</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in colaboradores %}
+              <tr>
+                <td>{{ c.nome }}</td>
+                <td>{{ c.email }}</td>
+                <td><code>{{ c.matricula }}</code></td>
+                <td>{{ c.cargo|default:"-" }}</td>
+                <td>{{ c.setor|default:"-" }}</td>
+                <td>{{ c.telefone|default:"-" }}</td>
+                <td>
+                  {% if c.ativo %}
+                    <span class="badge bg-success">Ativo</span>
+                  {% else %}
+                    <span class="badge bg-danger">Inativo</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-2">
+                    {% if perms.app_colaboradores.change_colaborador %}
+                      <a class="btn btn-sm btn-danger" href="{% url 'app_colaboradores:editar' c.pk %}">Editar</a>
+                    {% endif %}
+                    {% if perms.app_colaboradores.delete_colaborador %}
+                      <a class="btn btn-sm btn-outline-danger" href="{% url 'app_colaboradores:excluir' c.pk %}">Excluir</a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if is_paginated %}
+        <nav class="mt-2">
+          <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ page_obj.previous_page_number }}">«</a>
+              </li>
+            {% endif %}
+            <li class="page-item disabled">
+              <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ page_obj.next_page_number }}">»</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
       {% endif %}
-      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-      {% if page_obj.has_next %}
-        <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}">Próxima »</a>
-      {% endif %}
-    </div>
+    {% else %}
+      <p class="mb-0">Nenhum colaborador encontrado.</p>
     {% endif %}
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'app_colaboradores/js/main.js' %}"></script>
 {% endblock %}
