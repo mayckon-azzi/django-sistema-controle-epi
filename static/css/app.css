@@ -1,0 +1,12 @@
+/* ajustes globais leves — personalize depois */
+.nav-link.active {
+  color: #5b21b6;
+}
+
+.badge-success {
+  background-color: #16a34a;
+}
+
+.badge-danger {
+  background-color: #dc2626;
+}
