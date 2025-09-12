@@ -1,18 +1,26 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Entrega, Solicitacao
+from app_epis.models import EPI
 
 class EntregaForm(forms.ModelForm):
     class Meta:
         model = Entrega
         fields = ["colaborador", "epi", "quantidade", "status", "observacao"]
-        widgets = {"quantidade": forms.NumberInput(attrs={"min": 1})}
+        widgets = {
+            "colaborador": forms.Select(attrs={"class": "form-select"}),
+            "epi": forms.Select(attrs={"class": "form-select"}),
+            "quantidade": forms.NumberInput(attrs={"min": 1, "class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-select"}),
+            "observacao": forms.Textarea(attrs={"placeholder": "Opcional", "rows": 2, "class": "form-control"}),
+        }
 
     def clean_quantidade(self):
         q = self.cleaned_data["quantidade"]
         if q < 1:
-            raise ValidationError("Quantidade deve ser ≥ 1.")
+            raise forms.ValidationError("Quantidade deve ser ≥ 1.")
         return q
+
 
     def clean(self):
         cleaned = super().clean()
@@ -28,23 +36,15 @@ class EntregaForm(forms.ModelForm):
             self.add_error("epi", "EPI inativo — não é possível registrar entrega.")
         return cleaned
 
-
-from app_epis.models import EPI
-
 class SolicitacaoForm(forms.ModelForm):
-    epi = forms.ModelChoiceField(
-        queryset=EPI.objects.filter(ativo=True).order_by("nome"),
-        label="EPI",
-    )
-
     class Meta:
         model = Solicitacao
-        fields = ["epi", "quantidade", "justificativa"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # rótulo bonito no select
-        self.fields["epi"].label_from_instance = lambda obj: f"{obj.nome} ({obj.codigo})"
+        fields = ["epi", "quantidade", "observacao"]
+        widgets = {
+            "epi": forms.Select(attrs={"class": "form-select"}),
+            "quantidade": forms.NumberInput(attrs={"min": 1, "class": "form-control"}),
+            "observacao": forms.Textarea(attrs={"placeholder": "Justificativa/observação (opcional)", "rows": 2, "class": "form-control"}),
+        }
 
     def clean_quantidade(self):
         q = self.cleaned_data["quantidade"]

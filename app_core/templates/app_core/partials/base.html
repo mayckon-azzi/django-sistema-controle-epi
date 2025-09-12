@@ -5,22 +5,23 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}Sistema EPI{% endblock %}</title>
-
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous">
   <link rel="stylesheet" href="{% static 'app_core/css/main.css' %}?v=ui2">
+
   {% block extra_css %}{% endblock %}
 </head>
 <body>
-
-  <!-- Acessibilidade: pular para conteúdo -->
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
 
-  <!-- Topbar: logo + usuário -->
   <header class="topbar">
     <div class="left">
       <button class="sidebar-toggle" aria-label="Abrir menu" onclick="toggleSidebar()">☰</button>
       <a class="brand" href="{% url 'app_core:home' %}">
-        <img class="logo" src="{% static 'app_core/img/logo.svg' %}" alt="Logo">
-        <span class="brand-name">Sistema EPI</span>
+        <img class="logo" src="{% static 'app_core/img/logo.png' %}" style="max-width: 100%; height: auto;" alt="Logo">
+        {% comment %} <span class="brand-name">Sistema EPI</span> {% endcomment %}
       </a>
     </div>
     <div class="topbar-right">
@@ -116,8 +117,11 @@
       </footer>
     </section>
   </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
   <script src="{% static 'app_core/js/main.js' %}?v=ui2"></script>
-  {% block extra_js %}{% endblock %}
+  {% block extra_js %}
+  {% endblock %}
 </body>
 </html>

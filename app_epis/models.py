@@ -28,7 +28,7 @@ class EPI(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.nome} ({self.codigo})"
+        return f"{self.nome} ({self.codigo})" if self.codigo else self.nome
 
 class Meta:
     constraints = [

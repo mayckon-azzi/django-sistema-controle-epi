@@ -20,7 +20,7 @@ class Solicitacao(models.Model):
         related_name="solicitacoes",
     )
     quantidade = models.PositiveIntegerField(default=1)
-    justificativa = models.CharField(max_length=255, blank=True)
+    observacao = models.CharField(max_length=255, blank=True)
     status = models.CharField(
         max_length=12, choices=Status.choices, default=Status.PENDENTE
     )

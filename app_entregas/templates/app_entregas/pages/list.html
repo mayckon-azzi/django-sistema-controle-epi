@@ -1,105 +1,135 @@
 {% extends "app_core/partials/base.html" %}
-{% load static %}
-
-{% block title %}Lista de Entregas{% endblock %}
+{% block title %}Entregas{% endblock %}
 {% block page_title %}Entregas{% endblock %}
 {% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Entregas{% endblock %}
 
-{% block extra_css %}
-  <link rel="stylesheet" href="{% static 'app_entregas/css/main.css' %}?v=l1">
-{% endblock %}
-
-  {% block content %}
+{% block content %}
 <div class="card">
-  <div class="card-header">
-    <h2>Lista de Entregas</h2>
-    <form method="get" class="search-form" style="display:flex; gap:8px; flex-wrap: wrap; align-items:center;">
-      <input type="text" name="q" value="{{ q }}" placeholder="Buscar por colaborador, e-mail, matrícula, EPI ou código" />
-      <select name="colaborador">
-        <option value="">-- Colaborador --</option>
-        {% for c in colaboradores %}
-          <option value="{{ c.id }}" {% if colaborador_id|default:'' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nome }}</option>
-        {% endfor %}
-      </select>
-      <select name="epi">
-        <option value="">-- EPI --</option>
-        {% for e in epis %}
-          <option value="{{ e.id }}" {% if epi_id|default:'' == e.id|stringformat:'s' %}selected{% endif %}>{{ e.nome }}</option>
-        {% endfor %}
-      </select>
-      <select name="status">
-        <option value="">-- Status --</option>
-        {% for value,label in statuses %}
-          <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-      <button class="btn" type="submit">Filtrar</button>
-      {% if perms.app_entregas.add_entrega %}
-        <a class="btn outline" href="{% url 'app_entregas:criar' %}">Nova Entrega</a>
-      {% endif %}
-    </form>
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <h2 class="m-0 fs-5">Histórico de Entregas</h2>
+    {% if perms.app_entregas.add_entrega %}
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'app_entregas:criar' %}">Nova Entrega</a>
+    {% endif %}
   </div>
 
   <div class="card-body">
-    {% if entregas %}
-    <div class="table-responsive">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Colaborador</th>
-            <th>EPI</th>
-            <th>Qtd</th>
-            <th>Status</th>
-            <th class="actions">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for e in entregas %}
-          <tr>
-            <td>{{ e.data_entrega|date:"d/m/Y H:i" }}</td>
-            <td>{{ e.colaborador.nome }}</td>
-            <td>{{ e.epi.nome }}</td>
-            <td>{{ e.quantidade }}</td>
-            <td>
-              {% if e.status == 'ENTREGUE' %}<span class="badge success">Entregue</span>
-              {% elif e.status == 'DEVOLVIDO' %}<span class="badge">Devolvido</span>
-              {% else %}<span class="badge">Cancelado</span>{% endif %}
-            </td>
-            <td class="actions">
-              <a class="btn small" href="{% url 'app_entregas:detalhe' e.pk %}">Detalhes</a>
-              {% if perms.app_entregas.change_entrega %}
-                <a class="btn small" href="{% url 'app_entregas:editar' e.pk %}">Editar</a>
-              {% endif %}
-              {% if perms.app_entregas.delete_entrega %}
-                <a class="btn small danger" href="{% url 'app_entregas:excluir' e.pk %}">Excluir</a>
-              {% endif %}
-            </td>
-          </tr>
+    <form method="get" class="row g-2 align-items-end mb-3">
+      <div class="col-12 col-lg-4">
+        <label class="form-label">Buscar</label>
+        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Colaborador, e-mail, matrícula, EPI ou código">
+      </div>
+      <div class="col-6 col-lg-3">
+        <label class="form-label">Colaborador</label>
+        <select name="colaborador" class="form-select">
+          <option value="">Todos</option>
+          {% for c in colaboradores %}
+            <option value="{{ c.id }}" {% if colaborador_id|default:'' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nome }}</option>
           {% endfor %}
-        </tbody>
-      </table>
-    </div>
+        </select>
+      </div>
+      <div class="col-6 col-lg-3">
+        <label class="form-label">EPI</label>
+        <select name="epi" class="form-select">
+          <option value="">Todos</option>
+          {% for e in epis %}
+            <option value="{{ e.id }}" {% if epi_id|default:'' == e.id|stringformat:'s' %}selected{% endif %}>{{ e.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6 col-lg-2">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+          <option value="">Todos</option>
+          {% for val,label in statuses %}
+            <option value="{{ val }}" {% if status == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 col-lg-auto">
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+        <a class="btn btn-outline-secondary" href="{% url 'app_entregas:lista' %}">Limpar</a>
+      </div>
+    </form>
 
-    {% if is_paginated %}
-    <div class="pagination">
-      {% if page_obj.has_previous %}
-        <a href="?q={{ q }}&colaborador={{ colaborador_id }}&epi={{ epi_id }}&status={{ status }}&page={{ page_obj.previous_page_number }}">« Anterior</a>
-      {% endif %}
-      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-      {% if page_obj.has_next %}
-        <a href="?q={{ q }}&colaborador={{ colaborador_id }}&epi={{ epi_id }}&status={{ status }}&page={{ page_obj.next_page_number }}">Próxima »</a>
-      {% endif %}
-    </div>
-    {% endif %}
+    {% if entregas %}
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Colaborador</th>
+              <th>EPI</th>
+              <th class="text-center">Qtd</th>
+              <th>Status</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in entregas %}
+              <tr>
+                <td>{{ e.data_entrega|date:"d/m/Y H:i" }}</td>
+                <td>{{ e.colaborador.nome }}</td>
+                <td>{{ e.epi.nome }}</td>
+                <td class="text-center">{{ e.quantidade }}</td>
+                <td>
+                  {% if e.status == "ENTREGUE" %}
+                    <span class="badge bg-primary">Entregue</span>
+                  {% elif e.status == "DEVOLVIDO" %}
+                    <span class="badge bg-success">Devolvido</span>
+                  {% elif e.status == "CANCELADO" %}
+                    <span class="badge bg-secondary">Cancelado</span>
+                  {% else %}
+                    <span class="badge bg-light text-dark">{{ e.get_status_display }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-2">
+                    {% if perms.app_entregas.change_entrega %}
+                      {% if e.status == "ENTREGUE" %}
+                        <form method="post" action="{% url 'app_entregas:marcar_devolvido' e.pk %}" class="d-inline">
+                          {% csrf_token %}
+                          <button class="btn btn-sm btn-outline-success" onclick="return confirm('Confirmar devolução?')">Devolver</button>
+                        </form>
+                        <form method="post" action="{% url 'app_entregas:marcar_cancelado' e.pk %}" class="d-inline">
+                          {% csrf_token %}
+                          <button class="btn btn-sm btn-outline-secondary" onclick="return confirm('Cancelar esta entrega?')">Cancelar</button>
+                        </form>
+                      {% endif %}
+                      <a class="btn btn-sm btn-outline-primary" href="{% url 'app_entregas:editar' e.pk %}">Editar</a>
+                    {% endif %}
+                    {% if perms.app_entregas.delete_entrega %}
+                      <a class="btn btn-sm btn-outline-danger" href="{% url 'app_entregas:excluir' e.pk %}">Excluir</a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
+      {% if is_paginated %}
+        <nav class="mt-2">
+          <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ page_obj.previous_page_number }}">«</a>
+              </li>
+            {% endif %}
+            <li class="page-item disabled">
+              <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ page_obj.next_page_number }}">»</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
     {% else %}
-      <p>Nenhuma entrega encontrada.</p>
+      <p class="mb-0">Nenhuma entrega para os filtros aplicados.</p>
     {% endif %}
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'app_entregas/js/main.js' %}"></script>
 {% endblock %}

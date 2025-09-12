@@ -2,42 +2,54 @@
 {% block title %}Minhas Solicitações{% endblock %}
 {% block page_title %}Minhas Solicitações{% endblock %}
 {% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Minhas Solicitações{% endblock %}
+
 {% block content %}
 <div class="card">
-  <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
-    <h2>Minhas Solicitações</h2>
-    {% if perms.app_entregas.add_solicitacao %}
-      <a class="btn" href="{% url 'app_entregas:criar_solicitacao' %}">Nova Solicitação</a>
-    {% endif %}
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <h2 class="m-0 fs-5">Solicitações</h2>
+    <a class="btn btn-outline-primary btn-sm" href="{% url 'app_entregas:criar_solicitacao' %}">Nova Solicitação</a>
   </div>
+
   <div class="card-body">
     {% if solicitacoes %}
       <div class="table-responsive">
-        <table class="table">
+        <table class="table table-sm table-hover align-middle">
           <thead>
-            <tr><th>Data</th><th>EPI</th><th>Qtd</th><th>Status</th></tr>
+            <tr>
+              <th>Data</th>
+              <th>EPI</th>
+              <th class="text-center">Qtd</th>
+              <th>Status</th>
+            </tr>
           </thead>
           <tbody>
             {% for s in solicitacoes %}
-            <tr>
-              <td>{{ s.criado_em|date:"d/m/Y H:i" }}</td>
-              <td>{{ s.epi.nome }}</td>
-              <td>{{ s.quantidade }}</td>
-              <td>{{ s.get_status_display }}</td>
-            </tr>
+              <tr>
+                <td>{{ s.criado_em|date:"d/m/Y H:i" }}</td>
+                <td>{{ s.epi.nome }}</td>
+                <td class="text-center">{{ s.quantidade }}</td>
+                <td>
+                  {% if s.status == "PENDENTE" %}
+                    <span class="badge bg-warning text-dark">Pendente</span>
+                  {% elif s.status == "APROVADA" %}
+                    <span class="badge bg-primary">Aprovada</span>
+                  {% elif s.status == "ATENDIDA" %}
+                    <span class="badge bg-success">Atendida</span>
+                  {% elif s.status == "REPROVADA" %}
+                    <span class="badge bg-danger">Reprovada</span>
+                  {% elif s.status == "CANCELADA" %}
+                    <span class="badge bg-secondary">Cancelada</span>
+                  {% else %}
+                    <span class="badge bg-light text-dark">{{ s.get_status_display }}</span>
+                  {% endif %}
+                </td>
+              </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-      {% if is_paginated %}
-        <div class="pagination">
-          {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">« Anterior</a>{% endif %}
-          <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-          {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Próxima »</a>{% endif %}
-        </div>
-      {% endif %}
     {% else %}
-      <p>Você ainda não fez solicitações.</p>
+      <p class="mb-0">Você ainda não possui solicitações.</p>
     {% endif %}
   </div>
 </div>

@@ -1,35 +1,35 @@
 {% extends "app_core/partials/base.html" %}
-{% load static %}
 {% block title %}Solicitar EPI{% endblock %}
-{% block page_title %}Solicitações{% endblock %}
-{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Solicitar EPI{% endblock %}
+{% block page_title %}Solicitar EPI{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'app_core:home' %}">Início</a> ›
+  <a href="{% url 'app_entregas:minhas_solicitacoes' %}">Minhas Solicitações</a> › Nova
+{% endblock %}
+
 {% block content %}
 <div class="card">
-  <div class="card-header"><h2>Solicitar EPI</h2></div>
+  <div class="card-header"><h2 class="m-0 fs-5">Nova Solicitação</h2></div>
   <div class="card-body">
-    <form method="post" style="display:grid; gap:12px;">
+    <form method="post" class="row g-3">
       {% csrf_token %}
       {{ form.non_field_errors }}
 
-      <div style="display:grid; gap:12px; grid-template-columns: 2fr 1fr;">
-        <div>
-          <label>EPI</label>
-          {{ form.epi }} {{ form.epi.errors }}
-        </div>
-        <div>
-          <label>Quantidade</label>
-          {{ form.quantidade }} {{ form.quantidade.errors }}
-        </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">EPI</label>
+        {{ form.epi }} {{ form.epi.errors }}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label">Quantidade</label>
+        {{ form.quantidade }} {{ form.quantidade.errors }}
+      </div>
+      <div class="col-12">
+        <label class="form-label">Justificativa/Observação</label>
+        {{ form.observacao }} {{ form.observacao.errors }}
       </div>
 
-      <div>
-        <label>Justificativa (opcional)</label>
-        {{ form.justificativa }} {{ form.justificativa.errors }}
-      </div>
-
-      <div style="display:flex; gap:8px;">
-        <a class="btn outline" href="{% url 'app_entregas:minhas_solicitacoes' %}">Cancelar</a>
-        <button class="btn" type="submit">Enviar</button>
+      <div class="col-12 d-flex gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'app_entregas:minhas_solicitacoes' %}">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Enviar</button>
       </div>
     </form>
   </div>
