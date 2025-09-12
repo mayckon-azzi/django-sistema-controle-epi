@@ -76,8 +76,10 @@
             <!-- Demais módulos -->
             <a class="item {% if ns == 'app_epis' %}active{% endif %}"
                href="{% url 'app_epis:lista' %}" title="EPIs"><span class="label">EPIs</span></a>
-            <a class="item {% if ns == 'app_colaboradores' %}active{% endif %}"
-               href="{% url 'app_colaboradores:lista' %}" title="Colaboradores"><span class="label">Colaboradores</span></a>
+            {% if perms.app_colaboradores.view_colaborador %}
+              <a class="item {% if ns == 'app_colaboradores' %}active{% endif %}"
+                href="{% url 'app_colaboradores:lista' %}" title="Colaboradores"><span class="label">Colaboradores</span></a>
+            {% endif %}
             <a class="item {% if ns == 'app_relatorios' %}active{% endif %}"
                href="{% url 'app_relatorios:index' %}" title="Relatórios"><span class="label">Relatórios</span></a>
           {% endif %}

@@ -1,43 +1,18 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import Colaborador
-from .forms import ColaboradorForm, RegisterForm
+from .forms import ColaboradorAdminForm, ColaboradorForm, RegisterForm
 from django.db.utils import OperationalError, ProgrammingError  
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 
 
-# Create your views here.
-# def lista(request):
-#     q = request.GET.get("q", "").strip()
 
-#     qs = Colaborador.objects.all()
-#     if q:
-#         qs = qs.filter(
-#             Q(nome__icontains=q) |
-#             Q(email__icontains=q) |
-#             Q(matricula__icontains=q) |
-#             Q(cargo__icontains=q) |
-#             Q(setor__icontains=q)
-#         )
 
-#     paginator = Paginator(qs, 10)  # 10 por página
-#     page_number = request.GET.get("page")
-#     page_obj = paginator.get_page(page_number)
-
-#     context = {
-#         "colaboradores": page_obj.object_list,
-#         "page_obj": page_obj,
-#         "paginator": paginator,
-#         "is_paginated": page_obj.has_other_pages(),
-#         "q": q,
-#     }
-#     return render(request, "app_colaboradores/pages/list.html", context)
 
 class EntrarView(LoginView):
 	template_name = 'app_colaboradores/pages/login.html'
@@ -45,57 +20,77 @@ class EntrarView(LoginView):
 	def get_success_url(self):
 		return reverse_lazy('app_colaboradores:lista')
 
-class ListaColaboradoresView(LoginRequiredMixin, ListView):
-	login_url = reverse_lazy('app_colaboradores:entrar')  
-	model = Colaborador
-	template_name = 'app_colaboradores/pages/list.html'
-	context_object_name = 'colaboradores'
-	paginate_by = 10
-	def get_queryset(self):
-		queryset = super().get_queryset()
-		busca = self.request.GET.get('q', '').strip()
-		if busca:
-			from django.db.models import Q
-			queryset = queryset.filter(
-				Q(nome__icontains=busca) |
-				Q(email__icontains=busca) |
-				Q(matricula__icontains=busca)
-			)
-		return queryset
+# LISTA: só para quem tem permissão de ver colaboradores
+class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    permission_required = "app_colaboradores.view_colaborador"
+    raise_exception = True
 
-class CriarColaboradorView(LoginRequiredMixin, CreateView):
-	login_url = reverse_lazy('app_colaboradores:entrar') 
-	model = Colaborador
-	form_class = ColaboradorForm
-	template_name = 'app_colaboradores/pages/form.html'
-	success_url = reverse_lazy('app_colaboradores:lista')
+    model = Colaborador
+    template_name = 'app_colaboradores/pages/list.html'
+    context_object_name = 'colaboradores'
+    paginate_by = 10
 
-	def form_valid(self, form):
-		resp = super().form_valid(form)
-		messages.success(self.request, "Colaborador criado com sucesso.")
-		return resp
+    def get_queryset(self):
+        qs = super().get_queryset()
+        q = (self.request.GET.get('q') or '').strip()
+        if q:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(nome__icontains=q) | Q(email__icontains=q) |
+                Q(matricula__icontains=q) | Q(cargo__icontains=q) | Q(setor__icontains=q)
+            )
+        return qs
 
-class AtualizarColaboradorView(LoginRequiredMixin, UpdateView):
-	login_url = reverse_lazy('app_colaboradores:entrar') 
-	model = Colaborador
-	form_class = ColaboradorForm
-	template_name = 'app_colaboradores/pages/form.html'
-	success_url = reverse_lazy('app_colaboradores:lista')
+# CRIAR
+class CriarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    permission_required = "app_colaboradores.add_colaborador"
+    raise_exception = True
 
-	def form_valid(self, form):
-		resp = super().form_valid(form)
-		messages.success(self.request, "Colaborador atualizado com sucesso.")
-		return resp
+    model = Colaborador
+    form_class = ColaboradorForm
+    template_name = 'app_colaboradores/pages/form.html'
+    success_url = reverse_lazy('app_colaboradores:lista')
 
-class ExcluirColaboradorView(LoginRequiredMixin, DeleteView):
-	login_url = reverse_lazy('app_colaboradores:entrar')  
-	model = Colaborador
-	template_name = 'app_colaboradores/pages/confirm_delete.html'
-	success_url = reverse_lazy('app_colaboradores:lista')
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        messages.success(self.request, "Colaborador criado.")
+        return resp
 
-	def delete(self, request, *args, **kwargs):
-		messages.success(self.request, "Colaborador excluído com sucesso.")
-		return super().delete(request, *args, **kwargs)
+# EDITAR: usa form com grupos para Almoxarife/Admin
+class AtualizarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    permission_required = "app_colaboradores.change_colaborador"
+    raise_exception = True
+
+    model = Colaborador
+    template_name = 'app_colaboradores/pages/form.html'
+    success_url = reverse_lazy('app_colaboradores:lista')
+
+    def get_form_class(self):
+        u = self.request.user
+        is_admin = u.is_superuser
+        is_almox = u.groups.filter(name="Almoxarife").exists()
+        return ColaboradorAdminForm if (is_admin or is_almox) else ColaboradorForm
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        messages.success(self.request, "Colaborador atualizado.")
+        return resp
+		
+class ExcluirColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    login_url = reverse_lazy('app_colaboradores:entrar')
+    permission_required = "app_colaboradores.delete_colaborador"
+    raise_exception = True
+
+    model = Colaborador
+    template_name = 'app_colaboradores/pages/confirm_delete.html'
+    success_url = reverse_lazy('app_colaboradores:lista')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Colaborador excluído.")
+        return super().delete(request, *args, **kwargs)
 
 @staff_member_required(login_url="app_colaboradores:entrar")
 def registrar(request):

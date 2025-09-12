@@ -15,9 +15,10 @@ class Colaborador(models.Model):
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        ordering = ["nome"]
-
     def __str__(self):
         return f"{self.nome} ({self.matricula})"
 
+class Meta:
+    ordering = ["nome"]
+
+   
