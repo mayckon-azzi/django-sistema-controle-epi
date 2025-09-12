@@ -17,9 +17,7 @@ class ListaEPIView(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = (
-            EPI.objects.select_related("categoria")
-        )
+        qs = EPI.objects.select_related("categoria")
 
         q = (self.request.GET.get("q") or "").strip()
         categoria_id = self.request.GET.get("categoria") or ""
@@ -27,11 +25,16 @@ class ListaEPIView(LoginRequiredMixin, ListView):
         below_min = self.request.GET.get("abaixo") == "1"
         order = self.request.GET.get("ordenar") or "nome"
 
+        # >>> NOVO: controlar quando mostrar resultados
+        self.has_filters = any([q, categoria_id, only_active, below_min])
+        if not self.has_filters:
+            return EPI.objects.none()
+
         if q:
             qs = qs.filter(
-                Q(nome__icontains=q)
-                | Q(codigo__icontains=q)
-                | Q(categoria__nome__icontains=q)
+                Q(nome__icontains=q) |
+                Q(codigo__icontains=q) |
+                Q(categoria__nome__icontains=q)
             )
         if categoria_id:
             qs = qs.filter(categoria_id=categoria_id)
@@ -40,7 +43,6 @@ class ListaEPIView(LoginRequiredMixin, ListView):
         if below_min:
             qs = qs.filter(estoque__lte=F("estoque_minimo"))
 
-        # flag para a view exibir badge de baixo estoque
         qs = qs.annotate(
             abaixo_min=Case(
                 When(estoque__lte=F("estoque_minimo"), then=Value(True)),
@@ -62,24 +64,20 @@ class ListaEPIView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx.update(
-            {
-                "q": self.request.GET.get("q", ""),
-                "categoria_id": self.request.GET.get("categoria", ""),
-                "categorias": CategoriaEPI.objects.all(),
-                "only_active": self.request.GET.get("ativos") == "1",
-                "below_min": self.request.GET.get("abaixo") == "1",
-                "ordenar": self.request.GET.get("ordenar") or "nome",
-                "ordenacoes": [
-                    ("nome", "Nome A→Z"),
-                    ("-nome", "Nome Z→A"),
-                    ("estoque", "Estoque ↑"),
-                    ("-estoque", "Estoque ↓"),
-                    ("categoria", "Categoria"),
-                    ("codigo", "Código"),
-                ],
-            }
-        )
+        ctx.update({
+            "q": self.request.GET.get("q", ""),
+            "categoria_id": self.request.GET.get("categoria", ""),
+            "categorias": CategoriaEPI.objects.all(),
+            "only_active": self.request.GET.get("ativos") == "1",
+            "below_min": self.request.GET.get("abaixo") == "1",
+            "ordenar": self.request.GET.get("ordenar") or "nome",
+            "ordenacoes": [
+                ("nome","Nome A→Z"), ("-nome","Nome Z→A"),
+                ("estoque","Estoque ↑"), ("-estoque","Estoque ↓"),
+                ("categoria","Categoria"), ("codigo","Código"),
+            ],
+            "has_filters": getattr(self, "has_filters", False),   # >>> NOVO
+        })
         return ctx
 
 

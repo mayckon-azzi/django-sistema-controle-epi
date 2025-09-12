@@ -47,11 +47,15 @@ class CriarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
     login_url = reverse_lazy('app_colaboradores:entrar')
     permission_required = "app_colaboradores.add_colaborador"
     raise_exception = True
-
     model = Colaborador
-    form_class = ColaboradorForm
     template_name = 'app_colaboradores/pages/form.html'
     success_url = reverse_lazy('app_colaboradores:lista')
+
+    def get_form_class(self):
+        u = self.request.user
+        if u.is_superuser or u.groups.filter(name="Almoxarife").exists():
+            return ColaboradorAdminForm   
+        return ColaboradorForm
 
     def form_valid(self, form):
         resp = super().form_valid(form)
@@ -63,16 +67,13 @@ class AtualizarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, Upda
     login_url = reverse_lazy('app_colaboradores:entrar')
     permission_required = "app_colaboradores.change_colaborador"
     raise_exception = True
-
     model = Colaborador
     template_name = 'app_colaboradores/pages/form.html'
     success_url = reverse_lazy('app_colaboradores:lista')
 
     def get_form_class(self):
         u = self.request.user
-        is_admin = u.is_superuser
-        is_almox = u.groups.filter(name="Almoxarife").exists()
-        return ColaboradorAdminForm if (is_admin or is_almox) else ColaboradorForm
+        return ColaboradorAdminForm if (u.is_superuser or u.groups.filter(name="Almoxarife").exists()) else ColaboradorForm
 
     def form_valid(self, form):
         resp = super().form_valid(form)
