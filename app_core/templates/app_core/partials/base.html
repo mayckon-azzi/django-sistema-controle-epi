@@ -55,12 +55,12 @@
 
             <!-- Minhas Solicitações e Criar Solicitação (para colaboradores) -->
             {% if perms.app_entregas.add_solicitacao %}
-              <a class="item {% if url_name == 'minhas_solicitacoes' or url_name == 'criar_solicitacao' %}active{% endif %}"
-                 href="{% url 'app_entregas:minhas_solicitacoes' %}" title="Minhas Solicitações">
+              <a class="item {% if url_name == 'minhas_solicitacoes' %}active{% endif %}"
+                href="{% url 'app_entregas:minhas_solicitacoes' %}" title="Minhas Solicitações">
                 <span class="label">Minhas Solicitações</span>
               </a>
               <a class="item {% if url_name == 'criar_solicitacao' %}active{% endif %}"
-                 href="{% url 'app_entregas:criar_solicitacao' %}" title="Solicitar EPI">
+                href="{% url 'app_entregas:criar_solicitacao' %}" title="Solicitar EPI">
                 <span class="label">Solicitar EPI</span>
               </a>
             {% endif %}

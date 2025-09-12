@@ -29,10 +29,22 @@ class EntregaForm(forms.ModelForm):
         return cleaned
 
 
+from app_epis.models import EPI
+
 class SolicitacaoForm(forms.ModelForm):
+    epi = forms.ModelChoiceField(
+        queryset=EPI.objects.filter(ativo=True).order_by("nome"),
+        label="EPI",
+    )
+
     class Meta:
         model = Solicitacao
         fields = ["epi", "quantidade", "justificativa"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # rótulo bonito no select
+        self.fields["epi"].label_from_instance = lambda obj: f"{obj.nome} ({obj.codigo})"
 
     def clean_quantidade(self):
         q = self.cleaned_data["quantidade"]

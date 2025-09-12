@@ -6,16 +6,14 @@ from .models import Entrega
 
 def _mov_value(status: str, qtd: int) -> int:
     """
-    Mapeia o status da Entrega para movimento de estoque:
-      ENTREGUE  => -qtd  (saída)
-      DEVOLVIDO => +qtd  (entrada)
+    Mapeia status -> efeito final no estoque para UM registro de Entrega.
+      ENTREGUE  => -q  (saída)
+      DEVOLVIDO =>  0  (ciclo completo: saiu e voltou; efeito líquido zero)
       CANCELADO =>  0
     """
     if status == Entrega.Status.ENTREGUE:
         return -int(qtd or 0)
-    if status == Entrega.Status.DEVOLVIDO:
-        return +int(qtd or 0)
-    return 0  # CANCELADO
+    return 0
 
 @transaction.atomic
 def _apply_delta(epi_id: int, delta: int) -> int:

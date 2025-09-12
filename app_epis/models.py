@@ -27,8 +27,8 @@ class EPI(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-def __str__(self):
-    return f"{self.nome} ({self.codigo})"
+    def __str__(self):
+        return f"{self.nome} ({self.codigo})"
 
 class Meta:
     constraints = [
@@ -38,6 +38,8 @@ class Meta:
             check=models.Q(estoque__gte=0),
         ),
     ]
+
+    
 
     
     
