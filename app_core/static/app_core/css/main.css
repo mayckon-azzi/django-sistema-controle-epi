@@ -243,7 +243,7 @@ body {
 
 /* Esconde o hambúrguer em telas grandes */
 .topbar .sidebar-toggle {
-  display: none;
+  display: none !important;
   border: 0;
   background: transparent;
   font-size: 20px;
@@ -442,7 +442,7 @@ body {
     z-index: 35;
   }
   .topbar .sidebar-toggle {
-    display: inline-flex;
+    display: inline-flex !important;
   }
   .brand-name {
     display: none;

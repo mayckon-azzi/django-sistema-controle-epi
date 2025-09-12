@@ -11,6 +11,9 @@
 </head>
 <body>
 
+  <!-- Acessibilidade: pular para conteúdo -->
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+
   <!-- Topbar: logo + usuário -->
   <header class="topbar">
     <div class="left">
@@ -24,9 +27,9 @@
       {% if request.user.is_authenticated %}
         <span class="user">{{ request.user.get_full_name|default:request.user.username }}</span>
         <form class="logout-form" method="post" action="{% url 'app_colaboradores:sair' %}">
-        {% csrf_token %}
-        <button class="link-logout" type="submit" title="Sair">Sair</button>
-      </form>
+          {% csrf_token %}
+          <button class="link-logout" type="submit" title="Sair">Sair</button>
+        </form>
       {% else %}
         <a class="link" href="{% url 'app_colaboradores:entrar' %}">Entrar</a>
       {% endif %}
@@ -37,15 +40,47 @@
     <!-- Sidebar -->
     <aside class="sidebar" data-collapsible>
       <div class="sidebar-head">
-        <button class="collapse-btn" aria-label="Recolher/Expandir menu" aria-expanded="true" onclick="toggleSidebarCollapse()"> ‹ </button>
+        <button class="collapse-btn" aria-label="Recolher/Expandir menu" aria-expanded="true" onclick="toggleSidebarCollapse()">‹</button>
       </div>
       <nav class="sidenav">
-        {% with ns=request.resolver_match.namespace %}
-          <a class="item {% if ns == 'app_core' %}active{% endif %}" href="{% url 'app_core:home' %}" title="Início"><span class="label">Início</span></a>
-          <a class="item {% if ns == 'app_colaboradores' %}active{% endif %}" href="{% url 'app_colaboradores:lista' %}" title="Colaboradores"><span class="label">Colaboradores</span></a>
-          <a class="item {% if ns == 'app_epis' %}active{% endif %}" href="{% url 'app_epis:lista' %}" title="EPIs"><span class="label">EPIs</span></a>
-          <a class="item {% if ns == 'app_entregas' %}active{% endif %}" href="{% url 'app_entregas:lista' %}" title="Entregas"><span class="label">Entregas</span></a>
-          <a class="item {% if ns == 'app_relatorios' %}active{% endif %}" href="{% url 'app_relatorios:index' %}" title="Relatórios"><span class="label">Relatórios</span></a>
+        {% with ns=request.resolver_match.namespace url_name=request.resolver_match.url_name %}
+          <!-- Sempre visível -->
+          <a class="item {% if ns == 'app_core' %}active{% endif %}"
+             href="{% url 'app_core:home' %}" title="Início"><span class="label">Início</span></a>
+
+          {% if request.user.is_authenticated %}
+            <!-- Entregas (lista/detalhe/editar/excluir) -->
+            <a class="item {% if ns == 'app_entregas' and (url_name == 'lista' or url_name == 'detalhe' or url_name == 'editar' or url_name == 'excluir') %}active{% endif %}"
+               href="{% url 'app_entregas:lista' %}" title="Entregas"><span class="label">Entregas</span></a>
+
+            <!-- Minhas Solicitações e Criar Solicitação (para colaboradores) -->
+            {% if perms.app_entregas.add_solicitacao %}
+              <a class="item {% if url_name == 'minhas_solicitacoes' or url_name == 'criar_solicitacao' %}active{% endif %}"
+                 href="{% url 'app_entregas:minhas_solicitacoes' %}" title="Minhas Solicitações">
+                <span class="label">Minhas Solicitações</span>
+              </a>
+              <a class="item {% if url_name == 'criar_solicitacao' %}active{% endif %}"
+                 href="{% url 'app_entregas:criar_solicitacao' %}" title="Solicitar EPI">
+                <span class="label">Solicitar EPI</span>
+              </a>
+            {% endif %}
+
+            <!-- Gestão de solicitações (almoxarife) -->
+            {% if perms.app_entregas.change_solicitacao %}
+              <a class="item {% if url_name == 'solicitacoes_gerenciar' %}active{% endif %}"
+                 href="{% url 'app_entregas:solicitacoes_gerenciar' %}">
+                 <span class="label">Solicitações (Gerenciar)</span>
+              </a>
+            {% endif %}
+
+            <!-- Demais módulos -->
+            <a class="item {% if ns == 'app_epis' %}active{% endif %}"
+               href="{% url 'app_epis:lista' %}" title="EPIs"><span class="label">EPIs</span></a>
+            <a class="item {% if ns == 'app_colaboradores' %}active{% endif %}"
+               href="{% url 'app_colaboradores:lista' %}" title="Colaboradores"><span class="label">Colaboradores</span></a>
+            <a class="item {% if ns == 'app_relatorios' %}active{% endif %}"
+               href="{% url 'app_relatorios:index' %}" title="Relatórios"><span class="label">Relatórios</span></a>
+          {% endif %}
         {% endwith %}
       </nav>
     </aside>
@@ -83,5 +118,4 @@
   <script src="{% static 'app_core/js/main.js' %}?v=ui2"></script>
   {% block extra_js %}{% endblock %}
 </body>
-<a class="skip-link" href="#main">Pular para o conteúdo</a>
 </html>

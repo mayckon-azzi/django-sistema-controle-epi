@@ -1,12 +1,19 @@
+# app_entregas/admin.py
 from django.contrib import admin
-from .models import Solicitacao
+from .models import Solicitacao, Entrega
 
 @admin.register(Solicitacao)
 class SolicitacaoAdmin(admin.ModelAdmin):
-    list_display = ("data_entrega", "colaborador", "epi", "quantidade", "status")
-    list_filter = ("status", "epi__categoria")
-    search_fields = ("colaborador__nome", "colaborador__email", "colaborador__matricula",
-                     "epi__nome", "epi__codigo")
+    list_display = ("id", "criado_em", "colaborador", "epi", "quantidade", "status")
+    list_filter = ("status", "epi")
+    search_fields = ("colaborador__nome", "colaborador__email", "epi__nome", "epi__codigo")
+    date_hierarchy = "criado_em"
     autocomplete_fields = ("colaborador", "epi")
+
+@admin.register(Entrega)
+class EntregaAdmin(admin.ModelAdmin):
+    list_display = ("id", "data_entrega", "colaborador", "epi", "quantidade", "status", "solicitacao")
+    list_filter = ("status", "epi")
+    search_fields = ("colaborador__nome", "colaborador__email", "epi__nome", "epi__codigo")
     date_hierarchy = "data_entrega"
-    list_per_page = 20
+    autocomplete_fields = ("colaborador", "epi", "solicitacao")

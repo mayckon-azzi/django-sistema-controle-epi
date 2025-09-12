@@ -1,0 +1,70 @@
+{% extends "app_core/partials/base.html" %}
+{% block title %}Solicitações (Gerenciar){% endblock %}
+{% block page_title %}Solicitações (Gerenciar){% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Solicitações (Gerenciar){% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header" style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+    <h2>Solicitações</h2>
+    <form method="get" style="display:flex; gap:8px;">
+      <select name="status">
+        {% for st in "PENDENTE,APROVADA".split(",") %}
+          <option value="{{ st }}" {% if request.GET.status|default:"PENDENTE" == st %}selected{% endif %}>
+            {{ st|title }}
+          </option>
+        {% endfor %}
+      </select>
+      <button class="btn" type="submit">Filtrar</button>
+    </form>
+  </div>
+
+  <div class="card-body">
+    {% if solicitacoes %}
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr><th>Data</th><th>Colaborador</th><th>EPI</th><th>Qtd</th><th>Status</th><th class="actions">Ações</th></tr>
+        </thead>
+        <tbody>
+        {% for s in solicitacoes %}
+          <tr>
+            <td>{{ s.criado_em|date:"d/m/Y H:i" }}</td>
+            <td>{{ s.colaborador.nome }}</td>
+            <td>{{ s.epi.nome }}</td>
+            <td>{{ s.quantidade }}</td>
+            <td>{{ s.get_status_display }}</td>
+            <td class="actions" style="display:flex; gap:6px; flex-wrap:wrap;">
+              {% if s.status == "PENDENTE" %}
+                <form method="post" action="{% url 'app_entregas:aprovar_solicitacao' s.pk %}">{% csrf_token %}
+                  <button class="btn small" type="submit">Aprovar</button>
+                </form>
+                <form method="post" action="{% url 'app_entregas:reprovar_solicitacao' s.pk %}">{% csrf_token %}
+                  <button class="btn small danger" type="submit">Reprovar</button>
+                </form>
+              {% endif %}
+              {% if s.status in "PENDENTE,APROVADA" %}
+                <a class="btn small" href="{% url 'app_entregas:atender_solicitacao' s.pk %}">Atender</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}<a href="?status={{ request.GET.status }}&page={{ page_obj.previous_page_number }}">« Anterior</a>{% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a href="?status={{ request.GET.status }}&page={{ page_obj.next_page_number }}">Próxima »</a>{% endif %}
+      </div>
+    {% else %}
+      <p>Nenhuma solicitação encontrada para o filtro.</p>
+    {% endif %}
+    {% else %}
+      <p>Nenhuma solicitação.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
