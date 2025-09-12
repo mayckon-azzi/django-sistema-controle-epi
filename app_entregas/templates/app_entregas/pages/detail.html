@@ -1,46 +1,123 @@
 {% extends "app_core/partials/base.html" %}
-{% block title %}Detalhes da Entrega{% endblock %}
-{% block page_title %}Entregas{% endblock %}
+{% block title %}Entrega #{{ entrega.pk }}{% endblock %}
+{% block page_title %}Entrega #{{ entrega.pk }}{% endblock %}
 {% block breadcrumb %}
   <a href="{% url 'app_core:home' %}">Início</a> ›
   <a href="{% url 'app_entregas:lista' %}">Entregas</a> › Detalhes
 {% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="card-header">
-    <h2>Detalhes da Entrega</h2>
+<div class="d-flex gap-2 mb-3">
+  <a class="btn btn-outline-secondary btn-sm" href="{% url 'app_entregas:lista' %}">Voltar</a>
+  <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Imprimir</button>
+  {% if perms.app_entregas.change_entrega and entrega.status == "ENTREGUE" %}
+    <form method="post" action="{% url 'app_entregas:marcar_devolvido' entrega.pk %}">
+      {% csrf_token %}
+      <button class="btn btn-outline-success btn-sm" onclick="return confirm('Confirmar devolução?')">Devolver</button>
+    </form>
+    <form method="post" action="{% url 'app_entregas:marcar_cancelado' entrega.pk %}">
+      {% csrf_token %}
+      <button class="btn btn-outline-secondary btn-sm" onclick="return confirm('Cancelar esta entrega?')">Cancelar</button>
+    </form>
+  {% endif %}
+  {% if perms.app_entregas.change_entrega %}
+    <a class="btn btn-outline-primary btn-sm" href="{% url 'app_entregas:editar' entrega.pk %}">Editar</a>
+  {% endif %}
+  {% if perms.app_entregas.delete_entrega %}
+    <a class="btn btn-outline-danger btn-sm" href="{% url 'app_entregas:excluir' entrega.pk %}">Excluir</a>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-xl-8">
+    <div class="card">
+      <div class="card-header"><h2 class="m-0 fs-6">Resumo da Entrega</h2></div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-3">Data</dt>
+          <dd class="col-sm-9">{{ entrega.data_entrega|date:"d/m/Y H:i" }}</dd>
+
+          <dt class="col-sm-3">Colaborador</dt>
+          <dd class="col-sm-9">{{ entrega.colaborador.nome }}</dd>
+
+          <dt class="col-sm-3">EPI</dt>
+          <dd class="col-sm-9">
+            {{ entrega.epi.nome }}
+            {% if entrega.epi.codigo %}<span class="text-muted">({{ entrega.epi.codigo }})</span>{% endif %}
+            {% if entrega.epi.categoria %}<div class="small text-muted">Categoria: {{ entrega.epi.categoria.nome }}</div>{% endif %}
+          </dd>
+
+          <dt class="col-sm-3">Quantidade</dt>
+          <dd class="col-sm-9">{{ entrega.quantidade }}</dd>
+
+          <dt class="col-sm-3">Status</dt>
+          <dd class="col-sm-9">
+            {% if entrega.status == "ENTREGUE" %}
+              <span class="badge bg-primary">Entregue</span>
+            {% elif entrega.status == "DEVOLVIDO" %}
+              <span class="badge bg-success">Devolvido</span>
+            {% elif entrega.status == "CANCELADO" %}
+              <span class="badge bg-secondary">Cancelado</span>
+            {% else %}
+              <span class="badge bg-light text-dark">{{ entrega.get_status_display }}</span>
+            {% endif %}
+          </dd>
+
+          {% if entrega.observacao %}
+            <dt class="col-sm-3">Observação</dt>
+            <dd class="col-sm-9">{{ entrega.observacao }}</dd>
+          {% endif %}
+
+          <dt class="col-sm-3">Criado em</dt>
+          <dd class="col-sm-9">{{ entrega.criado_em|date:"d/m/Y H:i" }}</dd>
+        </dl>
+      </div>
+    </div>
   </div>
-  <div class="card-body">
-    <dl style="display:grid; grid-template-columns: 180px 1fr; row-gap:8px; column-gap:16px; align-items:baseline;">
-      <dt><strong>Data</strong></dt>
-      <dd>{{ entrega.data_entrega|date:"d/m/Y H:i" }}</dd>
 
-      <dt><strong>Colaborador</strong></dt>
-      <dd>{{ entrega.colaborador.nome }}</dd>
+  <div class="col-12 col-xl-4">
+    <div class="card">
+      <div class="card-header"><h2 class="m-0 fs-6">Solicitação</h2></div>
+      <div class="card-body">
+        {% if entrega.solicitacao %}
+          <dl class="row mb-0">
+            <dt class="col-sm-5"># Solicitação</dt>
+            <dd class="col-sm-7">{{ entrega.solicitacao.pk }}</dd>
 
-      <dt><strong>EPI</strong></dt>
-      <dd>{{ entrega.epi.nome }} ({{ entrega.epi.codigo }}) — {{ entrega.epi.categoria.nome }}</dd>
+            <dt class="col-sm-5">Criada em</dt>
+            <dd class="col-sm-7">{{ entrega.solicitacao.criado_em|date:"d/m/Y H:i" }}</dd>
 
-      <dt><strong>Quantidade</strong></dt>
-      <dd>{{ entrega.quantidade }}</dd>
+            <dt class="col-sm-5">Status</dt>
+            <dd class="col-sm-7">
+              {% with s=entrega.solicitacao %}
+                {% if s.status == "PENDENTE" %}
+                  <span class="badge bg-warning text-dark">Pendente</span>
+                {% elif s.status == "APROVADA" %}
+                  <span class="badge bg-primary">Aprovada</span>
+                {% elif s.status == "ATENDIDA" %}
+                  <span class="badge bg-success">Atendida</span>
+                {% elif s.status == "REPROVADA" %}
+                  <span class="badge bg-danger">Reprovada</span>
+                {% elif s.status == "CANCELADA" %}
+                  <span class="badge bg-secondary">Cancelada</span>
+                {% else %}
+                  <span class="badge bg-light text-dark">{{ s.get_status_display }}</span>
+                {% endif %}
+              {% endwith %}
+            </dd>
 
-      <dt><strong>Status</strong></dt>
-      <dd>
-        {% if entrega.status == 'ENTREGUE' %}<span class="badge success">Entregue</span>
-        {% elif entrega.status == 'DEVOLVIDO' %}<span class="badge">Devolvido</span>
-        {% else %}<span class="badge">Cancelado</span>{% endif %}
-      </dd>
+            <dt class="col-sm-5">Qtd solicitada</dt>
+            <dd class="col-sm-7">{{ entrega.solicitacao.quantidade }}</dd>
 
-      <dt><strong>Observação</strong></dt>
-      <dd>{{ entrega.observacao|default:"—" }}</dd>
-    </dl>
-
-    <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
-      <a class="btn" href="{% url 'app_entregas:editar' entrega.pk %}">Editar</a>
-      <a class="btn danger" href="{% url 'app_entregas:excluir' entrega.pk %}">Excluir</a>
-      <a class="btn outline" href="{% url 'app_entregas:lista' %}">Voltar</a>
-      <button class="btn outline" type="button" onclick="window.print()">Imprimir</button>
+            {% if entrega.solicitacao.observacao %}
+              <dt class="col-sm-5">Observação</dt>
+              <dd class="col-sm-7">{{ entrega.solicitacao.observacao }}</dd>
+            {% endif %}
+          </dl>
+        {% else %}
+          <p class="mb-0 text-muted">Sem solicitação vinculada (registro legado).</p>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>

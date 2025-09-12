@@ -127,11 +127,16 @@ class ExcluirEntregaView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
             return redirect(self.success_url)
 
 class DetalheEntregaView(LoginRequiredMixin, DetailView):
-    login_url = reverse_lazy("app_colaboradores:entrar")
+    login_url = reverse_lazy('app_colaboradores:entrar')
     model = Entrega
-    template_name = "app_entregas/pages/detail.html"
-    context_object_name = "entrega"
+    template_name = 'app_entregas/pages/detail.html'
+    context_object_name = 'entrega'
 
+    def get_queryset(self):
+        return (
+            Entrega.objects
+            .select_related('colaborador', 'epi', 'solicitacao', 'epi__categoria')
+        )
 
 # ===== SOLICITAÇÕES =====
 class CriarSolicitacaoView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -185,9 +190,7 @@ class SolicitacoesGerenciarView(LoginRequiredMixin, PermissionRequiredMixin, Lis
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        # status permitidos para o filtro do almoxarife
         ctx["statuses_manage"] = ["PENDENTE", "APROVADA"]
-        # status atualmente selecionado no filtro (com default)
         ctx["status_selected"] = self.request.GET.get("status") or "PENDENTE"
         return ctx
 
@@ -261,7 +264,6 @@ def marcar_devolvido(request, pk):
         messages.warning(request, "Só é possível devolver entregas no status ENTREGUE.")
         return redirect("app_entregas:lista")
 
-    # devolução = volta pro estoque
     EPI.objects.filter(pk=e.epi_id).update(estoque=F("estoque") + e.quantidade)
     e.status = Entrega.Status.DEVOLVIDO
     e.save(update_fields=["status"])
@@ -282,8 +284,6 @@ def marcar_cancelado(request, pk):
         messages.info(request, "Entrega já está CANCELADA.")
         return redirect("app_entregas:lista")
 
-    # Se já estava ENTREGUE, ao cancelar devolve o estoque;
-    # se estava em outro status (ex.: pendente), só marca o cancelamento.
     if e.status == Entrega.Status.ENTREGUE:
         EPI.objects.filter(pk=e.epi_id).update(estoque=F("estoque") + e.quantidade)
 

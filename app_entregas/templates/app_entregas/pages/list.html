@@ -84,6 +84,7 @@
                 </td>
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
+                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'app_entregas:detalhe' e.pk %}">Detalhes</a>
                     {% if perms.app_entregas.change_entrega %}
                       {% if e.status == "ENTREGUE" %}
                         <form method="post" action="{% url 'app_entregas:marcar_devolvido' e.pk %}" class="d-inline">
