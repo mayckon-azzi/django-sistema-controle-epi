@@ -1,4 +1,6 @@
 {% extends "app_core/partials/base.html" %}
+{% load static %}
+
 {% block title %}{% if view.object %}Editar Entrega{% else %}Nova Entrega{% endif %}{% endblock %}
 {% block page_title %}Entregas{% endblock %}
 {% block breadcrumb %}
@@ -8,10 +10,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="card">
+<div class="card shadow-sm">
   <div class="card-header"><h2 class="m-0 fs-5">{% if view.object %}Editar{% else %}Nova{% endif %} Entrega</h2></div>
   <div class="card-body">
-    <form method="post" class="row g-3">
+    <form method="post" class="row g-3" novalidate>
       {% csrf_token %}
       {{ form.non_field_errors }}
 
@@ -19,6 +21,7 @@
         <label class="form-label">Colaborador</label>
         {{ form.colaborador }} {{ form.colaborador.errors }}
       </div>
+
       <div class="col-12 col-md-6">
         <label class="form-label">EPI</label>
         {{ form.epi }} {{ form.epi.errors }}
@@ -28,21 +31,47 @@
         <label class="form-label">Quantidade</label>
         {{ form.quantidade }} {{ form.quantidade.errors }}
       </div>
+
       <div class="col-6 col-md-3">
         <label class="form-label">Status</label>
         {{ form.status }} {{ form.status.errors }}
       </div>
 
-      <div class="col-12">
+      <div class="col-12 col-md-6">
         <label class="form-label">Observação</label>
         {{ form.observacao }} {{ form.observacao.errors }}
       </div>
 
-      <div class="col-12 d-flex gap-2">
+      <div class="col-12">
+        <hr class="my-2">
+      </div>
+
+      <!-- Prevista (mostrar para EMPRESTADO/EM_USO) -->
+      <div class="col-12 col-md-6" id="wrap_prevista">
+        <label class="form-label">Data prevista para devolução</label>
+        {{ form.data_prevista_devolucao }} {{ form.data_prevista_devolucao.errors }}
+      </div>
+
+      <!-- Efetiva (mostrar para DEVOLVIDO/DANIFICADO/PERDIDO) -->
+      <div class="col-12 col-md-6 d-none" id="wrap_devolucao">
+        <label class="form-label">Data da devolução</label>
+        {{ form.data_devolucao }} {{ form.data_devolucao.errors }}
+      </div>
+
+      <div class="col-12 d-none" id="wrap_obs_devolucao">
+        <label class="form-label">Observação na devolução</label>
+        {{ form.observacao_devolucao }} {{ form.observacao_devolucao.errors }}
+      </div>
+
+      <div class="col-12 d-flex gap-2 mt-1">
         <a class="btn btn-outline-secondary" href="{% url 'app_entregas:lista' %}">Cancelar</a>
         <button class="btn btn-primary" type="submit">Salvar</button>
       </div>
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'app_entregas/js/entrega_form.js' %}"></script>
 {% endblock %}

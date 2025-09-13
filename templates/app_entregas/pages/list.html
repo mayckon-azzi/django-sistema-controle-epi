@@ -57,6 +57,8 @@
           <thead>
             <tr>
               <th>Data</th>
+              <th>Prevista</th>
+              <th>Devolução</th>
               <th>Colaborador</th>
               <th>EPI</th>
               <th class="text-center">Qtd</th>
@@ -68,16 +70,27 @@
             {% for e in entregas %}
               <tr>
                 <td>{{ e.data_entrega|date:"d/m/Y H:i" }}</td>
+                <td>{% if e.data_prevista_devolucao %}{{ e.data_prevista_devolucao|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
+                <td>{% if e.data_devolucao %}{{ e.data_devolucao|date:"d/m/Y H:i" }}{% else %}-{% endif %}</td>
                 <td>{{ e.colaborador.nome }}</td>
-                <td>{{ e.epi.nome }}</td>
+                <td>
+                  {{ e.epi.nome }}
+                  {% if e.epi.codigo %}<span class="text-muted small">({{ e.epi.codigo }})</span>{% endif %}
+                </td>
                 <td class="text-center">{{ e.quantidade }}</td>
                 <td>
-                  {% if e.status == "ENTREGUE" %}
-                    <span class="badge bg-primary">Entregue</span>
+                  {% if e.status == "EMPRESTADO" %}
+                    <span class="badge bg-warning text-dark">Emprestado</span>
+                  {% elif e.status == "EM_USO" %}
+                    <span class="badge bg-info text-dark">Em uso</span>
+                  {% elif e.status == "FORNECIDO" %}
+                    <span class="badge bg-primary">Fornecido</span>
                   {% elif e.status == "DEVOLVIDO" %}
                     <span class="badge bg-success">Devolvido</span>
-                  {% elif e.status == "CANCELADO" %}
-                    <span class="badge bg-secondary">Cancelado</span>
+                  {% elif e.status == "DANIFICADO" %}
+                    <span class="badge bg-danger">Danificado</span>
+                  {% elif e.status == "PERDIDO" %}
+                    <span class="badge bg-secondary">Perdido</span>
                   {% else %}
                     <span class="badge bg-light text-dark">{{ e.get_status_display }}</span>
                   {% endif %}
@@ -85,19 +98,21 @@
                 <td class="text-end">
                   <div class="d-inline-flex flex-wrap gap-2">
                     <a class="btn btn-sm btn-outline-secondary" href="{% url 'app_entregas:detalhe' e.pk %}">Detalhes</a>
+
                     {% if perms.app_entregas.change_entrega %}
-                      {% if e.status == "ENTREGUE" %}
+                      {% if e.status == "EMPRESTADO" or e.status == "EM_USO" %}
                         <form method="post" action="{% url 'app_entregas:marcar_devolvido' e.pk %}">
                           {% csrf_token %}
                           <button class="btn btn-sm btn-outline-success" onclick="return confirm('Confirmar devolução?')">Devolver</button>
                         </form>
-                        <form method="post" action="{% url 'app_entregas:marcar_cancelado' e.pk %}">
+                        <form method="post" action="{% url 'app_entregas:marcar_perdido' e.pk %}">
                           {% csrf_token %}
-                          <button class="btn btn-sm btn-outline-secondary" onclick="return confirm('Cancelar esta entrega?')">Cancelar</button>
+                          <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Marcar como PERDIDO?')">Perdido</button>
                         </form>
                       {% endif %}
                       <a class="btn btn-sm btn-outline-primary" href="{% url 'app_entregas:editar' e.pk %}">Editar</a>
                     {% endif %}
+
                     {% if perms.app_entregas.delete_entrega %}
                       <a class="btn btn-sm btn-outline-danger" href="{% url 'app_entregas:excluir' e.pk %}">Excluir</a>
                     {% endif %}

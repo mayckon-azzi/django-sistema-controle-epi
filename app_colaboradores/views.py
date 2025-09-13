@@ -79,7 +79,6 @@ class CriarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
         messages.success(self.request, "Colaborador criado.")
         return resp
 
-# EDITAR: usa form com grupos para Almoxarife/Admin
 class AtualizarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     login_url = reverse_lazy('app_colaboradores:entrar')
     permission_required = "app_colaboradores.change_colaborador"
@@ -144,11 +143,9 @@ class PerfilView(LoginRequiredMixin, TemplateView):
     def _resolve_colab(self):
         pk = self.kwargs.get("pk")
         if pk is not None:
-            # Ver perfil de outro colaborador requer permissão
             if not self.request.user.has_perm("app_colaboradores.view_colaborador"):
                 raise PermissionDenied
             return get_object_or_404(Colaborador, pk=pk)
-        # próprio perfil
         return get_object_or_404(Colaborador, user=self.request.user)
 
     def get_context_data(self, **kwargs):
@@ -161,7 +158,6 @@ class PerfilView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         colab = self._resolve_colab()
 
-        # remover foto
         if "remover" in request.POST:
             if colab.foto:
                 colab.foto.delete(save=False)

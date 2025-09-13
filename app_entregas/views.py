@@ -3,21 +3,19 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.contrib import messages
 from django.urls import reverse_lazy
-
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import (
-    CreateView, UpdateView, DeleteView, DetailView, ListView
-)
+from django.views.generic import CreateView, UpdateView, DeleteView, DetailView, ListView
+from django.db import transaction
+from django.core.exceptions import ValidationError
 from .models import Solicitacao, Entrega
 from app_colaboradores.models import Colaborador
 from app_epis.models import EPI
 from .forms import SolicitacaoForm, EntregaForm
-from django.db import transaction
-from django.core.exceptions import ValidationError
 from .services import movimenta_por_entrega, movimenta_por_exclusao
+from datetime import timedelta
 
 
 def lista(request):
@@ -60,11 +58,12 @@ def lista(request):
         "colaboradores": Colaborador.objects.all().only("id", "nome"),
         "epis": EPI.objects.all().only("id", "nome"),
         "statuses": Entrega.Status.choices,
-        "base_query": params.urlencode(),  # <<< NOVO
+        "base_query": params.urlencode(),
     }
     return render(request, "app_entregas/pages/list.html", context)
 
-# ===== ENTREGAS (somente com permissão) =====
+
+# ===== ENTREGAS =====
 class CriarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "app_entregas.add_entrega"
     raise_exception = True
@@ -81,9 +80,15 @@ class CriarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
                 movimenta_por_entrega(self.object, antiga=None)
         except ValidationError as ex:
             form.add_error(None, ex.message)
+            messages.error(self.request, ex.message)
             return self.form_invalid(form)
         messages.success(self.request, "Entrega registrada com sucesso.")
         return resp
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Não foi possível salvar. Verifique os campos destacados.")
+        return super().form_invalid(form)
+
 
 class AtualizarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     permission_required = "app_entregas.change_entrega"
@@ -102,9 +107,14 @@ class AtualizarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVi
                 movimenta_por_entrega(self.object, antiga=antiga)
         except ValidationError as ex:
             form.add_error(None, ex.message)
+            messages.error(self.request, ex.message)
             return self.form_invalid(form)
         messages.success(self.request, "Entrega atualizada com sucesso.")
         return resp
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Não foi possível salvar. Verifique os campos destacados.")
+        return super().form_invalid(form)
 
 
 class ExcluirEntregaView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
@@ -126,6 +136,7 @@ class ExcluirEntregaView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
             messages.error(self.request, ex.message)
             return redirect(self.success_url)
 
+
 class DetalheEntregaView(LoginRequiredMixin, DetailView):
     login_url = reverse_lazy('app_colaboradores:entrar')
     model = Entrega
@@ -138,6 +149,7 @@ class DetalheEntregaView(LoginRequiredMixin, DetailView):
             .select_related('colaborador', 'epi', 'solicitacao', 'epi__categoria')
         )
 
+
 # ===== SOLICITAÇÕES =====
 class CriarSolicitacaoView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "app_entregas.add_solicitacao"
@@ -148,7 +160,6 @@ class CriarSolicitacaoView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
     success_url = reverse_lazy("app_entregas:minhas_solicitacoes")
 
     def dispatch(self, request, *args, **kwargs):
-        # precisa ter Colaborador vinculado e ativo
         if not hasattr(request.user, "colaborador") or not request.user.colaborador.ativo:
             messages.error(request, "Sua conta não está vinculada a um Colaborador ativo.")
             return redirect("app_core:home")
@@ -168,12 +179,13 @@ class MinhasSolicitacoesView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         if not hasattr(self.request.user, "colaborador"):
             return Solicitacao.objects.none()
-        return Solicitacao.objects.filter(
-            colaborador=self.request.user.colaborador
-        ).select_related("epi")
+        return (
+            Solicitacao.objects
+            .filter(colaborador=self.request.user.colaborador)
+            .select_related("epi")
+        )
 
 
-# ===== GERENCIAR (almoxarife) =====
 class SolicitacoesGerenciarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     permission_required = "app_entregas.change_solicitacao"
     raise_exception = True
@@ -187,12 +199,13 @@ class SolicitacoesGerenciarView(LoginRequiredMixin, PermissionRequiredMixin, Lis
         if status in {"PENDENTE", "APROVADA"}:
             qs = qs.filter(status=status)
         return qs.order_by("-criado_em")
-    
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["statuses_manage"] = ["PENDENTE", "APROVADA"]
         ctx["status_selected"] = self.request.GET.get("status") or "PENDENTE"
         return ctx
+
 
 @require_POST
 @permission_required("app_entregas.change_solicitacao", raise_exception=True)
@@ -219,11 +232,16 @@ def reprovar_solicitacao(request, pk):
     messages.success(request, "Solicitação reprovada.")
     return redirect("app_entregas:solicitacoes_gerenciar")
 
-
 @login_required
 @permission_required("app_entregas.change_solicitacao", raise_exception=True)
 def atender_solicitacao(request, pk):
+    """
+    Cria uma Entrega a partir da solicitação.
+    Por padrão, cria como EMPRESTADO e define data_prevista_devolucao = agora + 7 dias
+    (atende à validação do formulário).
+    """
     s = get_object_or_404(Solicitacao.objects.select_related("colaborador", "epi"), pk=pk)
+
     if s.status not in {Solicitacao.Status.APROVADA, Solicitacao.Status.PENDENTE}:
         messages.warning(request, "Apenas solicitações PENDENTES/APROVADAS podem ser atendidas.")
         return redirect("app_entregas:solicitacoes_gerenciar")
@@ -235,9 +253,10 @@ def atender_solicitacao(request, pk):
                     colaborador=s.colaborador,
                     epi=s.epi,
                     quantidade=s.quantidade,
-                    status=Entrega.Status.ENTREGUE,
-                    observacao=f"Atendida a solicitação #{s.pk}",
+                    status=Entrega.Status.EMPRESTADO,  # padrão inicial
                     data_entrega=timezone.now(),
+                    data_prevista_devolucao=timezone.now() + timedelta(days=7),
+                    observacao=f"Atendida a solicitação #{s.pk}",
                     solicitacao=s,
                 )
                 movimenta_por_entrega(e, antiga=None)
@@ -250,7 +269,13 @@ def atender_solicitacao(request, pk):
         messages.success(request, f"Solicitação atendida. Entrega #{e.pk} criada.")
         return redirect("app_entregas:lista")
 
-    return render(request, "app_entregas/pages/solicitacao_atender_confirm.html", {"s": s})
+    # GET → tela de confirmação
+    return render(
+        request,
+        "app_entregas/pages/solicitacao_atender_confirm.html",
+        {"s": s},
+    )
+
 
 @login_required
 @permission_required("app_entregas.change_entrega", raise_exception=True)
@@ -260,13 +285,15 @@ def marcar_devolvido(request, pk):
         return redirect("app_entregas:lista")
 
     e = get_object_or_404(Entrega.objects.select_for_update(), pk=pk)
-    if e.status != Entrega.Status.ENTREGUE:
-        messages.warning(request, "Só é possível devolver entregas no status ENTREGUE.")
+    if e.status not in {Entrega.Status.EMPRESTADO, Entrega.Status.EM_USO}:
+        messages.warning(request, "Somente entregas EMPRESTADO/EM USO podem ser marcadas como DEVOLVIDAS.")
         return redirect("app_entregas:lista")
 
-    EPI.objects.filter(pk=e.epi_id).update(estoque=F("estoque") + e.quantidade)
+    antiga = Entrega.objects.get(pk=e.pk)
     e.status = Entrega.Status.DEVOLVIDO
-    e.save(update_fields=["status"])
+    e.data_devolucao = timezone.now()
+    e.save(update_fields=["status", "data_devolucao"])
+    movimenta_por_entrega(e, antiga=antiga)
     messages.success(request, "Entrega marcada como DEVOLVIDA e estoque atualizado.")
     return redirect("app_entregas:lista")
 
@@ -274,20 +301,19 @@ def marcar_devolvido(request, pk):
 @login_required
 @permission_required("app_entregas.change_entrega", raise_exception=True)
 @transaction.atomic
-def marcar_cancelado(request, pk):
+def marcar_perdido(request, pk):
     if request.method != "POST":
         return redirect("app_entregas:lista")
 
     e = get_object_or_404(Entrega.objects.select_for_update(), pk=pk)
-
-    if e.status == Entrega.Status.CANCELADO:
-        messages.info(request, "Entrega já está CANCELADA.")
+    if e.status not in {Entrega.Status.EMPRESTADO, Entrega.Status.EM_USO}:
+        messages.warning(request, "Somente entregas EMPRESTADO/EM USO podem ser marcadas como PERDIDAS.")
         return redirect("app_entregas:lista")
 
-    if e.status == Entrega.Status.ENTREGUE:
-        EPI.objects.filter(pk=e.epi_id).update(estoque=F("estoque") + e.quantidade)
-
-    e.status = Entrega.Status.CANCELADO
-    e.save(update_fields=["status"])
-    messages.success(request, "Entrega CANCELADA com sucesso.")
+    antiga = Entrega.objects.get(pk=e.pk)
+    e.status = Entrega.Status.PERDIDO
+    e.data_devolucao = timezone.now()
+    e.save(update_fields=["status", "data_devolucao"])
+    movimenta_por_entrega(e, antiga=antiga)  # efeito líquido continua -q
+    messages.success(request, "Entrega marcada como PERDIDA.")
     return redirect("app_entregas:lista")

@@ -10,14 +10,14 @@
 <div class="d-flex flex-wrap gap-2 mb-3">
   <a class="btn btn-outline-secondary btn-sm" href="{% url 'app_entregas:lista' %}">Voltar</a>
   <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Imprimir</button>
-  {% if perms.app_entregas.change_entrega and entrega.status == "ENTREGUE" %}
+  {% if perms.app_entregas.change_entrega and entrega.status in "EMPRESTADO,EM_USO" %}
     <form method="post" action="{% url 'app_entregas:marcar_devolvido' entrega.pk %}">
       {% csrf_token %}
       <button class="btn btn-outline-success btn-sm" onclick="return confirm('Confirmar devolução?')">Devolver</button>
     </form>
-    <form method="post" action="{% url 'app_entregas:marcar_cancelado' entrega.pk %}">
+    <form method="post" action="{% url 'app_entregas:marcar_perdido' entrega.pk %}">
       {% csrf_token %}
-      <button class="btn btn-outline-secondary btn-sm" onclick="return confirm('Cancelar esta entrega?')">Cancelar</button>
+      <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Marcar como PERDIDO?')">Perdido</button>
     </form>
   {% endif %}
   {% if perms.app_entregas.change_entrega %}
@@ -34,42 +34,63 @@
       <div class="card-header"><h2 class="m-0 fs-6">Resumo da Entrega</h2></div>
       <div class="card-body">
         <dl class="row mb-0">
-          <dt class="col-sm-3">Data</dt>
-          <dd class="col-sm-9">{{ entrega.data_entrega|date:"d/m/Y H:i" }}</dd>
+          <dt class="col-sm-4 col-lg-3">Data da entrega</dt>
+          <dd class="col-sm-8 col-lg-9">{{ entrega.data_entrega|date:"d/m/Y H:i" }}</dd>
 
-          <dt class="col-sm-3">Colaborador</dt>
-          <dd class="col-sm-9">{{ entrega.colaborador.nome }}</dd>
+          <dt class="col-sm-4 col-lg-3">Prevista de devolução</dt>
+          <dd class="col-sm-8 col-lg-9">
+            {% if entrega.data_prevista_devolucao %}{{ entrega.data_prevista_devolucao|date:"d/m/Y H:i" }}{% else %}-{% endif %}
+          </dd>
 
-          <dt class="col-sm-3">EPI</dt>
-          <dd class="col-sm-9">
+          <dt class="col-sm-4 col-lg-3">Data da devolução</dt>
+          <dd class="col-sm-8 col-lg-9">
+            {% if entrega.data_devolucao %}{{ entrega.data_devolucao|date:"d/m/Y H:i" }}{% else %}-{% endif %}
+          </dd>
+
+          <dt class="col-sm-4 col-lg-3">Colaborador</dt>
+          <dd class="col-sm-8 col-lg-9">{{ entrega.colaborador.nome }}</dd>
+
+          <dt class="col-sm-4 col-lg-3">EPI</dt>
+          <dd class="col-sm-8 col-lg-9">
             {{ entrega.epi.nome }}
             {% if entrega.epi.codigo %}<span class="text-muted">({{ entrega.epi.codigo }})</span>{% endif %}
             {% if entrega.epi.categoria %}<div class="small text-muted">Categoria: {{ entrega.epi.categoria.nome }}</div>{% endif %}
           </dd>
 
-          <dt class="col-sm-3">Quantidade</dt>
-          <dd class="col-sm-9">{{ entrega.quantidade }}</dd>
+          <dt class="col-sm-4 col-lg-3">Quantidade</dt>
+          <dd class="col-sm-8 col-lg-9">{{ entrega.quantidade }}</dd>
 
-          <dt class="col-sm-3">Status</dt>
-          <dd class="col-sm-9">
-            {% if entrega.status == "ENTREGUE" %}
-              <span class="badge bg-primary">Entregue</span>
+          <dt class="col-sm-4 col-lg-3">Status</dt>
+          <dd class="col-sm-8 col-lg-9">
+            {% if entrega.status == "EMPRESTADO" %}
+              <span class="badge bg-warning text-dark">Emprestado</span>
+            {% elif entrega.status == "EM_USO" %}
+              <span class="badge bg-info text-dark">Em uso</span>
+            {% elif entrega.status == "FORNECIDO" %}
+              <span class="badge bg-primary">Fornecido</span>
             {% elif entrega.status == "DEVOLVIDO" %}
               <span class="badge bg-success">Devolvido</span>
-            {% elif entrega.status == "CANCELADO" %}
-              <span class="badge bg-secondary">Cancelado</span>
+            {% elif entrega.status == "DANIFICADO" %}
+              <span class="badge bg-danger">Danificado</span>
+            {% elif entrega.status == "PERDIDO" %}
+              <span class="badge bg-secondary">Perdido</span>
             {% else %}
               <span class="badge bg-light text-dark">{{ entrega.get_status_display }}</span>
             {% endif %}
           </dd>
 
           {% if entrega.observacao %}
-            <dt class="col-sm-3">Observação</dt>
-            <dd class="col-sm-9">{{ entrega.observacao }}</dd>
+            <dt class="col-sm-4 col-lg-3">Observação</dt>
+            <dd class="col-sm-8 col-lg-9">{{ entrega.observacao }}</dd>
           {% endif %}
 
-          <dt class="col-sm-3">Criado em</dt>
-          <dd class="col-sm-9">{{ entrega.criado_em|date:"d/m/Y H:i" }}</dd>
+          {% if entrega.observacao_devolucao %}
+            <dt class="col-sm-4 col-lg-3">Obs. devolução</dt>
+            <dd class="col-sm-8 col-lg-9">{{ entrega.observacao_devolucao }}</dd>
+          {% endif %}
+
+          <dt class="col-sm-4 col-lg-3">Criado em</dt>
+          <dd class="col-sm-8 col-lg-9">{{ entrega.created_at|date:"d/m/Y H:i" }}</dd>
         </dl>
       </div>
     </div>
@@ -88,23 +109,7 @@
             <dd class="col-sm-7">{{ entrega.solicitacao.criado_em|date:"d/m/Y H:i" }}</dd>
 
             <dt class="col-sm-5">Status</dt>
-            <dd class="col-sm-7">
-              {% with s=entrega.solicitacao %}
-                {% if s.status == "PENDENTE" %}
-                  <span class="badge bg-warning text-dark">Pendente</span>
-                {% elif s.status == "APROVADA" %}
-                  <span class="badge bg-primary">Aprovada</span>
-                {% elif s.status == "ATENDIDA" %}
-                  <span class="badge bg-success">Atendida</span>
-                {% elif s.status == "REPROVADA" %}
-                  <span class="badge bg-danger">Reprovada</span>
-                {% elif s.status == "CANCELADA" %}
-                  <span class="badge bg-secondary">Cancelada</span>
-                {% else %}
-                  <span class="badge bg-light text-dark">{{ s.get_status_display }}</span>
-                {% endif %}
-              {% endwith %}
-            </dd>
+            <dd class="col-sm-7">{{ entrega.solicitacao.get_status_display }}</dd>
 
             <dt class="col-sm-5">Qtd solicitada</dt>
             <dd class="col-sm-7">{{ entrega.solicitacao.quantidade }}</dd>

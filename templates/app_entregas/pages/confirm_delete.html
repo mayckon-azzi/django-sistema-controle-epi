@@ -10,6 +10,8 @@
     <p>Tem certeza que deseja excluir esta entrega?</p>
     <ul class="mb-3">
       <li><strong>Data:</strong> {{ object.data_entrega|date:"d/m/Y H:i" }}</li>
+      <li><strong>Prevista:</strong> {% if object.data_prevista_devolucao %}{{ object.data_prevista_devolucao|date:"d/m/Y H:i" }}{% else %}-{% endif %}</li>
+      <li><strong>Devolução:</strong> {% if object.data_devolucao %}{{ object.data_devolucao|date:"d/m/Y H:i" }}{% else %}-{% endif %}</li>
       <li><strong>Colaborador:</strong> {{ object.colaborador.nome }}</li>
       <li><strong>EPI:</strong> {{ object.epi.nome }}</li>
       <li><strong>Quantidade:</strong> {{ object.quantidade }}</li>

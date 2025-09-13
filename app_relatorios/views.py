@@ -2,12 +2,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.views.generic import TemplateView
 from django.http import HttpResponse
 from django.db.models import Sum, Case, When, IntegerField, Value, F, Count
-from django.utils import timezone
 from django.shortcuts import render
 import csv
 
 from .forms import RelatorioEntregasForm
 from app_entregas.models import Entrega
+
 
 def _filtrar_qs(request):
     form = RelatorioEntregasForm(request.GET or None)
@@ -36,50 +36,100 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
         ctx = super().get_context_data(**kwargs)
         form, qs = _filtrar_qs(self.request)
 
-        # agregados
+        status_codes = [code for code, _ in Entrega.Status.choices]
+        fora_do_estoque = [s for s in status_codes if s not in {"DEVOLVIDO", "CANCELADO"}]
+
         agg = qs.aggregate(
             registros=Count("id"),
             quantidade_total=Sum("quantidade"),
             total_entregue=Sum(
-                Case(When(status=Entrega.Status.ENTREGUE, then=F("quantidade")),
-                     default=Value(0), output_field=IntegerField())
+                Case(
+                    When(status__in=fora_do_estoque, then=F("quantidade")),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                )
             ),
             total_devolvido=Sum(
-                Case(When(status=Entrega.Status.DEVOLVIDO, then=F("quantidade")),
-                     default=Value(0), output_field=IntegerField())
+                Case(
+                    When(status="DEVOLVIDO", then=F("quantidade")),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                )
             ),
             total_cancelado=Sum(
-                Case(When(status=Entrega.Status.CANCELADO, then=F("quantidade")),
-                     default=Value(0), output_field=IntegerField())
+                Case(
+                    When(status="CANCELADO", then=F("quantidade")),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                )
             ),
         )
 
-        # resumos por EPI e por Colaborador
         por_epi = (
             qs.values("epi__id", "epi__nome", "epi__codigo")
-              .annotate(
-                  entregues=Sum(Case(When(status=Entrega.Status.ENTREGUE, then=F("quantidade")), default=Value(0), output_field=IntegerField())),
-                  devolvidos=Sum(Case(When(status=Entrega.Status.DEVOLVIDO, then=F("quantidade")), default=Value(0), output_field=IntegerField())),
-                  cancelados=Sum(Case(When(status=Entrega.Status.CANCELADO, then=F("quantidade")), default=Value(0), output_field=IntegerField())),
-              ).order_by("epi__nome", "epi__codigo")
+            .annotate(
+                entregues=Sum(
+                    Case(
+                        When(status__in=fora_do_estoque, then=F("quantidade")),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    )
+                ),
+                devolvidos=Sum(
+                    Case(
+                        When(status="DEVOLVIDO", then=F("quantidade")),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    )
+                ),
+                cancelados=Sum(
+                    Case(
+                        When(status="CANCELADO", then=F("quantidade")),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    )
+                ),
+            )
+            .order_by("epi__nome", "epi__codigo")
         )
 
         por_colab = (
             qs.values("colaborador__id", "colaborador__nome")
-              .annotate(
-                  entregues=Sum(Case(When(status=Entrega.Status.ENTREGUE, then=F("quantidade")), default=Value(0), output_field=IntegerField())),
-                  devolvidos=Sum(Case(When(status=Entrega.Status.DEVOLVIDO, then=F("quantidade")), default=Value(0), output_field=IntegerField())),
-                  cancelados=Sum(Case(When(status=Entrega.Status.CANCELADO, then=F("quantidade")), default=Value(0), output_field=IntegerField())),
-              ).order_by("colaborador__nome")
+            .annotate(
+                entregues=Sum(
+                    Case(
+                        When(status__in=fora_do_estoque, then=F("quantidade")),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    )
+                ),
+                devolvidos=Sum(
+                    Case(
+                        When(status="DEVOLVIDO", then=F("quantidade")),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    )
+                ),
+                cancelados=Sum(
+                    Case(
+                        When(status="CANCELADO", then=F("quantidade")),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    )
+                ),
+            )
+            .order_by("colaborador__nome")
         )
 
-        ctx.update({
-            "form": form,
-            "qs": qs[:200],  # evita tela gigante; pode paginar depois
-            "agg": agg,
-            "por_epi": por_epi,
-            "por_colab": por_colab,
-        })
+        ctx.update(
+            {
+                "form": form,
+                "qs": qs[:200],  # evita tela gigante; paginar depois se quiser
+                "agg": agg,
+                "por_epi": por_epi,
+                "por_colab": por_colab,
+            }
+        )
         return ctx
 
 
@@ -90,18 +140,20 @@ class ExportarEntregasCSVView(LoginRequiredMixin, PermissionRequiredMixin, Templ
 
     def get(self, request, *args, **kwargs):
         form, qs = _filtrar_qs(request)
-        # resposta CSV
         resp = HttpResponse(content_type="text/csv; charset=utf-8")
         resp["Content-Disposition"] = 'attachment; filename="relatorio_entregas.csv"'
         w = csv.writer(resp, delimiter=";")
-        w.writerow(["Data", "Colaborador", "EPI", "Quantidade", "Status", "Observação"])
+        w.writerow(["Data", "Data Devolução", "Colaborador", "EPI", "Quantidade", "Status", "Observação"])
         for e in qs.iterator():
-            w.writerow([
-                e.data_entrega.strftime("%d/%m/%Y %H:%M"),
-                e.colaborador.nome,
-                f"{e.epi.nome} ({e.epi.codigo})",
-                e.quantidade,
-                e.get_status_display(),
-                (e.observacao or "").replace("\n", " ").strip(),
-            ])
+            w.writerow(
+                [
+                    e.data_entrega.strftime("%d/%m/%Y %H:%M"),
+                    e.data_prevista_devolucao.strftime("%d/%m/%Y %H:%M") if e.data_prevista_devolucao else "-",
+                    e.colaborador.nome,
+                    f"{e.epi.nome} ({e.epi.codigo})",
+                    e.quantidade,
+                    e.get_status_display(),
+                    (e.observacao or "").replace("\n", " ").strip(),
+                ]
+            )
         return resp

@@ -178,6 +178,11 @@ body {
   pointer-events: none; /* evita cliques fantasmas */
 }
 
+.teste {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Quando a sidebar estiver aberta (hover), mostra só os que estiverem "show" */
 .app-sidebar:hover .collapse.show {
   display: block !important;
