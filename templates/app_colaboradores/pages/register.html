@@ -1,0 +1,87 @@
+{% extends "app_core/partials/base.html" %}
+{% block title %}Criar conta{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-card{max-width:640px;margin:1.25rem auto;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Criar conta</h5>
+    </div>
+
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="{{ form.username.id_for_label }}">Usuário</label>
+            {{ form.username }}
+            {% if form.username.errors %}<div class="invalid-feedback d-block">{{ form.username.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="{{ form.email.id_for_label }}">E-mail</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="invalid-feedback d-block">{{ form.email.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="{{ form.nome.id_for_label }}">Nome</label>
+            {{ form.nome }}
+            {% if form.nome.errors %}<div class="invalid-feedback d-block">{{ form.nome.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="{{ form.matricula.id_for_label }}">Matrícula</label>
+            {{ form.matricula }}
+            {% if form.matricula.errors %}<div class="invalid-feedback d-block">{{ form.matricula.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="{{ form.password1.id_for_label }}">Senha</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}<div class="invalid-feedback d-block">{{ form.password1.errors|striptags }}</div>{% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="{{ form.password2.id_for_label }}">Confirmar senha</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}<div class="invalid-feedback d-block">{{ form.password2.errors|striptags }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+          <a class="btn btn-outline-secondary" href="{% url 'app_colaboradores:entrar' %}">Cancelar</a>
+          <button class="btn btn-primary" type="submit">Cadastrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Aplica classes/placeholder do Bootstrap sem precisar mexer no form Python
+  (function () {
+    const sel = '.auth-card input:not([type=checkbox]), .auth-card select, .auth-card textarea';
+    document.querySelectorAll(sel).forEach(el => {
+      if (!el.classList.contains('form-control')) el.classList.add('form-control');
+    });
+    const setPH = (id, ph) => { const el = document.getElementById(id); if (el && !el.placeholder) el.placeholder = ph; };
+    setPH('id_username','usuario');
+    setPH('id_email','email@empresa.com');
+    setPH('id_nome','Nome completo');
+    setPH('id_matricula','Ex.: C123');
+    setPH('id_password1','Senha');
+    setPH('id_password2','Confirmar senha');
+  })();
+</script>
+{% endblock %}

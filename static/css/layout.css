@@ -2,7 +2,8 @@
   --topbar-h: 56px;
   --sb-collapsed: 84px;
   --sb-expanded: 320px;
-  --sb-bg: rgba(18, 18, 22, 0.92);
+  --sb-bg: rgba(18, 18, 22, 0.82);
+  --content-inline: clamp(8px, 0.9vw, 16px);
 }
 
 html,
@@ -135,14 +136,29 @@ body {
 }
 
 /* ============ Conteúdo ============ */
-.app-content {
+.app-content{
   margin-left: var(--sb-collapsed);
   padding-top: calc(var(--topbar-h) + 0.25rem);
   min-height: calc(100vh - var(--topbar-h));
+  box-sizing: border-box;
 }
 
-.app-content > .container-fluid {
-  padding-right: clamp(0.75rem, 1.5vw, 1.25rem);
+.app-content > .content-container{
+  padding-left:  var(--content-inline);
+  padding-right: var(--content-inline);
+}
+
+.app-content > .content-container > .container,
+.app-content > .content-container > .container-fluid{
+  padding-left:  var(--content-inline);
+  padding-right: var(--content-inline);
+  box-sizing: border-box;
+}
+
+@media (min-width: 1400px){
+  .app-content{
+    padding-inline: 1.5rem;
+  }
 }
 
 /* Responsivo */

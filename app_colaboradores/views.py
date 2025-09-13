@@ -5,22 +5,30 @@ from django.contrib.auth.views import LoginView
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.db.models import Q
 from .models import Colaborador
-from .forms import ColaboradorAdminForm, ColaboradorForm, RegisterForm
+from .forms import ColaboradorAdminForm, ColaboradorForm, LoginFormBootstrap, RegisterForm
 from django.db.utils import OperationalError, ProgrammingError  
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 
 
 
-
-
 class EntrarView(LoginView):
-	template_name = 'app_colaboradores/pages/login.html'
-	redirect_authenticated_user = True
-	def get_success_url(self):
-		return reverse_lazy('app_colaboradores:lista')
+    template_name = "app_colaboradores/pages/login.html"
+    form_class = LoginFormBootstrap
+    redirect_authenticated_user = True
 
-# LISTA: só para quem tem permissão de ver colaboradores
+    def get_success_url(self):
+        next_url = self.get_redirect_url()
+        if next_url:
+            return next_url
+        
+        user = self.request.user
+        if user.has_perm("app_colaboradores.view_colaborador") or user.is_staff:
+            return reverse_lazy("app_colaboradores:lista")
+        if user.has_perm("app_entregas.view_solicitacao"):
+            return reverse_lazy("app_entregas:lista")
+        return reverse_lazy("app_core:home")
+
 class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     login_url = reverse_lazy('app_colaboradores:entrar')
     permission_required = "app_colaboradores.view_colaborador"
