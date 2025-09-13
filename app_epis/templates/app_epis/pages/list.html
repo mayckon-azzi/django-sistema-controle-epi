@@ -5,133 +5,87 @@
 
 {% block content %}
 <div class="card">
-  <div class="card-header d-flex align-items-center justify-content-between">
-    <h2 class="m-0 fs-5">Catálogo de EPIs</h2>
-    {% if perms.app_epis.add_epi %}
-      <a class="btn btn-outline-primary btn-sm" href="{% url 'app_epis:criar' %}">Novo EPI</a>
-    {% endif %}
+  <div class="card-header">
+    <h2>Catálogo de EPIs</h2>
+    <form method="get" class="search-form" style="display:grid; gap:8px; grid-template-columns: 1fr auto auto auto;">
+      <input type="text" name="q" value="{{ q }}" placeholder="Buscar por nome, código ou categoria" />
+      <label style="display:flex; align-items:center; gap:6px;">
+        <input type="checkbox" name="ativos" value="1" {% if only_active %}checked{% endif %}/> Ativos
+      </label>
+      <label style="display:flex; align-items:center; gap:6px;">
+        <input type="checkbox" name="abaixo" value="1" {% if below_min %}checked{% endif %}/> Abaixo do mínimo
+      </label>
+      <select name="ordenar">
+        {% for key, label in ordenacoes %}
+          <option value="{{ key }}" {% if ordenar == key %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn" type="submit">Filtrar</button>
+      {% if perms.app_epis.add_epi %}
+        <a class="btn outline" href="{% url 'app_epis:criar' %}">Novo EPI</a>
+      {% endif %}
+    </form>
   </div>
 
   <div class="card-body">
-    <form method="get" class="row g-2 align-items-end">
-      <div class="col-12 col-md-4">
-        <label class="form-label">Buscar</label>
-        <input type="text" name="q" class="form-control" value="{{ q }}" placeholder="Nome, código ou categoria">
+    {% if epis %}
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Código</th>
+              <th>Categoria</th>
+              <th>Estoque</th>
+              <th>Status</th>
+              <th class="actions">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in epis %}
+              <tr>
+                <td>{{ e.nome }}</td>
+                <td>{{ e.codigo }}</td>
+                <td>{{ e.categoria.nome }}</td>
+                <td>
+                  {% if e.abaixo_min %}
+                    <span class="badge danger">{{ e.estoque }}</span>
+                  {% else %}
+                    <span class="badge success">{{ e.estoque }}</span>
+                  {% endif %}
+                  <small style="opacity:.7;"> / mín. {{ e.estoque_minimo }}</small>
+                </td>
+                <td>
+                  {% if e.ativo %}
+                    <span class="badge success">Ativo</span>
+                  {% else %}
+                    <span class="badge">Inativo</span>
+                  {% endif %}
+                </td>
+                <td class="actions">
+                  {% if perms.app_epis.change_epi %}
+                    <a class="btn small" href="{% url 'app_epis:editar' e.pk %}">Editar</a>
+                  {% endif %}
+                  {% if perms.app_epis.delete_epi %}
+                    <a class="btn small danger" href="{% url 'app_epis:excluir' e.pk %}">Excluir</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
 
-      <div class="col-12 col-md-3">
-        <label class="form-label">Categoria</label>
-        <select name="categoria" class="form-select">
-          <option value="">Todas</option>
-          {% for c in categorias %}
-            <option value="{{ c.id }}" {% if categoria_id|default:'' == c.id|stringformat:'s' %}selected{% endif %}>{{ c.nome }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="col-6 col-md-2">
-        <div class="form-check mt-4">
-          <input class="form-check-input" type="checkbox" name="ativos" value="1" id="fAtivos" {% if only_active %}checked{% endif %}>
-          <label class="form-check-label" for="fAtivos">Apenas ativos</label>
+      {% if is_paginated %}
+        <div class="pagination">
+          {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">« Anterior</a>{% endif %}
+          <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Próxima »</a>{% endif %}
         </div>
-      </div>
-
-      <div class="col-6 col-md-3">
-        <div class="form-check mt-4">
-          <input class="form-check-input" type="checkbox" name="abaixo" value="1" id="fAbaixo" {% if below_min %}checked{% endif %}>
-          <label class="form-check-label" for="fAbaixo">Abaixo do mínimo</label>
-        </div>
-      </div>
-
-      <div class="col-12 col-md-3">
-        <label class="form-label">Ordenar por</label>
-        <select name="ordenar" class="form-select">
-          {% for k, lbl in ordenacoes %}
-            <option value="{{ k }}" {% if ordenar == k %}selected{% endif %}>{{ lbl }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="col-12 col-md-auto">
-        <button class="btn btn-primary" type="submit">Filtrar</button>
-        <a class="btn btn-outline-secondary" href="{% url 'app_epis:lista' %}">Limpar</a>
-      </div>
-    </form>
+      {% endif %}
+    {% else %}
+      <p>Nenhum EPI encontrado.</p>
+    {% endif %}
   </div>
 </div>
-
-{% if has_filters %}
-  <div class="card mt-3">
-    <div class="card-body">
-      {% if epis %}
-        <div class="table-responsive">
-          <table class="table table-sm table-hover align-middle">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Código</th>
-                <th>Categoria</th>
-                <th class="text-center">Estoque</th>
-                <th>Status</th>
-                <th class="text-end">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for e in epis %}
-                <tr>
-                  <td>{{ e.nome }}</td>
-                  <td><code>{{ e.codigo }}</code></td>
-                  <td>{{ e.categoria.nome }}</td>
-                  <td class="text-center">
-                    {% if e.abaixo_min %}
-                      <span class="badge text-bg-danger">{{ e.estoque }}</span>
-                    {% else %}
-                      <span class="badge text-bg-success">{{ e.estoque }}</span>
-                    {% endif %}
-                    <small class="text-muted">/ mín. {{ e.estoque_minimo }}</small>
-                  </td>
-                  <td>
-                    {% if e.ativo %}
-                      <span class="badge text-bg-success">Ativo</span>
-                    {% else %}
-                      <span class="badge text-bg-secondary">Inativo</span>
-                    {% endif %}
-                  </td>
-                  <td class="text-end">
-                    {% if perms.app_epis.change_epi %}
-                      <a class="btn btn-sm btn-outline-primary" href="{% url 'app_epis:editar' e.pk %}">Editar</a>
-                    {% endif %}
-                    {% if perms.app_epis.delete_epi %}
-                      <a class="btn btn-sm btn-outline-danger" href="{% url 'app_epis:excluir' e.pk %}">Excluir</a>
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-
-        {% if is_paginated %}
-          <nav class="mt-2">
-            <ul class="pagination pagination-sm mb-0">
-              {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:'page=%s'|format:page_obj.number }}">«</a></li>
-              {% endif %}
-              <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
-              {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&{{ request.GET.urlencode|cut:'page='|cut:'page=%s'|format:page_obj.number }}">»</a></li>
-              {% endif %}
-            </ul>
-          </nav>
-        {% endif %}
-      {% else %}
-        <p class="mb-0">Nenhum EPI encontrado para os filtros aplicados.</p>
-      {% endif %}
-    </div>
-  </div>
-{% else %}
-  <div class="alert alert-info mt-3" role="alert">
-    Use os filtros acima para localizar EPIs. Você também pode marcar <strong>Abaixo do mínimo</strong> para ver apenas itens críticos.
-  </div>
-{% endif %}
 {% endblock %}
