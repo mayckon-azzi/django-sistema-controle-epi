@@ -1,0 +1,21 @@
+{% extends "app_core/partials/base.html" %}
+{% load static %}
+{% block title %}Excluir Colaborador{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header">
+    <h2 class="m-0 fs-5"><i class="bi bi-trash3"></i> Excluir Colaborador</h2>
+  </div>
+  <div class="card-body">
+    <p class="mb-3">
+      Tem certeza que deseja excluir <strong>{{ object.nome }}</strong> ({{ object.matricula }})?
+    </p>
+    <form method="post" class="d-flex gap-2">
+      {% csrf_token %}
+      <a class="btn btn-outline-secondary" href="{% url 'app_colaboradores:lista' %}">Cancelar</a>
+      <button class="btn btn-danger" type="submit">Excluir</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

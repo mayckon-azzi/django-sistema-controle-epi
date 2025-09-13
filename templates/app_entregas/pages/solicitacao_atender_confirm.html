@@ -1,0 +1,25 @@
+{% extends "app_core/partials/base.html" %}
+{% block title %}Atender Solicitação{% endblock %}
+{% block page_title %}Solicitações (Gerenciar){% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › <a href="{% url 'app_entregas:solicitacoes_gerenciar' %}">Solicitações</a> › Atender{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header"><h2 class="m-0 fs-5">Confirmar atendimento</h2></div>
+  <div class="card-body">
+    <p>Será criada uma <strong>Entrega</strong> com os dados abaixo:</p>
+    <ul class="mb-3">
+      <li><strong>Colaborador:</strong> {{ s.colaborador.nome }}</li>
+      <li><strong>EPI:</strong> {{ s.epi.nome }} ({{ s.epi.codigo }})</li>
+      <li><strong>Quantidade:</strong> {{ s.quantidade }}</li>
+      <li><strong>Status da Solicitação:</strong> {{ s.get_status_display }}</li>
+    </ul>
+    <form method="post" class="d-flex gap-2">
+      {% csrf_token %}
+      <a class="btn btn-outline-secondary" href="{% url 'app_entregas:solicitacoes_gerenciar' %}">Cancelar</a>
+      <button class="btn btn-primary" type="submit">Confirmar e criar Entrega</button>
+    </form>
+    <p class="text-muted mt-2 mb-0">Obs.: a movimentação de estoque será aplicada na Etapa B.</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,12 +1,49 @@
 from django import forms
-from .models import Entrega
 from django.core.exceptions import ValidationError
+from .models import Entrega, Solicitacao
+
+class EntregaForm(forms.ModelForm):
+    class Meta:
+        model = Entrega
+        fields = ["colaborador", "epi", "quantidade", "status", "observacao"]
+        widgets = {
+            "colaborador": forms.Select(attrs={"class": "form-select"}),
+            "epi": forms.Select(attrs={"class": "form-select"}),
+            "quantidade": forms.NumberInput(attrs={"min": 1, "class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-select"}),
+            "observacao": forms.Textarea(attrs={"placeholder": "Opcional", "rows": 2, "class": "form-control"}),
+        }
+
+    def clean_quantidade(self):
+        q = self.cleaned_data["quantidade"]
+        if q < 1:
+            raise forms.ValidationError("Quantidade deve ser ≥ 1.")
+        return q
+
+    def clean(self):
+        cleaned = super().clean()
+        colab = cleaned.get("colaborador")
+        epi = cleaned.get("epi")
+        status = cleaned.get("status")
+        obs = (cleaned.get("observacao") or "").strip()
+        if status == Entrega.Status.DEVOLVIDO and not obs:
+            self.add_error("observacao", "Informe o motivo/observação para devolução.")
+        if colab and not colab.ativo:
+            self.add_error("colaborador", "Colaborador inativo — não é possível registrar entrega.")
+        if epi and not epi.ativo:
+            self.add_error("epi", "EPI inativo — não é possível registrar entrega.")
+        return cleaned
 
 
 class SolicitacaoForm(forms.ModelForm):
     class Meta:
-        model = Entrega
+        model = Solicitacao
         fields = ["epi", "quantidade", "observacao"]
+        widgets = {
+            "epi": forms.Select(attrs={"class": "form-select"}),
+            "quantidade": forms.NumberInput(attrs={"min": 1, "class": "form-control"}),
+            "observacao": forms.Textarea(attrs={"placeholder": "Justificativa/observação (opcional)", "rows": 2, "class": "form-control"}),
+        }
 
     def clean_quantidade(self):
         q = self.cleaned_data["quantidade"]
@@ -19,18 +56,3 @@ class SolicitacaoForm(forms.ModelForm):
         if not e.ativo:
             raise ValidationError("EPI inativo não pode ser solicitado.")
         return e
-    
-class EntregaForm(forms.ModelForm):
-    class Meta:
-        model = Entrega
-        fields = ["colaborador", "epi", "quantidade", "status", "observacao"]
-        widgets = {
-            "quantidade": forms.NumberInput(attrs={"min": 1}),
-            "observacao": forms.TextInput(attrs={"placeholder": "Opcional"}),
-        }
-
-    def clean_quantidade(self):
-        q = self.cleaned_data["quantidade"]
-        if q < 1:
-            raise forms.ValidationError("Quantidade deve ser ≥ 1.")
-        return q

@@ -1,0 +1,113 @@
+{% extends "app_core/partials/base.html" %}
+{% load static %}
+{% block title %}Solicitações (Gerenciar){% endblock %}
+{% block page_title %}Solicitações (Gerenciar){% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Solicitações (Gerenciar){% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+      <h2 class="m-0 fs-5">Solicitações</h2>
+      <form method="get" class="d-flex gap-2 align-items-center">
+        <label class="form-label m-0 me-1">Status</label>
+        <select name="status" class="form-select">
+          {% for st in statuses_manage %}
+            <option value="{{ st }}" {% if status_selected == st %}selected{% endif %}>{{ st|title }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-primary" type="submit">Filtrar</button>
+        <a class="btn btn-outline-secondary" href="{% url 'app_entregas:solicitacoes_gerenciar' %}">Limpar</a>
+      </form>
+    </div>
+  </div>
+
+  <div class="card-body">
+    {% if solicitacoes %}
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Colaborador</th>
+              <th>EPI</th>
+              <th class="text-center">Qtd</th>
+              <th>Status</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in solicitacoes %}
+              <tr>
+                <td>{{ s.criado_em|date:"d/m/Y H:i" }}</td>
+                <td>{{ s.colaborador.nome }}</td>
+                <td>{{ s.epi.nome }}</td>
+                <td class="text-center">{{ s.quantidade }}</td>
+                <td>
+                  {% if s.status == "PENDENTE" %}
+                    <span class="badge bg-warning text-dark">Pendente</span>
+                  {% elif s.status == "APROVADA" %}
+                    <span class="badge bg-primary">Aprovada</span>
+                  {% elif s.status == "ATENDIDA" %}
+                    <span class="badge bg-success">Atendida</span>
+                  {% elif s.status == "REPROVADA" %}
+                    <span class="badge bg-danger">Reprovada</span>
+                  {% elif s.status == "CANCELADA" %}
+                    <span class="badge bg-secondary">Cancelada</span>
+                  {% else %}
+                    <span class="badge bg-light text-dark">{{ s.get_status_display }}</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex flex-wrap gap-2">
+                    {% if s.status == "PENDENTE" %}
+                      <form method="post" action="{% url 'app_entregas:aprovar_solicitacao' s.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-success" data-confirm="Aprovar esta solicitação?" type="submit">Aprovar</button>
+                      </form>
+                      <form method="post" action="{% url 'app_entregas:reprovar_solicitacao' s.pk %}">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-danger" data-confirm="Reprovar esta solicitação?" type="submit">Reprovar</button>
+                      </form>
+                    {% endif %}
+
+                    {% if s.status == "PENDENTE" or s.status == "APROVADA" %}
+                      <a class="btn btn-sm btn-outline-primary" href="{% url 'app_entregas:atender_solicitacao' s.pk %}">Atender</a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if is_paginated %}
+        <nav class="mt-2">
+          <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?status={{ request.GET.status }}&page={{ page_obj.previous_page_number }}">«</a>
+              </li>
+            {% endif %}
+            <li class="page-item disabled">
+              <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?status={{ request.GET.status }}&page={{ page_obj.next_page_number }}">»</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      {% endif %}
+    {% else %}
+      <p class="mb-0">Nenhuma solicitação encontrada para o filtro.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'app_entregas/js/manage.js' %}"></script>
+{% endblock %}

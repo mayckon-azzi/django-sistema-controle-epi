@@ -12,12 +12,13 @@ class Colaborador(models.Model):
     telefone = models.CharField(max_length=20, blank=True)
     ativo = models.BooleanField(default=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ["nome"]
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.nome} ({self.matricula})"
 
+class Meta:
+    ordering = ["nome"]
+
+   

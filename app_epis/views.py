@@ -1,74 +1,126 @@
-from django.shortcuts import redirect, render
-from django.core.paginator import Paginator
-from django.db.models import Q
-from .models import EPI, CategoriaEPI
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import CreateView
+from django.shortcuts import redirect
+from django.db.models import Q, F, BooleanField, Case, When, Value, ProtectedError
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
+
+from .models import EPI, CategoriaEPI
 from .forms import EPIForm
-from django.views.generic import UpdateView, DeleteView
-from django.db.models import ProtectedError
-from django.contrib.auth.mixins import PermissionRequiredMixin
 
-def lista(request):
-    q = request.GET.get("q", "").strip()
-    categoria_id = request.GET.get("categoria", "")
 
-    qs = EPI.objects.select_related("categoria").all()
-    if q:
-        qs = qs.filter(Q(nome__icontains=q) | Q(codigo__icontains=q) | Q(categoria__nome__icontains=q))
-    if categoria_id:
-        qs = qs.filter(categoria_id=categoria_id)
+# ===== LISTA (CBV) =====
+class ListaEPIView(LoginRequiredMixin, ListView):
+    model = EPI
+    template_name = "app_epis/pages/list.html"
+    context_object_name = "epis"
+    paginate_by = 10
 
-    paginator = Paginator(qs, 10)
-    page_obj = paginator.get_page(request.GET.get("page"))
+    def get_queryset(self):
+        qs = EPI.objects.select_related("categoria")
 
-    context = {
-        "epis": page_obj.object_list,
-        "page_obj": page_obj,
-        "is_paginated": page_obj.has_other_pages(),
-        "q": q,
-        "categoria_id": categoria_id,
-        "categorias": CategoriaEPI.objects.all(),
-    }
-    return render(request, "app_epis/pages/list.html", context)
+        q = (self.request.GET.get("q") or "").strip()
+        categoria_id = self.request.GET.get("categoria") or ""
+        only_active = self.request.GET.get("ativos") == "1"
+        below_min = self.request.GET.get("abaixo") == "1"
+        order = self.request.GET.get("ordenar") or "nome"
 
+        # >>> NOVO: controlar quando mostrar resultados
+        self.has_filters = any([q, categoria_id, only_active, below_min])
+        if not self.has_filters:
+            return EPI.objects.none()
+
+        if q:
+            qs = qs.filter(
+                Q(nome__icontains=q) |
+                Q(codigo__icontains=q) |
+                Q(categoria__nome__icontains=q)
+            )
+        if categoria_id:
+            qs = qs.filter(categoria_id=categoria_id)
+        if only_active:
+            qs = qs.filter(ativo=True)
+        if below_min:
+            qs = qs.filter(estoque__lte=F("estoque_minimo"))
+
+        qs = qs.annotate(
+            abaixo_min=Case(
+                When(estoque__lte=F("estoque_minimo"), then=Value(True)),
+                default=Value(False),
+                output_field=BooleanField(),
+            )
+        )
+
+        ordering = {
+            "nome": "nome",
+            "-nome": "-nome",
+            "estoque": "estoque",
+            "-estoque": "-estoque",
+            "categoria": "categoria__nome",
+            "codigo": "codigo",
+        }.get(order, "nome")
+
+        return qs.order_by(ordering, "id")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx.update({
+            "q": self.request.GET.get("q", ""),
+            "categoria_id": self.request.GET.get("categoria", ""),
+            "categorias": CategoriaEPI.objects.all(),
+            "only_active": self.request.GET.get("ativos") == "1",
+            "below_min": self.request.GET.get("abaixo") == "1",
+            "ordenar": self.request.GET.get("ordenar") or "nome",
+            "ordenacoes": [
+                ("nome","Nome A→Z"), ("-nome","Nome Z→A"),
+                ("estoque","Estoque ↑"), ("-estoque","Estoque ↓"),
+                ("categoria","Categoria"), ("codigo","Código"),
+            ],
+            "has_filters": getattr(self, "has_filters", False),  
+        })
+        params = self.request.GET.copy()
+        params.pop("page", None)          
+        ctx["base_query"] = params.urlencode()  
+        return ctx
+        
+# ===== CRUD =====
 class CriarEPIView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "app_epis.add_epi"
     raise_exception = True
-    login_url = reverse_lazy('app_colaboradores:entrar')
+    login_url = reverse_lazy("app_colaboradores:entrar")
     model = EPI
     form_class = EPIForm
-    template_name = 'app_epis/pages/form.html'
-    success_url = reverse_lazy('app_epis:lista')
+    template_name = "app_epis/pages/form.html"
+    success_url = reverse_lazy("app_epis:lista")
 
     def form_valid(self, form):
         resp = super().form_valid(form)
         messages.success(self.request, "EPI criado com sucesso.")
         return resp
-    
+
+
 class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     permission_required = "app_epis.change_epi"
     raise_exception = True
-    login_url = reverse_lazy('app_colaboradores:entrar')
+    login_url = reverse_lazy("app_colaboradores:entrar")
     model = EPI
     form_class = EPIForm
-    template_name = 'app_epis/pages/form.html'
-    success_url = reverse_lazy('app_epis:lista')
+    template_name = "app_epis/pages/form.html"
+    success_url = reverse_lazy("app_epis:lista")
 
     def form_valid(self, form):
         resp = super().form_valid(form)
         messages.success(self.request, "EPI atualizado com sucesso.")
         return resp
 
+
 class ExcluirEPIView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     permission_required = "app_epis.delete_epi"
     raise_exception = True
-    login_url = reverse_lazy('app_colaboradores:entrar')
+    login_url = reverse_lazy("app_colaboradores:entrar")
     model = EPI
-    template_name = 'app_epis/pages/confirm_delete.html'
-    success_url = reverse_lazy('app_epis:lista')
+    template_name = "app_epis/pages/confirm_delete.html"
+    success_url = reverse_lazy("app_epis:lista")
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -77,5 +129,8 @@ class ExcluirEPIView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
             messages.success(self.request, "EPI excluído com sucesso.")
             return resp
         except ProtectedError:
-            messages.error(self.request, "Não é possível excluir este EPI porque há entregas associadas.")
+            messages.error(
+                self.request,
+                "Não é possível excluir este EPI porque há entregas associadas.",
+            )
             return redirect(self.success_url)

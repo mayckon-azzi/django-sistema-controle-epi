@@ -1,0 +1,188 @@
+{% extends "app_core/partials/base.html" %}
+{% load static %}
+{% block title %}Relatórios — Entregas{% endblock %}
+{% block page_title %}Relatórios de Entregas{% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Relatórios{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+  <div class="card-header">
+    <h2 class="m-0 fs-5">Filtros</h2>
+  </div>
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end" id="reportFilters">
+      <div class="col-12 col-md-3">
+        <label class="form-label">De</label>
+        {{ form.data_de }}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label">Até</label>
+        {{ form.data_ate }}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label">Colaborador</label>
+        {{ form.colaborador }}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label">EPI</label>
+        {{ form.epi }}
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label">Status</label>
+        {{ form.status }}
+      </div>
+      <div class="col-12 col-md-auto d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Aplicar</button>
+        <!-- Limpa filtros indo para a mesma rota sem querystring -->
+        <a class="btn btn-outline-secondary" href="{{ request.path }}">Limpar</a>
+        <a class="btn btn-outline-success" href="{% url 'app_relatorios:exportar' %}?{{ request.GET.urlencode }}">
+          Exportar CSV
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Resumo (cards) -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body text-center">
+        <div class="text-muted small">Registros</div>
+        <div class="fs-4">{{ agg.registros|default:0 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body text-center">
+        <div class="text-muted small">Qtd total</div>
+        <div class="fs-4">{{ agg.quantidade_total|default:0 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body text-center">
+        <div class="text-muted small">Entregues (ativos)</div>
+        <div class="fs-4">{{ agg.total_entregue|default:0 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body text-center">
+        <div class="text-muted small">Devolvidos</div>
+        <div class="fs-4">{{ agg.total_devolvido|default:0 }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Movimentações -->
+<div class="card mb-3">
+  <div class="card-header"><h2 class="m-0 fs-5">Movimentações</h2></div>
+  <div class="card-body">
+    {% if qs %}
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Colaborador</th>
+              <th>EPI</th>
+              <th class="text-center">Qtd</th>
+              <th>Status</th>
+              <th>Obs.</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for e in qs %}
+            <tr>
+              <td>{{ e.data_entrega|date:"d/m/Y H:i" }}</td>
+              <td>{{ e.colaborador.nome }}</td>
+              <td>{{ e.epi.nome }}{% if e.epi.codigo %} <span class="text-muted">({{ e.epi.codigo }})</span>{% endif %}</td>
+              <td class="text-center">{{ e.quantidade }}</td>
+              <td>
+                {% if e.status == "ENTREGUE" %}
+                  <span class="badge bg-primary">Entregue</span>
+                {% elif e.status == "DEVOLVIDO" %}
+                  <span class="badge bg-success">Devolvido</span>
+                {% elif e.status == "CANCELADO" %}
+                  <span class="badge bg-secondary">Cancelado</span>
+                {% else %}
+                  <span class="badge bg-light text-dark">{{ e.get_status_display }}</span>
+                {% endif %}
+              </td>
+              <td class="text-break">{{ e.observacao }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="mb-0">Nenhum resultado para os filtros aplicados.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Resumo por EPI -->
+<div class="card mb-3">
+  <div class="card-header"><h2 class="m-0 fs-5">Resumo por EPI</h2></div>
+  <div class="card-body">
+    {% if por_epi %}
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr><th>EPI</th><th>Entregues</th><th>Devolvidos</th><th>Cancelados</th></tr>
+          </thead>
+          <tbody>
+            {% for r in por_epi %}
+              <tr>
+                <td>{{ r.epi__nome }}{% if r.epi__codigo %} <span class="text-muted">({{ r.epi__codigo }})</span>{% endif %}</td>
+                <td>{{ r.entregues|default:0 }}</td>
+                <td>{{ r.devolvidos|default:0 }}</td>
+                <td>{{ r.cancelados|default:0 }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="mb-0">Sem dados.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Resumo por Colaborador -->
+<div class="card">
+  <div class="card-header"><h2 class="m-0 fs-5">Resumo por Colaborador</h2></div>
+  <div class="card-body">
+    {% if por_colab %}
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr><th>Colaborador</th><th>Entregues</th><th>Devolvidos</th><th>Cancelados</th></tr>
+          </thead>
+          <tbody>
+            {% for r in por_colab %}
+              <tr>
+                <td>{{ r.colaborador__nome }}</td>
+                <td>{{ r.entregues|default:0 }}</td>
+                <td>{{ r.devolvidos|default:0 }}</td>
+                <td>{{ r.cancelados|default:0 }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="mb-0">Sem dados.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'app_relatorios/js/filters.js' %}"></script>
+{% endblock %}
