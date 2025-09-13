@@ -16,11 +16,9 @@ class EPIForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # Aplique classes Bootstrap por padrão em todos os campos:
+        
         for name, field in self.fields.items():
             w = field.widget
-            # Preserve classes existentes (se houver)
             base = w.attrs.get("class", "")
 
             if isinstance(w, (forms.CheckboxInput, forms.CheckboxSelectMultiple)):
@@ -28,17 +26,12 @@ class EPIForm(forms.ModelForm):
             elif isinstance(w, forms.Select):
                 w.attrs["class"] = (base + " form-select").strip()
             else:
-                # TextInput, NumberInput, Textarea, DateInput etc.
                 w.attrs["class"] = (base + " form-control").strip()
 
-            # Qualquer campo recebe autocomplete off (opcional)
             w.attrs.setdefault("autocomplete", "off")
 
-        # Pequenos ajustes específicos:
-        # – Deixe o switch mais semântico
         self.fields["ativo"].widget.attrs.update({"role": "switch"})
 
-        # – Campos numéricos com step e inputmode
         for num_name in ("estoque", "estoque_minimo"):
             if num_name in self.fields:
                 self.fields[num_name].widget.attrs.setdefault("step", "1")

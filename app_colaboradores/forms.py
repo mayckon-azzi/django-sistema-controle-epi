@@ -193,3 +193,13 @@ class LoginFormBootstrap(AuthenticationForm):
         self.fields['password'].widget.attrs.update({
             'class': 'form-control', 'placeholder': '••••••••', 'id': 'id_password'
         })
+
+class ColaboradorFotoForm(forms.ModelForm):
+    class Meta:
+        model = Colaborador
+        fields = ["foto"]
+        widgets = {
+            "foto": forms.ClearableFileInput(
+                attrs={"class": "form-control", "accept": "image/*"}
+            )
+        }

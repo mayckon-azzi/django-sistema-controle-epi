@@ -12,7 +12,7 @@
 {% block content %}
 <div class="card shadow-sm">
   <div class="card-header">
-    <h2 class="h4 mb-0">{% if view.object %}Editar EPI{% else %}Novo EPI{% endif %}</h2>
+    <h2 class="h5 mb-0">{% if view.object %}Editar EPI{% else %}Novo EPI{% endif %}</h2>
   </div>
 
   <div class="card-body">
@@ -46,10 +46,25 @@
         </div>
 
         <div class="col-12 col-md-4 d-flex align-items-center">
-          <div class="form-check form-switch">
+          <div class="form-check form-switch mt-3 mt-md-0">
             {{ form.ativo }}
             <label class="form-check-label ms-2">Ativo</label>
           </div>
+        </div>
+
+        <!-- Estoque -->
+        <div class="col-12 col-md-3">
+          <label class="form-label">Estoque</label>
+          {{ form.estoque }}
+          <div class="form-text">Quantidade atual no estoque.</div>
+          {% if form.estoque.errors %}<div class="invalid-feedback d-block">{{ form.estoque.errors|join:", " }}</div>{% endif %}
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label class="form-label">Estoque mínimo</label>
+          {{ form.estoque_minimo }}
+          <div class="form-text">Defina o mínimo para alerta.</div>
+          {% if form.estoque_minimo.errors %}<div class="invalid-feedback d-block">{{ form.estoque_minimo.errors|join:", " }}</div>{% endif %}
         </div>
       </div>
 

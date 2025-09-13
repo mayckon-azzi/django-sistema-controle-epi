@@ -1,15 +1,15 @@
 from django.shortcuts import redirect
-from django.db.models import Q, F, BooleanField, Case, When, Value, ProtectedError
+from django.db.models import Q, F, BooleanField, Case, When, Value
+from django.db.models import ProtectedError
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 
 from .models import EPI, CategoriaEPI
 from .forms import EPIForm
 
 
-# ===== LISTA (CBV) =====
 class ListaEPIView(LoginRequiredMixin, ListView):
     model = EPI
     template_name = "app_epis/pages/list.html"
@@ -25,11 +25,7 @@ class ListaEPIView(LoginRequiredMixin, ListView):
         below_min = self.request.GET.get("abaixo") == "1"
         order = self.request.GET.get("ordenar") or "nome"
 
-        # >>> NOVO: controlar quando mostrar resultados
-        self.has_filters = any([q, categoria_id, only_active, below_min])
-        if not self.has_filters:
-            return EPI.objects.none()
-
+        # Exibe resultados sempre (removi o "gate" que escondia sem filtros)
         if q:
             qs = qs.filter(
                 Q(nome__icontains=q) |
@@ -76,14 +72,13 @@ class ListaEPIView(LoginRequiredMixin, ListView):
                 ("estoque","Estoque ↑"), ("-estoque","Estoque ↓"),
                 ("categoria","Categoria"), ("codigo","Código"),
             ],
-            "has_filters": getattr(self, "has_filters", False),  
         })
         params = self.request.GET.copy()
-        params.pop("page", None)          
-        ctx["base_query"] = params.urlencode()  
+        params.pop("page", None)
+        ctx["base_query"] = params.urlencode()
         return ctx
-        
-# ===== CRUD =====
+
+
 class CriarEPIView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "app_epis.add_epi"
     raise_exception = True
@@ -91,12 +86,17 @@ class CriarEPIView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = EPI
     form_class = EPIForm
     template_name = "app_epis/pages/form.html"
-    success_url = reverse_lazy("app_epis:lista")
+    # Permanece na tela de cadastro após salvar
+    success_url = reverse_lazy("app_epis:criar")
 
     def form_valid(self, form):
         resp = super().form_valid(form)
         messages.success(self.request, "EPI criado com sucesso.")
         return resp
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Não foi possível criar o EPI. Verifique os campos destacados.")
+        return super().form_invalid(form)
 
 
 class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -106,12 +106,15 @@ class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = EPI
     form_class = EPIForm
     template_name = "app_epis/pages/form.html"
-    success_url = reverse_lazy("app_epis:lista")
 
-    def form_valid(self, form):
-        resp = super().form_valid(form)
+    # Permanece na tela de edição após salvar
+    def get_success_url(self):
         messages.success(self.request, "EPI atualizado com sucesso.")
-        return resp
+        return reverse("app_epis:editar", kwargs={"pk": self.object.pk})
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Não foi possível atualizar. Verifique os campos destacados.")
+        return super().form_invalid(form)
 
 
 class ExcluirEPIView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):

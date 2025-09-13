@@ -11,6 +11,7 @@ class Colaborador(models.Model):
     setor = models.CharField(max_length=80, blank=True)
     telefone = models.CharField(max_length=20, blank=True)
     ativo = models.BooleanField(default=True)
+    foto = models.ImageField(upload_to="colaboradores/%Y/%m/", blank=True, null=True)
 
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)

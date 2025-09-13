@@ -1,11 +1,14 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
+
+from app_core import views
 from .views import (
     EntrarView,
     ListaColaboradoresView,
     CriarColaboradorView,
     AtualizarColaboradorView,
     ExcluirColaboradorView,
+    PerfilView,
     registrar,
 )
 
@@ -21,4 +24,6 @@ urlpatterns = [
     path("novo/", CriarColaboradorView.as_view(), name="criar"),
     path("<int:pk>/editar/", AtualizarColaboradorView.as_view(), name="editar"),
     path("<int:pk>/excluir/", ExcluirColaboradorView.as_view(), name="excluir"),
+    path("perfil/", PerfilView.as_view(), name="perfil"),
+    path("perfil/<int:pk>/", PerfilView.as_view(), name="perfil_pk"),
 ]

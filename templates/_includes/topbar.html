@@ -9,9 +9,30 @@
 
   <div class="ms-auto d-flex align-items-center gap-3">
     {% if request.user.is_authenticated %}
-      <span class="text-muted small d-none d-md-inline">
+      <!-- Nome do usuário -> perfil -->
+      <a href="{% url 'app_colaboradores:perfil' %}"
+         class="text-muted medium d-none d-md-inline text-decoration-none">
         {{ request.user.get_full_name|default:request.user.username }}
-      </span>
+      </a>
+
+      <!-- Avatar -> perfil -->
+      <a href="{% url 'app_colaboradores:perfil' %}" class="d-inline-block">
+        {% if request.user.colaborador.foto %}
+          <img src="{{ request.user.colaborador.foto.url }}"
+               alt="Foto de perfil"
+               class="rounded-circle"
+               height="32" width="32"
+               style="object-fit:cover;">
+        {% else %}
+          <img src="{% static 'img/avatar-placeholder.png' %}"
+               alt="Foto de perfil"
+               class="rounded-circle"
+               height="32" width="32"
+               style="object-fit:cover;">
+        {% endif %}
+      </a>
+
+      <!-- Sair -->
       <form method="post" action="{% url 'app_colaboradores:sair' %}" class="mb-0">
         {% csrf_token %}
         <button class="btn btn-sm btn-outline-secondary" type="submit">Sair</button>

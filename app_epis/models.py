@@ -11,16 +11,18 @@ class CategoriaEPI(models.Model):
     def __str__(self):
         return self.nome
 
+
 class EPI(models.Model):
     TAMANHO_CHOICES = [
-        ("PP", "PP"), ("P", "P"), ("M", "M"), ("G", "G"), ("GG", "GG"),
-        ("U", "Único"),
+        ("PP", "PP"), ("P", "P"), ("M", "M"), ("G", "G"), ("GG", "GG"), ("U", "Único"),
     ]
     codigo = models.CharField("Código", max_length=30, unique=True)
     nome = models.CharField(max_length=120)
     categoria = models.ForeignKey(CategoriaEPI, on_delete=models.PROTECT, related_name="epis")
     tamanho = models.CharField(max_length=3, choices=TAMANHO_CHOICES, blank=True)
     ativo = models.BooleanField(default=True)
+
+    # Estoque
     estoque = models.PositiveIntegerField(default=0)
     estoque_minimo = models.PositiveIntegerField(default=0, blank=True)
 
@@ -30,17 +32,10 @@ class EPI(models.Model):
     def __str__(self):
         return f"{self.nome} ({self.codigo})" if self.codigo else self.nome
 
-class Meta:
-    constraints = [
-        # Garante que nunca fique negativo (reforço no BD)
-        models.CheckConstraint(
-            name="epi_estoque_nao_negativo",
-            check=models.Q(estoque__gte=0),
-        ),
-    ]
-
-    
-
-    
-    
-
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                name="epi_estoque_nao_negativo",
+                check=models.Q(estoque__gte=0),
+            ),
+        ]

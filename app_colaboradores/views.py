@@ -1,15 +1,16 @@
-from django.shortcuts import render, redirect
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LoginView
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from django.db.models import Q
 from .models import Colaborador
-from .forms import ColaboradorAdminForm, ColaboradorForm, LoginFormBootstrap, RegisterForm
+from .forms import ColaboradorAdminForm, ColaboradorForm, ColaboradorFotoForm, LoginFormBootstrap, RegisterForm
 from django.db.utils import OperationalError, ProgrammingError  
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-
+from django.core.exceptions import PermissionDenied
 
 
 class EntrarView(LoginView):
@@ -65,7 +66,7 @@ class CriarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
     raise_exception = True
     model = Colaborador
     template_name = 'app_colaboradores/pages/form.html'
-    success_url = reverse_lazy('app_colaboradores:lista')
+    success_url = reverse_lazy('app_colaboradores:criar')
 
     def get_form_class(self):
         u = self.request.user
@@ -133,3 +134,55 @@ def registrar(request):
 		{'form': form, 'erro_banco': erro_banco}
 	)
 
+class PerfilView(LoginRequiredMixin, TemplateView):
+    """
+    - /colaboradores/perfil/         -> perfil do usuário logado
+    - /colaboradores/perfil/<pk>/    -> requer permissão 'view_colaborador'
+    """
+    template_name = "app_colaboradores/pages/perfil.html"
+
+    def _resolve_colab(self):
+        pk = self.kwargs.get("pk")
+        if pk is not None:
+            # Ver perfil de outro colaborador requer permissão
+            if not self.request.user.has_perm("app_colaboradores.view_colaborador"):
+                raise PermissionDenied
+            return get_object_or_404(Colaborador, pk=pk)
+        # próprio perfil
+        return get_object_or_404(Colaborador, user=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        colab = self._resolve_colab()
+        ctx["colaborador"] = colab
+        ctx["foto_form"] = ColaboradorFotoForm(instance=colab)
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        colab = self._resolve_colab()
+
+        # remover foto
+        if "remover" in request.POST:
+            if colab.foto:
+                colab.foto.delete(save=False)
+                colab.foto = None
+                colab.save()
+                messages.success(request, "Foto removida com sucesso.")
+            else:
+                messages.info(request, "Este perfil não possui foto.")
+            return redirect(
+                "app_colaboradores:perfil" if "pk" not in self.kwargs else "app_colaboradores:perfil_pk",
+                **({"pk": colab.pk} if "pk" in self.kwargs else {}),
+            )
+
+        form = ColaboradorFotoForm(request.POST, request.FILES, instance=colab)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Foto atualizada com sucesso.")
+            return redirect(
+                "app_colaboradores:perfil" if "pk" not in self.kwargs else "app_colaboradores:perfil_pk",
+                **({"pk": colab.pk} if "pk" in self.kwargs else {}),
+            )
+
+        messages.error(request, "Não foi possível atualizar a foto.")
+        return self.get(request, *args, **kwargs)

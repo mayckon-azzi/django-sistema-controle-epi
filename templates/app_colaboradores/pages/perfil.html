@@ -1,0 +1,85 @@
+{% extends "app_core/partials/base.html" %}
+{% load static %}
+
+{% block title %}Perfil{% endblock %}
+{% block page_title %}Perfil{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'app_core:home' %}">Início</a> › Perfil
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-12 col-xl-4">
+    <div class="card">
+      <div class="card-header"><h2 class="m-0 fs-6">Minha foto</h2></div>
+      <div class="card-body text-center">
+        {% if colaborador.foto %}
+          <img src="{{ colaborador.foto.url }}" alt="Foto do perfil"
+               class="rounded-circle mb-3"
+               style="width:160px;height:160px;object-fit:cover;">
+        {% else %}
+          <img src="{% static 'img/avatar-placeholder.png' %}" alt="Sem foto"
+               class="rounded-circle mb-3"
+               style="width:160px;height:160px;object-fit:cover;opacity:.9;">
+          <div class="text-muted small">Sem foto</div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="mt-3 d-grid gap-2">
+          {% csrf_token %}
+          <div class="text-start">
+            <label class="form-label">{{ foto_form.foto.label }}</label>
+            {{ foto_form.foto }}
+            {% if foto_form.foto.errors %}
+              <div class="invalid-feedback d-block">{{ foto_form.foto.errors|striptags }}</div>
+            {% endif %}
+          </div>
+          <div class="d-flex gap-2 justify-content-center">
+            <button class="btn btn-primary" type="submit">Atualizar foto</button>
+            {% if colaborador.foto %}
+              <button class="btn btn-outline-danger" type="submit" name="remover" value="1">Remover foto</button>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-8">
+    <div class="card">
+      <div class="card-header"><h2 class="m-0 fs-6">Dados do colaborador</h2></div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-3">Nome</dt><dd class="col-sm-9">{{ colaborador.nome }}</dd>
+          <dt class="col-sm-3">E-mail</dt><dd class="col-sm-9">{{ colaborador.email }}</dd>
+          <dt class="col-sm-3">Matrícula</dt><dd class="col-sm-9"><code>{{ colaborador.matricula }}</code></dd>
+          <dt class="col-sm-3">Cargo</dt><dd class="col-sm-9">{{ colaborador.cargo|default:"—" }}</dd>
+          <dt class="col-sm-3">Setor</dt><dd class="col-sm-9">{{ colaborador.setor|default:"—" }}</dd>
+          <dt class="col-sm-3">Telefone</dt><dd class="col-sm-9">{{ colaborador.telefone|default:"—" }}</dd>
+          <dt class="col-sm-3">Status</dt>
+          <dd class="col-sm-9">
+            {% if colaborador.ativo %}<span class="badge bg-success">Ativo</span>
+            {% else %}<span class="badge bg-danger">Inativo</span>{% endif %}
+          </dd>
+
+          {% if colaborador.user %}
+            <dt class="col-sm-3">Usuário</dt><dd class="col-sm-9">{{ colaborador.user.username }}</dd>
+            <dt class="col-sm-3">Grupos</dt>
+            <dd class="col-sm-9">
+              {% with gs=colaborador.user.groups.all %}
+                {% if gs %}{% for g in gs %}<span class="badge text-bg-light border me-1">{{ g.name }}</span>{% endfor %}
+                {% else %}<span class="text-muted">—</span>{% endif %}
+              {% endwith %}
+            </dd>
+          {% endif %}
+        </dl>
+
+        {% if perms.app_colaboradores.change_colaborador %}
+          <div class="mt-3">
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'app_colaboradores:editar' colaborador.pk %}">Editar dados</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
