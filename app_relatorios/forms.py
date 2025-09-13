@@ -1,23 +1,33 @@
 from django import forms
-from django.utils import timezone
 from app_entregas.models import Entrega
 from app_colaboradores.models import Colaborador
 from app_epis.models import EPI
 
 class RelatorioEntregasForm(forms.Form):
-    data_de = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
-    data_ate = forms.DateField(required=False, widget=forms.DateInput(attrs={"type": "date"}))
+    data_de = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
+    data_ate = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"})
+    )
     colaborador = forms.ModelChoiceField(
         queryset=Colaborador.objects.order_by("nome"),
-        required=False, empty_label="Todos os colaboradores",
+        required=False,
+        empty_label="Todos os colaboradores",
+        widget=forms.Select(attrs={"class": "form-select"})
     )
     epi = forms.ModelChoiceField(
         queryset=EPI.objects.order_by("nome"),
-        required=False, empty_label="Todos os EPIs",
+        required=False,
+        empty_label="Todos os EPIs",
+        widget=forms.Select(attrs={"class": "form-select"})
     )
     status = forms.ChoiceField(
         required=False,
         choices=[("", "Todos os status")] + list(Entrega.Status.choices),
+        widget=forms.Select(attrs={"class": "form-select"})
     )
 
     def clean(self):
