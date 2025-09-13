@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="d-flex gap-2 mb-3">
+<div class="d-flex flex-wrap gap-2 mb-3">
   <a class="btn btn-outline-secondary btn-sm" href="{% url 'app_entregas:lista' %}">Voltar</a>
   <button class="btn btn-outline-primary btn-sm" onclick="window.print()">Imprimir</button>
   {% if perms.app_entregas.change_entrega and entrega.status == "ENTREGUE" %}

@@ -1,7 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import Entrega, Solicitacao
-from app_epis.models import EPI
 
 class EntregaForm(forms.ModelForm):
     class Meta:
@@ -21,7 +20,6 @@ class EntregaForm(forms.ModelForm):
             raise forms.ValidationError("Quantidade deve ser ≥ 1.")
         return q
 
-
     def clean(self):
         cleaned = super().clean()
         colab = cleaned.get("colaborador")
@@ -35,6 +33,7 @@ class EntregaForm(forms.ModelForm):
         if epi and not epi.ativo:
             self.add_error("epi", "EPI inativo — não é possível registrar entrega.")
         return cleaned
+
 
 class SolicitacaoForm(forms.ModelForm):
     class Meta:

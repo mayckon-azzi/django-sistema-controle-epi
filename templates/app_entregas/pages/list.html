@@ -83,15 +83,15 @@
                   {% endif %}
                 </td>
                 <td class="text-end">
-                  <div class="d-inline-flex gap-2">
+                  <div class="d-inline-flex flex-wrap gap-2">
                     <a class="btn btn-sm btn-outline-secondary" href="{% url 'app_entregas:detalhe' e.pk %}">Detalhes</a>
                     {% if perms.app_entregas.change_entrega %}
                       {% if e.status == "ENTREGUE" %}
-                        <form method="post" action="{% url 'app_entregas:marcar_devolvido' e.pk %}" class="d-inline">
+                        <form method="post" action="{% url 'app_entregas:marcar_devolvido' e.pk %}">
                           {% csrf_token %}
                           <button class="btn btn-sm btn-outline-success" onclick="return confirm('Confirmar devolução?')">Devolver</button>
                         </form>
-                        <form method="post" action="{% url 'app_entregas:marcar_cancelado' e.pk %}" class="d-inline">
+                        <form method="post" action="{% url 'app_entregas:marcar_cancelado' e.pk %}">
                           {% csrf_token %}
                           <button class="btn btn-sm btn-outline-secondary" onclick="return confirm('Cancelar esta entrega?')">Cancelar</button>
                         </form>
