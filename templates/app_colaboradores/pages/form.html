@@ -1,0 +1,71 @@
+{% extends "app_core/partials/base.html" %}
+{% load static %}
+
+{% block title %}{{ view.object|default_if_none:"Novo" }} Colaborador{% endblock %}
+{% block page_title %}Colaboradores{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'app_core:home' %}">Início</a> ›
+  <a href="{% url 'app_colaboradores:lista' %}">Colaboradores</a> ›
+  {{ view.object|yesno:"Editar,Novo" }}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header">
+    <h2 class="m-0 fs-5">
+      {% if view.object %}<i class="bi bi-pencil-square"></i> Editar{% else %}<i class="bi bi-person-plus"></i> Novo{% endif %}
+      Colaborador
+    </h2>
+  </div>
+
+  <div class="card-body">
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Nome</label>
+        {{ form.nome }} {{ form.nome.errors }}
+      </div>
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">E-mail</label>
+        {{ form.email }} {{ form.email.errors }}
+      </div>
+
+      <div class="col-12 col-md-4">
+        <label class="form-label">Matrícula</label>
+        {{ form.matricula }} {{ form.matricula.errors }}
+      </div>
+
+      <div class="col-12 col-md-4">
+        <label class="form-label">Cargo</label>
+        {{ form.cargo }}
+      </div>
+
+      <div class="col-12 col-md-4">
+        <label class="form-label">Setor</label>
+        {{ form.setor }}
+      </div>
+
+      <div class="col-12 col-md-4">
+        <label class="form-label">Telefone</label>
+        {{ form.telefone }}
+      </div>
+
+      <div class="col-12 col-md-4 d-flex align-items-end">
+        <div class="form-check form-switch">
+          {{ form.ativo }}
+          <label class="form-check-label ms-1" for="{{ form.ativo.id_for_label }}">Ativo</label>
+        </div>
+      </div>
+
+      <div class="col-12 d-flex gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'app_colaboradores:lista' %}">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

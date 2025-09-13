@@ -46,6 +46,9 @@ def lista(request):
     paginator = Paginator(qs, 10)
     page_obj = paginator.get_page(request.GET.get("page"))
 
+    params = request.GET.copy()
+    params.pop("page", None)
+
     context = {
         "entregas": page_obj.object_list,
         "page_obj": page_obj,
@@ -57,9 +60,9 @@ def lista(request):
         "colaboradores": Colaborador.objects.all().only("id", "nome"),
         "epis": EPI.objects.all().only("id", "nome"),
         "statuses": Entrega.Status.choices,
+        "base_query": params.urlencode(),  # <<< NOVO
     }
     return render(request, "app_entregas/pages/list.html", context)
-
 
 # ===== ENTREGAS (somente com permissão) =====
 class CriarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -124,11 +127,16 @@ class ExcluirEntregaView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView
             return redirect(self.success_url)
 
 class DetalheEntregaView(LoginRequiredMixin, DetailView):
-    login_url = reverse_lazy("app_colaboradores:entrar")
+    login_url = reverse_lazy('app_colaboradores:entrar')
     model = Entrega
-    template_name = "app_entregas/pages/detail.html"
-    context_object_name = "entrega"
+    template_name = 'app_entregas/pages/detail.html'
+    context_object_name = 'entrega'
 
+    def get_queryset(self):
+        return (
+            Entrega.objects
+            .select_related('colaborador', 'epi', 'solicitacao', 'epi__categoria')
+        )
 
 # ===== SOLICITAÇÕES =====
 class CriarSolicitacaoView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
@@ -182,9 +190,7 @@ class SolicitacoesGerenciarView(LoginRequiredMixin, PermissionRequiredMixin, Lis
     
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        # status permitidos para o filtro do almoxarife
         ctx["statuses_manage"] = ["PENDENTE", "APROVADA"]
-        # status atualmente selecionado no filtro (com default)
         ctx["status_selected"] = self.request.GET.get("status") or "PENDENTE"
         return ctx
 
@@ -246,3 +252,42 @@ def atender_solicitacao(request, pk):
 
     return render(request, "app_entregas/pages/solicitacao_atender_confirm.html", {"s": s})
 
+@login_required
+@permission_required("app_entregas.change_entrega", raise_exception=True)
+@transaction.atomic
+def marcar_devolvido(request, pk):
+    if request.method != "POST":
+        return redirect("app_entregas:lista")
+
+    e = get_object_or_404(Entrega.objects.select_for_update(), pk=pk)
+    if e.status != Entrega.Status.ENTREGUE:
+        messages.warning(request, "Só é possível devolver entregas no status ENTREGUE.")
+        return redirect("app_entregas:lista")
+
+    EPI.objects.filter(pk=e.epi_id).update(estoque=F("estoque") + e.quantidade)
+    e.status = Entrega.Status.DEVOLVIDO
+    e.save(update_fields=["status"])
+    messages.success(request, "Entrega marcada como DEVOLVIDA e estoque atualizado.")
+    return redirect("app_entregas:lista")
+
+
+@login_required
+@permission_required("app_entregas.change_entrega", raise_exception=True)
+@transaction.atomic
+def marcar_cancelado(request, pk):
+    if request.method != "POST":
+        return redirect("app_entregas:lista")
+
+    e = get_object_or_404(Entrega.objects.select_for_update(), pk=pk)
+
+    if e.status == Entrega.Status.CANCELADO:
+        messages.info(request, "Entrega já está CANCELADA.")
+        return redirect("app_entregas:lista")
+
+    if e.status == Entrega.Status.ENTREGUE:
+        EPI.objects.filter(pk=e.epi_id).update(estoque=F("estoque") + e.quantidade)
+
+    e.status = Entrega.Status.CANCELADO
+    e.save(update_fields=["status"])
+    messages.success(request, "Entrega CANCELADA com sucesso.")
+    return redirect("app_entregas:lista")

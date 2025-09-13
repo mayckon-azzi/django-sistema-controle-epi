@@ -11,6 +11,10 @@ urlpatterns = [
     path("solicitacoes/nova/", views.CriarSolicitacaoView.as_view(), name="criar_solicitacao"),
     path("solicitacoes/minhas/", views.MinhasSolicitacoesView.as_view(), name="minhas_solicitacoes"),
 
+    # AÇÕES RÁPIDAS
+    path("<int:pk>/marcar/devolvido/", views.marcar_devolvido, name="marcar_devolvido"),
+    path("<int:pk>/marcar/cancelado/", views.marcar_cancelado, name="marcar_cancelado"),
+
     # Solicitações - almoxarife (gerenciar)
     path("solicitacoes/gerenciar/", views.SolicitacoesGerenciarView.as_view(), name="solicitacoes_gerenciar"),
     path("solicitacoes/<int:pk>/aprovar/", views.aprovar_solicitacao, name="aprovar_solicitacao"),

@@ -1,0 +1,48 @@
+{% extends "app_core/partials/base.html" %}
+{% block title %}{% if view.object %}Editar Entrega{% else %}Nova Entrega{% endif %}{% endblock %}
+{% block page_title %}Entregas{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'app_core:home' %}">Início</a> ›
+  <a href="{% url 'app_entregas:lista' %}">Entregas</a> ›
+  {% if view.object %}Editar{% else %}Nova{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header"><h2 class="m-0 fs-5">{% if view.object %}Editar{% else %}Nova{% endif %} Entrega</h2></div>
+  <div class="card-body">
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="col-12 col-md-6">
+        <label class="form-label">Colaborador</label>
+        {{ form.colaborador }} {{ form.colaborador.errors }}
+      </div>
+      <div class="col-12 col-md-6">
+        <label class="form-label">EPI</label>
+        {{ form.epi }} {{ form.epi.errors }}
+      </div>
+
+      <div class="col-6 col-md-3">
+        <label class="form-label">Quantidade</label>
+        {{ form.quantidade }} {{ form.quantidade.errors }}
+      </div>
+      <div class="col-6 col-md-3">
+        <label class="form-label">Status</label>
+        {{ form.status }} {{ form.status.errors }}
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Observação</label>
+        {{ form.observacao }} {{ form.observacao.errors }}
+      </div>
+
+      <div class="col-12 d-flex gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'app_entregas:lista' %}">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

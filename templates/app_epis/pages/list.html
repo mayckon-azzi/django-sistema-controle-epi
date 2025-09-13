@@ -1,0 +1,140 @@
+{% extends "app_core/partials/base.html" %}
+{% block title %}EPIs{% endblock %}
+{% block page_title %}EPIs{% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › EPIs{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header border-0 pb-0">
+    <h2 class="h4 mb-3">Catálogo de EPIs</h2>
+
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-12 col-lg">
+        <label class="form-label small mb-1">Buscar</label>
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Buscar por nome, código ou categoria">
+      </div>
+
+      <div class="col-6 col-md-auto">
+        <div class="form-check form-switch mt-4">
+          <input class="form-check-input" type="checkbox" id="f-ativos" name="ativos" value="1"
+                 {% if only_active %}checked{% endif %}>
+          <label class="form-check-label" for="f-ativos">Ativos</label>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-auto">
+        <div class="form-check form-switch mt-4">
+          <input class="form-check-input" type="checkbox" id="f-abaixo" name="abaixo" value="1"
+                 {% if below_min %}checked{% endif %}>
+          <label class="form-check-label" for="f-abaixo">Abaixo do mínimo</label>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4 col-lg-3">
+        <label class="form-label small mb-1">Ordenar por</label>
+        <select name="ordenar" class="form-select">
+          {% for key, label in ordenacoes %}
+            <option value="{{ key }}" {% if ordenar == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-auto">
+        <button class="btn btn-primary" type="submit">
+          <i class="bi bi-funnel me-1"></i> Filtrar
+        </button>
+      </div>
+
+      {% if perms.app_epis.add_epi %}
+      <div class="col-auto ms-auto">
+        <a class="btn btn-success" href="{% url 'app_epis:criar' %}">
+          <i class="bi bi-plus-lg me-1"></i> Novo EPI
+        </a>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="card-body">
+    {% if epis %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nome</th>
+              <th class="text-nowrap">Código</th>
+              <th>Categoria</th>
+              <th class="text-nowrap">Estoque</th>
+              <th>Status</th>
+              <th class="text-end">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for e in epis %}
+              <tr>
+                <td class="fw-medium">{{ e.nome }}</td>
+                <td class="text-muted">{{ e.codigo }}</td>
+                <td>{{ e.categoria.nome }}</td>
+                <td class="text-nowrap">
+                  {% if e.abaixo_min %}
+                    <span class="badge text-bg-danger">{{ e.estoque }}</span>
+                  {% else %}
+                    <span class="badge text-bg-success">{{ e.estoque }}</span>
+                  {% endif %}
+                  <small class="text-muted"> / mín. {{ e.estoque_minimo }}</small>
+                </td>
+                <td>
+                  {% if e.ativo %}
+                    <span class="badge text-bg-success">Ativo</span>
+                  {% else %}
+                    <span class="badge text-bg-secondary">Inativo</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm" role="group">
+                    {% if perms.app_epis.change_epi %}
+                      <a class="btn btn-outline-primary" href="{% url 'app_epis:editar' e.pk %}">
+                        Editar
+                      </a>
+                    {% endif %}
+                    {% if perms.app_epis.delete_epi %}
+                      <a class="btn btn-outline-danger" href="{% url 'app_epis:excluir' e.pk %}">
+                        Excluir
+                      </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if is_paginated %}
+      <nav class="mt-3">
+        <ul class="pagination pagination-sm mb-0">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ page_obj.previous_page_number }}">«</a>
+            </li>
+          {% endif %}
+          <li class="page-item disabled">
+            <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+          </li>
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link"
+                 href="?{% if base_query %}{{ base_query }}&{% endif %}page={{ page_obj.next_page_number }}">»</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    {% else %}
+      <div class="text-muted">Nenhum EPI encontrado.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

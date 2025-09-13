@@ -1,0 +1,56 @@
+{% extends "app_core/partials/base.html" %}
+{% block title %}Minhas Solicitações{% endblock %}
+{% block page_title %}Minhas Solicitações{% endblock %}
+{% block breadcrumb %}<a href="{% url 'app_core:home' %}">Início</a> › Minhas Solicitações{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <h2 class="m-0 fs-5">Solicitações</h2>
+    <a class="btn btn-outline-primary btn-sm" href="{% url 'app_entregas:criar_solicitacao' %}">Nova Solicitação</a>
+  </div>
+
+  <div class="card-body">
+    {% if solicitacoes %}
+      <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>EPI</th>
+              <th class="text-center">Qtd</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in solicitacoes %}
+              <tr>
+                <td>{{ s.criado_em|date:"d/m/Y H:i" }}</td>
+                <td>{{ s.epi.nome }}</td>
+                <td class="text-center">{{ s.quantidade }}</td>
+                <td>
+                  {% if s.status == "PENDENTE" %}
+                    <span class="badge bg-warning text-dark">Pendente</span>
+                  {% elif s.status == "APROVADA" %}
+                    <span class="badge bg-primary">Aprovada</span>
+                  {% elif s.status == "ATENDIDA" %}
+                    <span class="badge bg-success">Atendida</span>
+                  {% elif s.status == "REPROVADA" %}
+                    <span class="badge bg-danger">Reprovada</span>
+                  {% elif s.status == "CANCELADA" %}
+                    <span class="badge bg-secondary">Cancelada</span>
+                  {% else %}
+                    <span class="badge bg-light text-dark">{{ s.get_status_display }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="mb-0">Você ainda não possui solicitações.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
