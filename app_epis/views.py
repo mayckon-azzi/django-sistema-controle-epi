@@ -97,6 +97,8 @@ class CriarEPIView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     def form_invalid(self, form):
         messages.error(self.request, "Não foi possível criar o EPI. Verifique os campos destacados.")
         return super().form_invalid(form)
+    
+    
 
 
 class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
