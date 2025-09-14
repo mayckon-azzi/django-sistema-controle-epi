@@ -10,7 +10,7 @@ from .models import EPI, CategoriaEPI
 from .forms import EPIForm
 
 
-class ListaEPIView(LoginRequiredMixin, ListView):
+class ListaEPIView(ListView):
     model = EPI
     template_name = "app_epis/pages/list.html"
     context_object_name = "epis"

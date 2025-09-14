@@ -45,21 +45,21 @@
             </li>
 
             {% if perms.app_entregas.add_solicitacao %}
-            <li class="nav-item">
-              <a class="nav-link text-white-50 {% if url_name == 'criar_solicitacao' %}active{% endif %}"
-                 href="{% url 'app_entregas:criar_solicitacao' %}">Solicitar EPI</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link text-white-50 {% if url_name == 'minhas_solicitacoes' %}active{% endif %}"
-                 href="{% url 'app_entregas:minhas_solicitacoes' %}">Minhas Solicitações</a>
-            </li>
-            {% endif %}
+              <li class="nav-item">
+                <a class="nav-link text-white-50 {% if url_name == 'criar_solicitacao' %}active{% endif %}"
+                  href="{% url 'app_entregas:criar_solicitacao' %}">Solicitar EPI</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-white-50 {% if url_name == 'minhas_solicitacoes' %}active{% endif %}"
+                  href="{% url 'app_entregas:minhas_solicitacoes' %}">Minhas Solicitações</a>
+              </li>
+              {% endif %}
 
-            {% if perms.app_entregas.change_solicitacao %}
-            <li class="nav-item">
-              <a class="nav-link text-white-50 {% if url_name == 'solicitacoes_gerenciar' %}active{% endif %}"
-                 href="{% url 'app_entregas:solicitacoes_gerenciar' %}">Gerenciar Solicitações</a>
-            </li>
+              {% if perms.app_entregas.change_solicitacao %}
+              <li class="nav-item">
+                <a class="nav-link text-white-50 {% if url_name == 'solicitacoes_gerenciar' %}active{% endif %}"
+                  href="{% url 'app_entregas:solicitacoes_gerenciar' %}">Gerenciar Solicitações</a>
+              </li>
             {% endif %}
           </ul>
         </div>
@@ -81,15 +81,16 @@
 
         <div id="menu-epis" class="collapse {% if ns == 'app_epis' %}show{% endif %}">
           <ul class="nav flex-column ms-4 my-1 sub">
+            
             <li class="nav-item">
               <a class="nav-link text-white-50 {% if url_name == 'lista' and ns == 'app_epis' %}active{% endif %}"
                  href="{% url 'app_epis:lista' %}">Listar EPIs</a>
             </li>
             {% if perms.app_epis.add_epi %}
-            <li class="nav-item">
-              <a class="nav-link text-white-50 {% if url_name == 'criar' and ns == 'app_epis' %}active{% endif %}"
-                 href="{% url 'app_epis:criar' %}">Cadastrar EPI</a>
-            </li>
+              <li class="nav-item">
+                <a class="nav-link text-white-50 {% if url_name == 'criar' and ns == 'app_epis' %}active{% endif %}"
+                  href="{% url 'app_epis:criar' %}">Cadastrar EPI</a>
+              </li>
             {% endif %}
           </ul>
         </div>
@@ -97,44 +98,46 @@
 
       <!-- Colaboradores -->
       {% if perms.app_colaboradores.view_colaborador %}
-      <li class="nav-item">
-        <button
-          class="nav-link w-100 text-start btn btn-link btn-toggle {% if ns == 'app_colaboradores' %}showing{% endif %}"
-          data-bs-toggle="collapse"
-          data-bs-target="#menu-colabs"
-          aria-controls="menu-colabs"
-          aria-expanded="{% if ns == 'app_colaboradores' %}true{% else %}false{% endif %}"
-        >
-          <i class="bi bi-people"></i>
-          <span class="label">Colaboradores</span>
-          <i class="bi bi-caret-down-fill chevron ms-auto"></i>
-        </button>
+        <li class="nav-item">
+          <button
+            class="nav-link w-100 text-start btn btn-link btn-toggle {% if ns == 'app_colaboradores' %}showing{% endif %}"
+            data-bs-toggle="collapse"
+            data-bs-target="#menu-colabs"
+            aria-controls="menu-colabs"
+            aria-expanded="{% if ns == 'app_colaboradores' %}true{% else %}false{% endif %}"
+          >
+            <i class="bi bi-people"></i>
+            <span class="label">Colaboradores</span>
+            <i class="bi bi-caret-down-fill chevron ms-auto"></i>
+          </button>
 
-        <div id="menu-colabs" class="collapse {% if ns == 'app_colaboradores' %}show{% endif %}">
-          <ul class="nav flex-column ms-4 my-1 sub">
-            <li class="nav-item">
-              <a class="nav-link text-white-50 {% if url_name == 'lista' and ns == 'app_colaboradores' %}active{% endif %}"
-                 href="{% url 'app_colaboradores:lista' %}">Listar Colaboradores</a>
-            </li>
-            {% if perms.app_colaboradores.add_colaborador %}
-            <li class="nav-item">
-              <a class="nav-link text-white-50 {% if url_name == 'criar' and ns == 'app_colaboradores' %}active{% endif %}"
-                 href="{% url 'app_colaboradores:criar' %}">Criar novo perfil</a>
-            </li>
-            {% endif %}
-          </ul>
-        </div>
-      </li>
+          <div id="menu-colabs" class="collapse {% if ns == 'app_colaboradores' %}show{% endif %}">
+            <ul class="nav flex-column ms-4 my-1 sub">
+              <li class="nav-item">
+                <a class="nav-link text-white-50 {% if url_name == 'lista' and ns == 'app_colaboradores' %}active{% endif %}"
+                  href="{% url 'app_colaboradores:lista' %}">Listar Colaboradores</a>
+              </li>
+              {% if perms.app_colaboradores.add_colaborador %}
+              <li class="nav-item">
+                <a class="nav-link text-white-50 {% if url_name == 'criar' and ns == 'app_colaboradores' %}active{% endif %}"
+                  href="{% url 'app_colaboradores:criar' %}">Criar novo perfil</a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </li>
       {% endif %}
 
       <!-- Relatórios -->
-      <li class="nav-item">
-        <a href="{% url 'app_relatorios:index' %}"
-           class="nav-link {% if ns == 'app_relatorios' %}active{% endif %}">
-          <i class="bi bi-graph-up"></i>
-          <span class="label">Relatórios</span>
-        </a>
-      </li>
+       {% if perms.app_entregas.view_entrega %}
+        <li class="nav-item">
+          <a href="{% url 'app_relatorios:index' %}"
+            class="nav-link {% if ns == 'app_relatorios' %}active{% endif %}">
+            <i class="bi bi-graph-up"></i>
+            <span class="label">Relatórios</span>
+          </a>
+        </li>
+      {% endif %}
 
     </ul>
 
