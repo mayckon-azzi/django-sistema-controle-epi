@@ -193,8 +193,8 @@ Observações:
 
 ```bash
 # Clonar o repositório
-git clone https://github.com/seu-usuario/sistema-controle-epi.git
-cd sistema-controle-epi
+git clone https://github.com/seu-usuario/senai-imersao-sabadou.git
+cd senai-imersao-sabadou
 
 # Criar e ativar ambiente virtual (opcional, mas recomendado)
 python -m venv venv
