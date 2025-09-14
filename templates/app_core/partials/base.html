@@ -24,13 +24,18 @@
     <div class="content-container container-fluid pt-3">
 
       {% if messages %}
-        <div class="mb-3">
-          {% for m in messages %}
-            <div class="alert alert-{{ m.tags }} py-2 my-1">{{ m }}</div>
+        <div class="container-xxl px-3 mt-2">
+          {% for message in messages %}
+            <div class="alert
+                        alert-{% if 'error' in message.tags %}danger{% else %}{{ message.tags|default:'info' }}{% endif %}
+                        alert-dismissible fade show shadow-sm"
+                role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            </div>
           {% endfor %}
         </div>
       {% endif %}
-
       {% block pagebar %}{% endblock %}
       {% block content %}{% endblock %}
 

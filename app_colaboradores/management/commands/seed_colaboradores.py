@@ -27,10 +27,10 @@ SEED = [
         "nome":"Henrique Reis", "email":"henrique@empresa.com", "matricula":"C008", "cargo":"Analista", "setor":"TI", "telefone":"11999990008"
     },
     {
-        "nome":"Iara Nunes", "email":"iara@empresa.com", "matricula":"C009", "cargo":"Técnica", "setor":"Qualidade", "telefone":"11999990009"
+        "nome":"colaborador", "email":"colaborador@empresa.com", "matricula":"C009", "cargo":"Técnico", "setor":"Qualidade", "telefone":"11999990009"
     },
     {
-        "nome":"João Prado", "email":"joao@empresa.com", "matricula":"C010", "cargo":"Estagiário", "setor":"TI", "telefone":"11999990010"
+        "nome":"almoxarife", "email":"almoxarife@empresa.com", "matricula":"C010", "cargo":"almoxarife", "setor":"TI", "telefone":"11999990010"
     },
 ]
 

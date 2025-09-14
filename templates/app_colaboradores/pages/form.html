@@ -61,6 +61,62 @@
         </div>
       </div>
 
+      {# ====== SEÇÃO ADMIN / GRUPOS ====== #}
+      {% if form.groups %}
+        <div class="col-12"><hr></div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label">Grupos do usuário</label>
+          {{ form.groups }}
+          {% if form.groups.errors %}
+            <div class="invalid-feedback d-block">{{ form.groups.errors|join:", " }}</div>
+          {% endif %}
+          <small class="text-muted">Use Ctrl/Cmd para selecionar múltiplos.</small>
+        </div>
+
+        {# Mostrar criação de usuário apenas quando NÃO há user vinculado #}
+        {% if not view.object or not view.object.user %}
+          <div class="col-12 col-md-4 d-flex align-items-end">
+            <div class="form-check form-switch">
+              {{ form.criar_usuario }}
+              <label class="form-check-label ms-1" for="{{ form.criar_usuario.id_for_label }}">
+                Criar usuário de acesso?
+              </label>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4 js-cred">
+            <label class="form-label">Username</label>
+            {{ form.username }} {{ form.username.errors }}
+          </div>
+
+          <div class="col-12 col-md-4 js-cred">
+            <label class="form-label">Senha</label>
+            {{ form.password1 }} {{ form.password1.errors }}
+          </div>
+
+          <div class="col-12 col-md-4 js-cred">
+            <label class="form-label">Confirmar senha</label>
+            {{ form.password2 }} {{ form.password2.errors }}
+          </div>
+
+          <script>
+            (function () {
+              const toggle = document.getElementById('{{ form.criar_usuario.id_for_label }}');
+              const creds = document.querySelectorAll('.js-cred');
+              function setVis() {
+                const show = toggle && toggle.checked;
+                creds.forEach(el => el.style.display = show ? '' : 'none');
+              }
+              if (toggle) {
+                toggle.addEventListener('change', setVis);
+                setVis();
+              }
+            })();
+          </script>
+        {% endif %}
+      {% endif %}
+
       <div class="col-12 d-flex gap-2">
         <a class="btn btn-outline-secondary" href="{% url 'app_colaboradores:lista' %}">Cancelar</a>
         <button class="btn btn-primary" type="submit">Salvar</button>

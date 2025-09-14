@@ -135,18 +135,77 @@ def registrar(request):
 
 class PerfilView(LoginRequiredMixin, TemplateView):
     """
-    - /colaboradores/perfil/         -> perfil do usuário logado
-    - /colaboradores/perfil/<pk>/    -> requer permissão 'view_colaborador'
+    - /colaboradores/perfil/         -> perfil do usuário logado (com auto-vínculo por e-mail)
+    - /colaboradores/perfil/<pk>/    -> requer permissão 'view_colaborador', exceto se for o próprio
     """
+    login_url = reverse_lazy("app_colaboradores:entrar")
     template_name = "app_colaboradores/pages/perfil.html"
 
+    # --- helpers -------------------------------------------------------------
+    def _get_or_autolink_user_colab(self):
+        """Retorna o Colaborador do usuário. Se não houver, tenta vincular por e-mail (único)."""
+        user = self.request.user
+        colab = Colaborador.objects.filter(user=user).first()
+        if colab:
+            return colab
+
+        email = (user.email or "").strip()
+        if email:
+            qs = Colaborador.objects.filter(user__isnull=True, email__iexact=email)
+            if qs.count() == 1:
+                colab = qs.first()
+                colab.user = user
+                colab.save(update_fields=["user"])
+                messages.info(
+                    self.request,
+                    "Vinculamos automaticamente seu usuário ao perfil de colaborador existente."
+                )
+                return colab
+        return None
+
     def _resolve_colab(self):
+        # cache caso já resolvido no dispatch
+        if hasattr(self, "_colab"):
+            return self._colab
+
         pk = self.kwargs.get("pk")
+        my_colab = Colaborador.objects.filter(user=self.request.user).first()
+
+        # Se pediu um PK e é o próprio, libera sem exigir view_colaborador
+        if pk is not None and my_colab and my_colab.pk == pk:
+            return my_colab
+
         if pk is not None:
             if not self.request.user.has_perm("app_colaboradores.view_colaborador"):
                 raise PermissionDenied
             return get_object_or_404(Colaborador, pk=pk)
+
+        # Sem PK: perfil próprio (já garantido no dispatch)
         return get_object_or_404(Colaborador, user=self.request.user)
+
+    # --- dispatch / GET / POST ----------------------------------------------
+    def dispatch(self, request, *args, **kwargs):
+        # Quando acessa /perfil/ (sem pk), garanta que temos um Colaborador
+        if "pk" not in kwargs:
+            colab = self._get_or_autolink_user_colab()
+            if not colab:
+                if request.user.has_perm("app_colaboradores.add_colaborador"):
+                    messages.info(
+                        request,
+                        "Seu usuário ainda não possui um perfil de colaborador. "
+                        "Crie seu perfil para continuar."
+                    )
+                    return redirect("app_colaboradores:criar")
+                messages.error(
+                    request,
+                    "Seu usuário não possui um perfil de colaborador. "
+                    "Solicite a um administrador para criar seu perfil."
+                )
+                return redirect("app_core:home")
+            # cache para reaproveitar
+            self._colab = colab
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
