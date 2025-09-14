@@ -197,9 +197,9 @@ git clone https://github.com/seu-usuario/senai-imersao-sabadou.git
 cd senai-imersao-sabadou
 
 # Criar e ativar ambiente virtual (opcional, mas recomendado)
-python -m venv venv
-source venv/bin/activate   # Linux/Mac
-venv\Scripts\activate      # Windows
+python -m venv .venv
+source .\.venv\Scripts\activate   # Linux/Mac
+.\.venv\Scripts\activate          # Windows
 
 # Instalar dependências
 pip install -r requirements.txt
