@@ -27,6 +27,7 @@ services:
     restart: unless-stopped
 
   web:
+    image: djohnni/sistema-controle-epi:latest
     build: .
     container_name: epi_web
     command: ["/bin/sh", "/app/entrypoint.sh"]

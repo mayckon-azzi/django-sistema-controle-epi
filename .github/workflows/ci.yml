@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: controle_epi_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+
+    env:
+      # Variáveis esperadas pelo settings.py (testes)
+      DB_ENGINE: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: controle_epi_test
+      DJANGO_DEBUG: 1
+      DJANGO_SECRET_KEY: ci-secret
+      DJANGO_ALLOWED_HOSTS: "*"
+      TZ: America/Sao_Paulo
+      PYTHONUNBUFFERED: 1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('**/requirements*.txt') }}
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # opcional: ruff/black/isort/pytest
+          pip install ruff black isort
+
+      - name: Wait for MySQL
+        run: |
+          for i in `seq 1 60`; do
+            mysqladmin ping -h 127.0.0.1 -uroot -proot --silent && break
+            echo "Aguardando MySQL..."
+            sleep 2
+          done
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Format check (black)
+        run: black --check .
+
+      - name: Imports check (isort)
+        run: isort --check-only .
+
+      - name: Django migrate
+        run: python manage.py migrate --noinput
+
+      - name: Django tests
+        run: |
+          # se usar pytest-django, trocar por: pytest -q
+          python manage.py test -v 2
