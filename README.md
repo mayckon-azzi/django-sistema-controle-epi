@@ -13,12 +13,13 @@ O sistema garante rastreabilidade, conformidade com normas de segurança, usabil
 - [Fluxo de Funcionamento](#fluxo-de-funcionamento)
 - [Modelos de Dados](#modelos-de-dados)
 - [Telas Mínimas](#telas-mínimas)
-- [Diagramas](#diagramas)
 - [Requisitos](#requisitos)
+- [Diagramas](#diagramas)
   - [Requisitos Funcionais (RF)](#requisitos-funcionais-rf)
   - [Requisitos Não Funcionais (RNF)](#requisitos-não-funcionais-rnf)
   - [Regras de Negócio (RN)](#regras-de-negócio-rn)
-- [Instalação e Execução](#instalação-e-execução)
+- [Instalação e Execução Padrão](#instalação-e-execução-padrão)
+- [Instalação e Execução Docker](#instalação-e-execução-docker)
 - [Estilos e UI](#estilos-e-ui)
 
 ---
@@ -127,18 +128,6 @@ Observações:
 
 ---
 
-## Diagramas
-
-### Caso de Uso
-![Diagrama de Caso de Uso](docs/diagrama-caso-uso.jpg)
-
-### Entidades e Relacionamento
-![Diagrama DER](docs/diagrama-der.png)
-
-[🔝 Voltar ao Índice](#índice)
-
----
-
 ## Requisitos
 
 ### Requisitos Funcionais (RF)
@@ -173,14 +162,146 @@ Observações:
 
 ---
 
-## Instalação e Execução
+## Diagramas
 
-*(mesma seção do seu README original — não alterada)*
+### Caso de Uso
+![Diagrama de Caso de Uso](docs/diagrama-caso-uso.jpg)
+
+### Entidades e Relacionamento
+![Diagrama DER](docs/diagrama-der.png)
+
+[🔝 Voltar ao Índice](#índice)
+
+---
+
+## Instalação e Execução (Padrão)
+
+### Pré-requisitos(Padrão)
+- Python **3.10+**
+- Pipenv ou Virtualenv (opcional)
+- Git
+
+### Passo a passo (Padrão - básico)
+
+```bash
+# Clonar o repositório
+git clone https://github.com/seu-usuario/senai-imersao-sabadou.git
+cd senai-imersao-sabadou
+
+# Criar e ativar ambiente virtual (opcional, mas recomendado)
+python -m venv .venv
+source .\.venv\Scripts\activate   # Linux/Mac
+.\.venv\Scripts\activate          # Windows
+
+# Instalar dependências
+pip install -r requirements.txt
+
+# Criar e aplicar migrações
+python manage.py makemigrations
+python manage.py migrate
+
+# Criar superusuário (admin)
+python manage.py createsuperuser
+
+# Rodar o servidor
+python manage.py runserver
+```
+
+### A aplicação estará disponível em:
+
+👉 [http://localhost:8000](http://localhost:8000)
+
+[🔝 Voltar ao Índice](#índice)
+
+---
+
+## Instalação e Execução (Docker)
+
+### Pré-requisitos (Docker)
+- **Docker Desktop** (com **WSL2** habilitado no Windows).
+- **Docker Compose v2** (já incluso no Docker Desktop).
+- **Git** para clonar o repositório.
+
+> **Portas:** se você já tiver MySQL local em `3306`, ajuste a porta do container (ex.: `3307:3306`) no `docker-compose.yml`.
+
+### Passo a passo (Docker — recomendado)
+
+```bash
+# 1) Clonar o repositório
+git clone https://github.com/seu-usuario/senai-imersao-sabadou.git
+cd senai-imersao-sabadou
+
+# 2) Criar o arquivo .env (exemplo abaixo)
+
+DJANGO_DEBUG=1
+DJANGO_SECRET_KEY=dev-secret-change-me
+DJANGO_ALLOWED_HOSTS=*
+
+DB_ENGINE=mysql
+DB_NAME=controle_epi
+DB_USER=root
+DB_PASSWORD=
+DB_HOST=db
+DB_PORT=3306
+
+TZ=America/Sao_Paulo
+
+# Linux/Mac:
+cp .env.example .env
+
+# Windows (PowerShell):
+Copy-Item .env.example .env
+
+# 3) (Opcional no Linux/Mac) Dar permissão ao entrypoint
+chmod +x entrypoint.sh
+
+# 4) Build das imagens
+docker compose build
+
+# 5) Subir os serviços em segundo plano
+docker compose up -d
+
+# 6) Ver logs (até o MySQL ficar "ready for connections")
+docker compose logs -f db
+
+# 7) Criar superusuário do Django
+docker compose exec web python manage.py createsuperuser
+
+# 8) A aplicação estará disponível em:
+
+👉 [http://localhost:8000](http://localhost:8000)
+
+```
+### Comandos Úteis Docker
+```bash
+# Parar os serviços
+docker compose down
+
+# Parar e remover volumes (zera o banco)
+docker compose down -v
+
+# Rebuild completo
+docker compose build --no-cache && docker compose up -d
+
+# Logs
+docker compose logs -f web
+docker compose logs -f db
+
+```
+[🔝 Voltar ao Índice](#índice)
 
 ---
 
 ## Estilos e UI
 
-*(igual ao seu README atual, mas aberto para melhorias futuras como integração com Tailwind)*
+O frontend utiliza uma estilização moderna e clean com CSS dividido por responsabilidade:
+
+- static/css/reset.css, variables.css, base.css, layout.css, components.css
+- static/css/pages/ (estilos específicos por página como dashboard.css, forms.css, tables.css)
+
+Os templates foram atualizados para usar classes semânticas (card, grid, table, form-grid, btn).  
+A navbar é responsiva e possui um toggle simples implementado em static/js/app.js.
+
+Para ajustes de tema (cores, espaçamentos), altere static/css/variables.css.
 
 [🔝 Voltar ao Índice](#índice)
