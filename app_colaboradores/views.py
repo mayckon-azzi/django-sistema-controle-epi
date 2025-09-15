@@ -1,10 +1,8 @@
-from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
-from django.db.models import Q
 from .models import Colaborador
 from .forms import ColaboradorAdminForm, ColaboradorForm, ColaboradorFotoForm, LoginFormBootstrap, RegisterForm
 from django.db.utils import OperationalError, ProgrammingError  

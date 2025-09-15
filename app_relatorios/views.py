@@ -2,9 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.views.generic import TemplateView
 from django.http import HttpResponse
 from django.db.models import Sum, Case, When, IntegerField, Value, F, Count
-from django.shortcuts import render
 import csv
-
 from .forms import RelatorioEntregasForm
 from app_entregas.models import Entrega
 

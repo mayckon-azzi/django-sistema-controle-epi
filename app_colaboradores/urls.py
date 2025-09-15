@@ -1,7 +1,5 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
-
-from app_core import views
 from .views import (
     EntrarView,
     ListaColaboradoresView,
