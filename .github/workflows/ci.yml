@@ -74,7 +74,7 @@ jobs:
         run: black --check .
 
       - name: Imports check (isort)
-        run: isort --check-only .
+        run: isort --profile black --check-only .
 
       - name: Django migrate
         run: python manage.py migrate --noinput
@@ -83,5 +83,3 @@ jobs:
         run: |
           # se usar pytest-django, trocar por: pytest -q
           python manage.py test -v 2
-      - name: Imports check (isort)
-        run: isort --profile black --check-only .
