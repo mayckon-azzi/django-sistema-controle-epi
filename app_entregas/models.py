@@ -56,7 +56,7 @@ class Entrega(models.Model):
         on_delete=models.PROTECT,
         related_name="entregas",
         null=True,
-        blank=True,  # legado sem vínculo
+        blank=True,  
     )
 
     # Datas
