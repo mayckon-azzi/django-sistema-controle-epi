@@ -19,13 +19,11 @@ def home(request):
     # Conta devoluções do mês apenas se o status existir na enum
     devolvidos_mes = 0
     if "DEVOLVIDO" in status_codes:
-        devolvidos_mes = (
-            Entrega.objects.filter(
-                status="DEVOLVIDO",
-                data_entrega__year=agora.year,
-                data_entrega__month=agora.month,
-            ).count()
-        )
+        devolvidos_mes = Entrega.objects.filter(
+            status="DEVOLVIDO",
+            data_entrega__year=agora.year,
+            data_entrega__month=agora.month,
+        ).count()
 
     ctx = {
         "total_colaboradores": Colaborador.objects.count(),

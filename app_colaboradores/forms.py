@@ -4,7 +4,6 @@ from django.contrib.auth.models import User, Group
 from .models import Colaborador
 
 
-
 def _bootstrapify_fields(form):
     """
     Adiciona classes Bootstrap apropriadas a todos os widgets do form,
@@ -36,6 +35,7 @@ def _bootstrapify_fields(form):
 #                           Colaborador
 # ===================================================================
 
+
 class ColaboradorForm(forms.ModelForm):
     class Meta:
         model = Colaborador
@@ -63,13 +63,13 @@ class ColaboradorAdminForm(ColaboradorForm):
         queryset=Group.objects.all(),
         required=False,
         label="Grupos do usuário",
-        widget=forms.SelectMultiple(), 
+        widget=forms.SelectMultiple(),
     )
     criar_usuario = forms.BooleanField(
         required=False,
         initial=False,
         label="Criar usuário de acesso?",
-        widget=forms.CheckboxInput(),  
+        widget=forms.CheckboxInput(),
     )
     username = forms.CharField(
         required=False, max_length=150, label="Username", widget=forms.TextInput()
@@ -82,7 +82,7 @@ class ColaboradorAdminForm(ColaboradorForm):
     )
 
     class Meta(ColaboradorForm.Meta):
-        fields = ColaboradorForm.Meta.fields 
+        fields = ColaboradorForm.Meta.fields
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -137,9 +137,11 @@ class ColaboradorAdminForm(ColaboradorForm):
                 u.groups.set(self.cleaned_data["groups"])
         return colab
 
+
 # ===================================================================
 #                           Registro de Usuário
 # ===================================================================
+
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput())
@@ -155,7 +157,9 @@ class RegisterForm(UserCreationForm):
         self.fields["username"].widget.attrs.setdefault("placeholder", "usuário")
         self.fields["email"].widget.attrs.setdefault("placeholder", "email@empresa.com")
         self.fields["password1"].widget.attrs.setdefault("placeholder", "Senha")
-        self.fields["password2"].widget.attrs.setdefault("placeholder", "Confirmar senha")
+        self.fields["password2"].widget.attrs.setdefault(
+            "placeholder", "Confirmar senha"
+        )
         self.fields["nome"].widget.attrs.setdefault("placeholder", "Nome completo")
         self.fields["matricula"].widget.attrs.setdefault("placeholder", "Ex.: C123")
         _bootstrapify_fields(self)
@@ -183,15 +187,17 @@ class RegisterForm(UserCreationForm):
                 pass
         return user
 
+
 class LoginFormBootstrap(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs.update({
-            'class': 'form-control', 'placeholder': 'Seu usuário'
-        })
-        self.fields['password'].widget.attrs.update({
-            'class': 'form-control', 'placeholder': '••••••••', 'id': 'id_password'
-        })
+        self.fields["username"].widget.attrs.update(
+            {"class": "form-control", "placeholder": "Seu usuário"}
+        )
+        self.fields["password"].widget.attrs.update(
+            {"class": "form-control", "placeholder": "••••••••", "id": "id_password"}
+        )
+
 
 class ColaboradorFotoForm(forms.ModelForm):
     class Meta:

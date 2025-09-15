@@ -6,22 +6,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app_epis', '0001_initial'),
+        ("app_epis", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='epi',
+            name="epi",
             options={},
         ),
         migrations.AddField(
-            model_name='epi',
-            name='estoque',
+            model_name="epi",
+            name="estoque",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='epi',
-            name='estoque_minimo',
+            model_name="epi",
+            name="estoque_minimo",
             field=models.PositiveIntegerField(blank=True, default=0),
         ),
     ]

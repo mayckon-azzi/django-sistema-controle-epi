@@ -6,27 +6,37 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app_entregas', '0001_initial'),
+        ("app_entregas", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='entrega',
-            options={'ordering': ['-criado_em']},
+            name="entrega",
+            options={"ordering": ["-criado_em"]},
         ),
         migrations.RenameField(
-            model_name='entrega',
-            old_name='updated_at',
-            new_name='atualizado_em',
+            model_name="entrega",
+            old_name="updated_at",
+            new_name="atualizado_em",
         ),
         migrations.RenameField(
-            model_name='entrega',
-            old_name='created_at',
-            new_name='criado_em',
+            model_name="entrega",
+            old_name="created_at",
+            new_name="criado_em",
         ),
         migrations.AlterField(
-            model_name='entrega',
-            name='status',
-            field=models.CharField(choices=[('PENDENTE', 'Pendente'), ('APROVADA', 'Aprovada'), ('REPROVADA', 'Reprovada'), ('ATENDIDA', 'Atendida'), ('CANCELADA', 'Cancelada')], default='PENDENTE', max_length=20),
+            model_name="entrega",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("PENDENTE", "Pendente"),
+                    ("APROVADA", "Aprovada"),
+                    ("REPROVADA", "Reprovada"),
+                    ("ATENDIDA", "Atendida"),
+                    ("CANCELADA", "Cancelada"),
+                ],
+                default="PENDENTE",
+                max_length=20,
+            ),
         ),
     ]

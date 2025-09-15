@@ -6,33 +6,48 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app_entregas', '0006_rename_justificativa_solicitacao_observacao'),
+        ("app_entregas", "0006_rename_justificativa_solicitacao_observacao"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='entrega',
-            name='data_devolucao',
+            model_name="entrega",
+            name="data_devolucao",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='entrega',
-            name='data_prevista_devolucao',
+            model_name="entrega",
+            name="data_prevista_devolucao",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='entrega',
-            name='observacao_devolucao',
-            field=models.CharField(blank=True, max_length=255, verbose_name='Observação na devolução'),
+            model_name="entrega",
+            name="observacao_devolucao",
+            field=models.CharField(
+                blank=True, max_length=255, verbose_name="Observação na devolução"
+            ),
         ),
         migrations.AlterField(
-            model_name='entrega',
-            name='observacao',
-            field=models.CharField(blank=True, max_length=255, verbose_name='Observação'),
+            model_name="entrega",
+            name="observacao",
+            field=models.CharField(
+                blank=True, max_length=255, verbose_name="Observação"
+            ),
         ),
         migrations.AlterField(
-            model_name='entrega',
-            name='status',
-            field=models.CharField(choices=[('EMPRESTADO', 'Emprestado'), ('EM_USO', 'Em uso'), ('FORNECIDO', 'Fornecido'), ('DEVOLVIDO', 'Devolvido'), ('DANIFICADO', 'Danificado'), ('PERDIDO', 'Perdido')], default='EMPRESTADO', max_length=20),
+            model_name="entrega",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("EMPRESTADO", "Emprestado"),
+                    ("EM_USO", "Em uso"),
+                    ("FORNECIDO", "Fornecido"),
+                    ("DEVOLVIDO", "Devolvido"),
+                    ("DANIFICADO", "Danificado"),
+                    ("PERDIDO", "Perdido"),
+                ],
+                default="EMPRESTADO",
+                max_length=20,
+            ),
         ),
     ]

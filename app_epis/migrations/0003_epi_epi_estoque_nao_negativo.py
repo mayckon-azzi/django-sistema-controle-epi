@@ -6,12 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app_epis', '0002_alter_epi_options_epi_estoque_epi_estoque_minimo'),
+        ("app_epis", "0002_alter_epi_options_epi_estoque_epi_estoque_minimo"),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='epi',
-            constraint=models.CheckConstraint(condition=models.Q(('estoque__gte', 0)), name='epi_estoque_nao_negativo'),
+            model_name="epi",
+            constraint=models.CheckConstraint(
+                condition=models.Q(("estoque__gte", 0)), name="epi_estoque_nao_negativo"
+            ),
         ),
     ]

@@ -17,7 +17,6 @@ urlpatterns = [
     path("login/", EntrarView.as_view(), name="entrar"),
     path("sair/", LogoutView.as_view(next_page="app_core:home"), name="sair"),
     path("registrar/", registrar, name="registrar"),
-    
     # CRUD Colaboradores
     path("", ListaColaboradoresView.as_view(), name="lista"),
     path("novo/", CriarColaboradorView.as_view(), name="criar"),

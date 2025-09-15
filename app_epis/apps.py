@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class AppEpisConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'app_epis'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "app_epis"

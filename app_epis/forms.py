@@ -18,6 +18,7 @@ DEFAULT_CATEGORIAS = [
     "Mangotes",
 ]
 
+
 def _bootstrapify(widget: forms.Widget, extra_role_switch=False):
     base = widget.attrs.get("class", "")
     if isinstance(widget, (forms.CheckboxInput, forms.CheckboxSelectMultiple)):
@@ -30,6 +31,7 @@ def _bootstrapify(widget: forms.Widget, extra_role_switch=False):
         widget.attrs["class"] = (base + " form-control").strip()
     widget.attrs.setdefault("autocomplete", "off")
 
+
 def _ensure_default_categories():
     """
     Cria categorias padrão se a tabela estiver vazia (ou se alguma estiver faltando).
@@ -41,16 +43,29 @@ def _ensure_default_categories():
     except (OperationalError, ProgrammingError):
         pass
 
+
 class EPIForm(forms.ModelForm):
     class Meta:
         model = EPI
-        fields = ["nome", "codigo", "categoria", "tamanho", "ativo", "estoque", "estoque_minimo"]
+        fields = [
+            "nome",
+            "codigo",
+            "categoria",
+            "tamanho",
+            "ativo",
+            "estoque",
+            "estoque_minimo",
+        ]
         widgets = {
             "codigo": forms.TextInput(attrs={"placeholder": "Ex.: LUV-010"}),
             "nome": forms.TextInput(attrs={"placeholder": "Nome do EPI"}),
             "tamanho": forms.Select(),
-            "estoque": forms.NumberInput(attrs={"min": 0, "step": "1", "inputmode": "numeric"}),
-            "estoque_minimo": forms.NumberInput(attrs={"min": 0, "step": "1", "inputmode": "numeric"}),
+            "estoque": forms.NumberInput(
+                attrs={"min": 0, "step": "1", "inputmode": "numeric"}
+            ),
+            "estoque_minimo": forms.NumberInput(
+                attrs={"min": 0, "step": "1", "inputmode": "numeric"}
+            ),
             "ativo": forms.CheckboxInput(),
         }
 
@@ -68,7 +83,7 @@ class EPIForm(forms.ModelForm):
             pass
 
         for name, field in self.fields.items():
-            extra_switch = (name == "ativo")
+            extra_switch = name == "ativo"
             _bootstrapify(field.widget, extra_role_switch=extra_switch)
 
     def clean(self):

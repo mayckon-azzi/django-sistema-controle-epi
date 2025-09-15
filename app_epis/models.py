@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class CategoriaEPI(models.Model):
     nome = models.CharField(max_length=80, unique=True)
 
@@ -14,11 +15,18 @@ class CategoriaEPI(models.Model):
 
 class EPI(models.Model):
     TAMANHO_CHOICES = [
-        ("PP", "PP"), ("P", "P"), ("M", "M"), ("G", "G"), ("GG", "GG"), ("U", "Único"),
+        ("PP", "PP"),
+        ("P", "P"),
+        ("M", "M"),
+        ("G", "G"),
+        ("GG", "GG"),
+        ("U", "Único"),
     ]
     codigo = models.CharField("Código", max_length=30, unique=True)
     nome = models.CharField(max_length=120)
-    categoria = models.ForeignKey(CategoriaEPI, on_delete=models.PROTECT, related_name="epis")
+    categoria = models.ForeignKey(
+        CategoriaEPI, on_delete=models.PROTECT, related_name="epis"
+    )
     tamanho = models.CharField(max_length=3, choices=TAMANHO_CHOICES, blank=True)
     ativo = models.BooleanField(default=True)
 

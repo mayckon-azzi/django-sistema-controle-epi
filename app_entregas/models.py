@@ -22,7 +22,9 @@ class Solicitacao(models.Model):
     )
     quantidade = models.PositiveIntegerField(default=1)
     observacao = models.CharField(max_length=255, blank=True)
-    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDENTE)
+    status = models.CharField(
+        max_length=12, choices=Status.choices, default=Status.PENDENTE
+    )
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -56,7 +58,7 @@ class Entrega(models.Model):
         on_delete=models.PROTECT,
         related_name="entregas",
         null=True,
-        blank=True,  
+        blank=True,
     )
 
     # Datas
@@ -66,9 +68,13 @@ class Entrega(models.Model):
 
     # Dados
     quantidade = models.PositiveIntegerField(default=1)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.EMPRESTADO)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.EMPRESTADO
+    )
     observacao = models.CharField("Observação", max_length=255, blank=True)
-    observacao_devolucao = models.CharField("Observação na devolução", max_length=255, blank=True)
+    observacao_devolucao = models.CharField(
+        "Observação na devolução", max_length=255, blank=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

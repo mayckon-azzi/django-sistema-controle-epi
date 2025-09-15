@@ -10,26 +10,62 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('app_colaboradores', '0002_rename_criado_em_colaborador_created_at_and_more'),
-        ('app_epis', '0001_initial'),
+        ("app_colaboradores", "0002_rename_criado_em_colaborador_created_at_and_more"),
+        ("app_epis", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Entrega',
+            name="Entrega",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('data_entrega', models.DateTimeField(default=django.utils.timezone.now)),
-                ('quantidade', models.PositiveIntegerField(default=1)),
-                ('status', models.CharField(choices=[('ENTREGUE', 'Entregue'), ('DEVOLVIDO', 'Devolvido'), ('CANCELADO', 'Cancelado')], default='ENTREGUE', max_length=20)),
-                ('observacao', models.CharField(blank=True, max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('colaborador', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='entregas', to='app_colaboradores.colaborador')),
-                ('epi', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='entregas', to='app_epis.epi')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "data_entrega",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
+                ("quantidade", models.PositiveIntegerField(default=1)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("ENTREGUE", "Entregue"),
+                            ("DEVOLVIDO", "Devolvido"),
+                            ("CANCELADO", "Cancelado"),
+                        ],
+                        default="ENTREGUE",
+                        max_length=20,
+                    ),
+                ),
+                ("observacao", models.CharField(blank=True, max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "colaborador",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="entregas",
+                        to="app_colaboradores.colaborador",
+                    ),
+                ),
+                (
+                    "epi",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="entregas",
+                        to="app_epis.epi",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-data_entrega'],
+                "ordering": ["-data_entrega"],
             },
         ),
     ]

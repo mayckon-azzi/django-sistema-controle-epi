@@ -6,37 +6,37 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app_colaboradores', '0001_initial'),
+        ("app_colaboradores", "0001_initial"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='colaborador',
-            old_name='criado_em',
-            new_name='created_at',
+            model_name="colaborador",
+            old_name="criado_em",
+            new_name="created_at",
         ),
         migrations.RenameField(
-            model_name='colaborador',
-            old_name='atualizado_em',
-            new_name='updated_at',
+            model_name="colaborador",
+            old_name="atualizado_em",
+            new_name="updated_at",
         ),
         migrations.RemoveField(
-            model_name='colaborador',
-            name='user',
+            model_name="colaborador",
+            name="user",
         ),
         migrations.AlterField(
-            model_name='colaborador',
-            name='cargo',
+            model_name="colaborador",
+            name="cargo",
             field=models.CharField(blank=True, max_length=80),
         ),
         migrations.AlterField(
-            model_name='colaborador',
-            name='nome',
+            model_name="colaborador",
+            name="nome",
             field=models.CharField(max_length=120),
         ),
         migrations.AlterField(
-            model_name='colaborador',
-            name='setor',
+            model_name="colaborador",
+            name="setor",
             field=models.CharField(blank=True, max_length=80),
         ),
     ]

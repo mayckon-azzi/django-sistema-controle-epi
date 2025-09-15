@@ -28,9 +28,15 @@ class EntregaForm(forms.ModelForm):
             "data_devolucao": forms.DateTimeInput(
                 attrs={"type": "datetime-local", "class": "form-control"}
             ),
-            "observacao": forms.Textarea(attrs={"rows": 2, "class": "form-control", "placeholder": "Opcional"}),
+            "observacao": forms.Textarea(
+                attrs={"rows": 2, "class": "form-control", "placeholder": "Opcional"}
+            ),
             "observacao_devolucao": forms.Textarea(
-                attrs={"rows": 2, "class": "form-control", "placeholder": "Informe detalhes da devolução (opcional)"}
+                attrs={
+                    "rows": 2,
+                    "class": "form-control",
+                    "placeholder": "Informe detalhes da devolução (opcional)",
+                }
             ),
         }
 
@@ -38,7 +44,11 @@ class EntregaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # Ocultar "Devolvido/Danificado/Perdido" no CADASTRO (apenas no EDITAR exibem)
-        hide_when_create = {Entrega.Status.DEVOLVIDO, Entrega.Status.DANIFICADO, Entrega.Status.PERDIDO}
+        hide_when_create = {
+            Entrega.Status.DEVOLVIDO,
+            Entrega.Status.DANIFICADO,
+            Entrega.Status.PERDIDO,
+        }
         if self.instance is None or self.instance.pk is None:
             self.fields["status"].choices = [
                 c for c in self.fields["status"].choices if c[0] not in hide_when_create
@@ -67,17 +77,30 @@ class EntregaForm(forms.ModelForm):
 
         # “Data prevista” deve ser futura quando houver (e recomendamos quando EMPRESTADO/EM_USO)
         if dt_prev and dt_prev <= now:
-            self.add_error("data_prevista_devolucao", "A data prevista precisa ser posterior a agora.")
+            self.add_error(
+                "data_prevista_devolucao",
+                "A data prevista precisa ser posterior a agora.",
+            )
 
         if status in {Entrega.Status.EMPRESTADO, Entrega.Status.EM_USO} and not dt_prev:
-            self.add_error("data_prevista_devolucao", "Informe a data prevista de devolução para este status.")
+            self.add_error(
+                "data_prevista_devolucao",
+                "Informe a data prevista de devolução para este status.",
+            )
 
         # Campos de devolução exigidos para devolvido/danificado/perdido
-        if status in {Entrega.Status.DEVOLVIDO, Entrega.Status.DANIFICADO, Entrega.Status.PERDIDO}:
+        if status in {
+            Entrega.Status.DEVOLVIDO,
+            Entrega.Status.DANIFICADO,
+            Entrega.Status.PERDIDO,
+        }:
             if not dt_dev:
                 self.add_error("data_devolucao", "Informe a data da devolução.")
             elif dt_dev < cleaned.get("data_entrega", now):
-                self.add_error("data_devolucao", "A data da devolução não pode ser anterior à entrega.")
+                self.add_error(
+                    "data_devolucao",
+                    "A data da devolução não pode ser anterior à entrega.",
+                )
 
         return cleaned
 
@@ -90,7 +113,11 @@ class SolicitacaoForm(forms.ModelForm):
             "epi": forms.Select(attrs={"class": "form-select"}),
             "quantidade": forms.NumberInput(attrs={"min": 1, "class": "form-control"}),
             "observacao": forms.Textarea(
-                attrs={"placeholder": "Justificativa/observação (opcional)", "rows": 2, "class": "form-control"}
+                attrs={
+                    "placeholder": "Justificativa/observação (opcional)",
+                    "rows": 2,
+                    "class": "form-control",
+                }
             ),
         }
 

@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app_colaboradores', '0005_alter_colaborador_options'),
+        ("app_colaboradores", "0005_alter_colaborador_options"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='colaborador',
-            name='foto',
-            field=models.ImageField(blank=True, null=True, upload_to='colaboradores/%Y/%m/'),
+            model_name="colaborador",
+            name="foto",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="colaboradores/%Y/%m/"
+            ),
         ),
     ]

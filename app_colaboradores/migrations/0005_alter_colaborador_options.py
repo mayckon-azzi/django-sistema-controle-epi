@@ -6,12 +6,15 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app_colaboradores', '0004_rename_updated_at_colaborador_atualizado_em_and_more'),
+        (
+            "app_colaboradores",
+            "0004_rename_updated_at_colaborador_atualizado_em_and_more",
+        ),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='colaborador',
+            name="colaborador",
             options={},
         ),
     ]

@@ -8,29 +8,70 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app_colaboradores', '0004_rename_updated_at_colaborador_atualizado_em_and_more'),
-        ('app_entregas', '0002_alter_entrega_options_and_more'),
-        ('app_epis', '0001_initial'),
+        (
+            "app_colaboradores",
+            "0004_rename_updated_at_colaborador_atualizado_em_and_more",
+        ),
+        ("app_entregas", "0002_alter_entrega_options_and_more"),
+        ("app_epis", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Solicitacao',
+            name="Solicitacao",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('data_entrega', models.DateTimeField(default=django.utils.timezone.now)),
-                ('quantidade', models.PositiveIntegerField(default=1)),
-                ('observacao', models.CharField(blank=True, max_length=255)),
-                ('status', models.CharField(choices=[('PENDENTE', 'Pendente'), ('APROVADA', 'Aprovada'), ('REPROVADA', 'Reprovada'), ('ATENDIDA', 'Atendida'), ('CANCELADA', 'Cancelada')], default='PENDENTE', max_length=12)),
-                ('criado_em', models.DateTimeField(auto_now_add=True)),
-                ('colaborador', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='solicitacoes', to='app_colaboradores.colaborador')),
-                ('epi', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='solicitacoes', to='app_epis.epi')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "data_entrega",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
+                ("quantidade", models.PositiveIntegerField(default=1)),
+                ("observacao", models.CharField(blank=True, max_length=255)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDENTE", "Pendente"),
+                            ("APROVADA", "Aprovada"),
+                            ("REPROVADA", "Reprovada"),
+                            ("ATENDIDA", "Atendida"),
+                            ("CANCELADA", "Cancelada"),
+                        ],
+                        default="PENDENTE",
+                        max_length=12,
+                    ),
+                ),
+                ("criado_em", models.DateTimeField(auto_now_add=True)),
+                (
+                    "colaborador",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="solicitacoes",
+                        to="app_colaboradores.colaborador",
+                    ),
+                ),
+                (
+                    "epi",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="solicitacoes",
+                        to="app_epis.epi",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-criado_em'],
+                "ordering": ["-criado_em"],
             },
         ),
         migrations.DeleteModel(
-            name='Entrega',
+            name="Entrega",
         ),
     ]

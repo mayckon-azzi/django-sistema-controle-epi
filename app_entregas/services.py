@@ -12,8 +12,13 @@ def _mov_value(status: str, qtd: int) -> int:
       - DEVOLVIDO => 0  (ciclo completo: saiu e voltou → efeito líquido zero)
       - DANIFICADO / PERDIDO => -q  (não retorna ao estoque)
     """
-    if status in {Entrega.Status.EMPRESTADO, Entrega.Status.EM_USO, Entrega.Status.FORNECIDO,
-                  Entrega.Status.DANIFICADO, Entrega.Status.PERDIDO}:
+    if status in {
+        Entrega.Status.EMPRESTADO,
+        Entrega.Status.EM_USO,
+        Entrega.Status.FORNECIDO,
+        Entrega.Status.DANIFICADO,
+        Entrega.Status.PERDIDO,
+    }:
         return -int(qtd or 0)
     if status == Entrega.Status.DEVOLVIDO:
         return 0

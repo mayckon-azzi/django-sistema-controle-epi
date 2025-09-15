@@ -28,9 +28,9 @@ class ListaEPIView(ListView):
         # Exibe resultados sempre (removi o "gate" que escondia sem filtros)
         if q:
             qs = qs.filter(
-                Q(nome__icontains=q) |
-                Q(codigo__icontains=q) |
-                Q(categoria__nome__icontains=q)
+                Q(nome__icontains=q)
+                | Q(codigo__icontains=q)
+                | Q(categoria__nome__icontains=q)
             )
         if categoria_id:
             qs = qs.filter(categoria_id=categoria_id)
@@ -60,19 +60,24 @@ class ListaEPIView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx.update({
-            "q": self.request.GET.get("q", ""),
-            "categoria_id": self.request.GET.get("categoria", ""),
-            "categorias": CategoriaEPI.objects.all(),
-            "only_active": self.request.GET.get("ativos") == "1",
-            "below_min": self.request.GET.get("abaixo") == "1",
-            "ordenar": self.request.GET.get("ordenar") or "nome",
-            "ordenacoes": [
-                ("nome","Nome A→Z"), ("-nome","Nome Z→A"),
-                ("estoque","Estoque ↑"), ("-estoque","Estoque ↓"),
-                ("categoria","Categoria"), ("codigo","Código"),
-            ],
-        })
+        ctx.update(
+            {
+                "q": self.request.GET.get("q", ""),
+                "categoria_id": self.request.GET.get("categoria", ""),
+                "categorias": CategoriaEPI.objects.all(),
+                "only_active": self.request.GET.get("ativos") == "1",
+                "below_min": self.request.GET.get("abaixo") == "1",
+                "ordenar": self.request.GET.get("ordenar") or "nome",
+                "ordenacoes": [
+                    ("nome", "Nome A→Z"),
+                    ("-nome", "Nome Z→A"),
+                    ("estoque", "Estoque ↑"),
+                    ("-estoque", "Estoque ↓"),
+                    ("categoria", "Categoria"),
+                    ("codigo", "Código"),
+                ],
+            }
+        )
         params = self.request.GET.copy()
         params.pop("page", None)
         ctx["base_query"] = params.urlencode()
@@ -95,10 +100,11 @@ class CriarEPIView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return resp
 
     def form_invalid(self, form):
-        messages.error(self.request, "Não foi possível criar o EPI. Verifique os campos destacados.")
+        messages.error(
+            self.request,
+            "Não foi possível criar o EPI. Verifique os campos destacados.",
+        )
         return super().form_invalid(form)
-    
-    
 
 
 class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
@@ -115,7 +121,9 @@ class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         return reverse("app_epis:editar", kwargs={"pk": self.object.pk})
 
     def form_invalid(self, form):
-        messages.error(self.request, "Não foi possível atualizar. Verifique os campos destacados.")
+        messages.error(
+            self.request, "Não foi possível atualizar. Verifique os campos destacados."
+        )
         return super().form_invalid(form)
 
 

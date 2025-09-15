@@ -8,41 +8,89 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app_colaboradores', '0004_rename_updated_at_colaborador_atualizado_em_and_more'),
-        ('app_entregas', '0004_solicitacao_solicitacao'),
-        ('app_epis', '0001_initial'),
+        (
+            "app_colaboradores",
+            "0004_rename_updated_at_colaborador_atualizado_em_and_more",
+        ),
+        ("app_entregas", "0004_solicitacao_solicitacao"),
+        ("app_epis", "0001_initial"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='solicitacao',
-            old_name='observacao',
-            new_name='justificativa',
+            model_name="solicitacao",
+            old_name="observacao",
+            new_name="justificativa",
         ),
         migrations.RemoveField(
-            model_name='solicitacao',
-            name='data_entrega',
+            model_name="solicitacao",
+            name="data_entrega",
         ),
         migrations.RemoveField(
-            model_name='solicitacao',
-            name='solicitacao',
+            model_name="solicitacao",
+            name="solicitacao",
         ),
         migrations.CreateModel(
-            name='Entrega',
+            name="Entrega",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('data_entrega', models.DateTimeField(default=django.utils.timezone.now)),
-                ('quantidade', models.PositiveIntegerField(default=1)),
-                ('status', models.CharField(choices=[('ENTREGUE', 'Entregue'), ('DEVOLVIDO', 'Devolvido'), ('CANCELADO', 'Cancelado')], default='ENTREGUE', max_length=20)),
-                ('observacao', models.CharField(blank=True, max_length=255)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('colaborador', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='entregas', to='app_colaboradores.colaborador')),
-                ('epi', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='entregas', to='app_epis.epi')),
-                ('solicitacao', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='entregas', to='app_entregas.solicitacao')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "data_entrega",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
+                ("quantidade", models.PositiveIntegerField(default=1)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("ENTREGUE", "Entregue"),
+                            ("DEVOLVIDO", "Devolvido"),
+                            ("CANCELADO", "Cancelado"),
+                        ],
+                        default="ENTREGUE",
+                        max_length=20,
+                    ),
+                ),
+                ("observacao", models.CharField(blank=True, max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "colaborador",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="entregas",
+                        to="app_colaboradores.colaborador",
+                    ),
+                ),
+                (
+                    "epi",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="entregas",
+                        to="app_epis.epi",
+                    ),
+                ),
+                (
+                    "solicitacao",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="entregas",
+                        to="app_entregas.solicitacao",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-data_entrega'],
+                "ordering": ["-data_entrega"],
             },
         ),
     ]

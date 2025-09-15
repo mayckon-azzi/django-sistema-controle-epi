@@ -35,7 +35,9 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
         form, qs = _filtrar_qs(self.request)
 
         status_codes = [code for code, _ in Entrega.Status.choices]
-        fora_do_estoque = [s for s in status_codes if s not in {"DEVOLVIDO", "CANCELADO"}]
+        fora_do_estoque = [
+            s for s in status_codes if s not in {"DEVOLVIDO", "CANCELADO"}
+        ]
 
         agg = qs.aggregate(
             registros=Count("id"),
@@ -131,7 +133,9 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
         return ctx
 
 
-class ExportarEntregasCSVView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
+class ExportarEntregasCSVView(
+    LoginRequiredMixin, PermissionRequiredMixin, TemplateView
+):
     permission_required = "app_entregas.view_entrega"
     raise_exception = True
     template_name = ""  # não usado
@@ -141,12 +145,26 @@ class ExportarEntregasCSVView(LoginRequiredMixin, PermissionRequiredMixin, Templ
         resp = HttpResponse(content_type="text/csv; charset=utf-8")
         resp["Content-Disposition"] = 'attachment; filename="relatorio_entregas.csv"'
         w = csv.writer(resp, delimiter=";")
-        w.writerow(["Data", "Data Devolução", "Colaborador", "EPI", "Quantidade", "Status", "Observação"])
+        w.writerow(
+            [
+                "Data",
+                "Data Devolução",
+                "Colaborador",
+                "EPI",
+                "Quantidade",
+                "Status",
+                "Observação",
+            ]
+        )
         for e in qs.iterator():
             w.writerow(
                 [
                     e.data_entrega.strftime("%d/%m/%Y %H:%M"),
-                    e.data_prevista_devolucao.strftime("%d/%m/%Y %H:%M") if e.data_prevista_devolucao else "-",
+                    (
+                        e.data_prevista_devolucao.strftime("%d/%m/%Y %H:%M")
+                        if e.data_prevista_devolucao
+                        else "-"
+                    ),
                     e.colaborador.nome,
                     f"{e.epi.nome} ({e.epi.codigo})",
                     e.quantidade,
