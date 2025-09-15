@@ -1,7 +1,9 @@
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import F
-from django.core.exceptions import ValidationError
+
 from app_epis.models import EPI
+
 from .models import Entrega
 
 

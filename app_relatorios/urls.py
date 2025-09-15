@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import RelatorioEntregasView, ExportarEntregasCSVView
+
+from .views import ExportarEntregasCSVView, RelatorioEntregasView
 
 app_name = "app_relatorios"
 

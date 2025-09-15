@@ -1,27 +1,30 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.core.paginator import Paginator
-from django.db.models import Q
+from datetime import timedelta
+
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.db import transaction
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required, permission_required
 from django.views.decorators.http import require_POST
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import (
     CreateView,
-    UpdateView,
     DeleteView,
     DetailView,
     ListView,
+    UpdateView,
 )
-from django.db import transaction
-from django.core.exceptions import ValidationError
-from .models import Solicitacao, Entrega
+
 from app_colaboradores.models import Colaborador
 from app_epis.models import EPI
-from .forms import SolicitacaoForm, EntregaForm
+
+from .forms import EntregaForm, SolicitacaoForm
+from .models import Entrega, Solicitacao
 from .services import movimenta_por_entrega, movimenta_por_exclusao
-from datetime import timedelta
 
 
 def lista(request):

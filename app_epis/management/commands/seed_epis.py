@@ -1,5 +1,6 @@
-from app_epis.models import CategoriaEPI, EPI
 from django.core.management.base import BaseCommand
+
+from app_epis.models import EPI, CategoriaEPI
 
 SEED = [
     {

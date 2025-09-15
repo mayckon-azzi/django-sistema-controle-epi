@@ -1,6 +1,6 @@
-from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.management.base import BaseCommand
 
 APPS_MODELS = {
     "app_colaboradores": ["colaborador"],
@@ -24,8 +24,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from app_colaboradores.models import Colaborador
+        from app_entregas.models import Entrega, Solicitacao
         from app_epis.models import EPI, CategoriaEPI
-        from app_entregas.models import Solicitacao, Entrega
 
         # grupos
         g_colab, _ = Group.objects.get_or_create(name="Colaborador")

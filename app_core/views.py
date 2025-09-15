@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.utils import timezone
 from django.db.models import Sum
+from django.shortcuts import redirect, render
+from django.utils import timezone
+
 from app_colaboradores.models import Colaborador
-from app_epis.models import EPI
 from app_entregas.models import Entrega, Solicitacao
+from app_epis.models import EPI
 
 
 def home(request):

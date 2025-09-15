@@ -1,15 +1,19 @@
-from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse_lazy
+from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LoginView
+from django.core.exceptions import PermissionDenied
+from django.db.utils import OperationalError, ProgrammingError
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from django.views.generic import (
-    ListView,
     CreateView,
-    UpdateView,
     DeleteView,
+    ListView,
     TemplateView,
+    UpdateView,
 )
-from .models import Colaborador
+
 from .forms import (
     ColaboradorAdminForm,
     ColaboradorForm,
@@ -17,10 +21,7 @@ from .forms import (
     LoginFormBootstrap,
     RegisterForm,
 )
-from django.db.utils import OperationalError, ProgrammingError
-from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.core.exceptions import PermissionDenied
+from .models import Colaborador
 
 
 class EntrarView(LoginView):

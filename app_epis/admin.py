@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import CategoriaEPI, EPI
+
+from .models import EPI, CategoriaEPI
 
 
 @admin.register(CategoriaEPI)

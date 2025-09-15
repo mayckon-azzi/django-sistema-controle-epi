@@ -1,7 +1,7 @@
 from django import forms
 from django.db.utils import OperationalError, ProgrammingError
-from .models import EPI, CategoriaEPI
 
+from .models import EPI, CategoriaEPI
 
 # Categorias mais comuns em ambientes industriais/empresariais
 DEFAULT_CATEGORIAS = [

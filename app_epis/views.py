@@ -1,13 +1,12 @@
-from django.shortcuts import redirect
-from django.db.models import Q, F, BooleanField, Case, When, Value
-from django.db.models import ProtectedError
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy, reverse
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.db.models import BooleanField, Case, F, ProtectedError, Q, Value, When
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
-from .models import EPI, CategoriaEPI
 from .forms import EPIForm
+from .models import EPI, CategoriaEPI
 
 
 class ListaEPIView(ListView):

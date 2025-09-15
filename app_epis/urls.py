@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import ListaEPIView, CriarEPIView, AtualizarEPIView, ExcluirEPIView
+
+from .views import AtualizarEPIView, CriarEPIView, ExcluirEPIView, ListaEPIView
 
 app_name = "app_epis"
 

@@ -1,10 +1,13 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.views.generic import TemplateView
-from django.http import HttpResponse
-from django.db.models import Sum, Case, When, IntegerField, Value, F, Count
 import csv
-from .forms import RelatorioEntregasForm
+
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.db.models import Case, Count, F, IntegerField, Sum, Value, When
+from django.http import HttpResponse
+from django.views.generic import TemplateView
+
 from app_entregas.models import Entrega
+
+from .forms import RelatorioEntregasForm
 
 
 def _filtrar_qs(request):

@@ -1,6 +1,7 @@
 from django import forms
-from app_entregas.models import Entrega
+
 from app_colaboradores.models import Colaborador
+from app_entregas.models import Entrega
 from app_epis.models import EPI
 
 
