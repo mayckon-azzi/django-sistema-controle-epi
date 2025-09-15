@@ -7,7 +7,7 @@ on:
       - "v*.*.*"
 
 env:
-  IMAGE_NAME: $djohnni/sistema-controle-epi
+  IMAGE_NAME: djohnni/sistema-controle-epi
 
 jobs:
   build-and-push:
