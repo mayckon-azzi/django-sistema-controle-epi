@@ -12,6 +12,8 @@ omit =
     config/asgi.py
     config/wsgi.py
     config/settings.py
+    */admin.py
+    */apps.py
 
 [report]
 show_missing = True

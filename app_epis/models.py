@@ -42,6 +42,6 @@ class EPI(models.Model):
         constraints = [
             models.CheckConstraint(
                 name="epi_estoque_nao_negativo",
-                check=models.Q(estoque__gte=0),
+                condition=models.Q(estoque__gte=0),
             ),
         ]
