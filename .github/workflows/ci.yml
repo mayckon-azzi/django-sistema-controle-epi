@@ -57,6 +57,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install ruff black isort
+          pip install ruff==0.6.0 black isort  # ou "ruff>=0.6"
           pip install pytest pytest-django pytest-cov
 
       - name: Install mysql-client
@@ -73,7 +74,7 @@ jobs:
           done
 
       - name: Lint (ruff)
-        run: ruff check --format=github .
+        run: ruff check --output-format=github .
 
       - name: Format check (black)
         run: black --check .
