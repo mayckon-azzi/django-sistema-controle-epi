@@ -21,6 +21,8 @@ O sistema garante rastreabilidade, conformidade com normas de segurança, usabil
 - [Instalação e Execução Padrão](#instalação-e-execução-padrão)
 - [Instalação e Execução Docker](#instalação-e-execução-docker)
 - [Estilos e UI](#estilos-e-ui)
+- [Imagem Docker da Aplicação](#imagem-docker-da-aplicação)
+- [Coverage de Testes com Codecov](#coverage-de-testes-com-codecov)
 
 ---
 
@@ -308,6 +310,19 @@ Para ajustes de tema (cores, espaçamentos), altere static/css/variables.css.
 
 ---
 
+## Imagem Docker da Aplicação (Docker hub)
+[![Docker Hub](https://img.shields.io/badge/DockerHub-djohnni%2Fsistema--controle--epi-blue?logo=docker)](https://hub.docker.com/repository/docker/djohnni/sistema-controle-epi/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/djohnni/sistema-controle-epi)](https://hub.docker.com/repository/docker/djohnni/sistema-controle-epi/)
+[![Image Size](https://img.shields.io/docker/image-size/djohnni/sistema-controle-epi/latest?label=image%20size)](https://hub.docker.com/repository/docker/djohnni/sistema-controle-epi/)
+
+[🔝 Voltar ao Índice](#índice)
+
+----
+
 ## Coverage de Testes com Codecov
 
-[![codecov](https://codecov.io/gh/<org-ou-usuario>/senai-imersao-sabadou/branch/main/graph/badge.svg)](https://app.codecov.io/gh/<org-ou-usuario>/senai-imersao-sabadou)
+[![codecov](https://codecov.io/gh/jonathaneichenberger/senai-imersao-sabadou/branch/main/graph/badge.svg)](https://app.codecov.io/gh/<org-ou-usuario>/senai-imersao-sabadou)
+
+[🔝 Voltar ao Índice](#índice)
+
+
