@@ -24,9 +24,7 @@ class EPI(models.Model):
     ]
     codigo = models.CharField("Código", max_length=30, unique=True)
     nome = models.CharField(max_length=120)
-    categoria = models.ForeignKey(
-        CategoriaEPI, on_delete=models.PROTECT, related_name="epis"
-    )
+    categoria = models.ForeignKey(CategoriaEPI, on_delete=models.PROTECT, related_name="epis")
     tamanho = models.CharField(max_length=3, choices=TAMANHO_CHOICES, blank=True)
     ativo = models.BooleanField(default=True)
 

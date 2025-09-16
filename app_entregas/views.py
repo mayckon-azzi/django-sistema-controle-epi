@@ -95,9 +95,7 @@ class CriarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return resp
 
     def form_invalid(self, form):
-        messages.error(
-            self.request, "Não foi possível salvar. Verifique os campos destacados."
-        )
+        messages.error(self.request, "Não foi possível salvar. Verifique os campos destacados.")
         return super().form_invalid(form)
 
 
@@ -124,9 +122,7 @@ class AtualizarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVi
         return resp
 
     def form_invalid(self, form):
-        messages.error(
-            self.request, "Não foi possível salvar. Verifique os campos destacados."
-        )
+        messages.error(self.request, "Não foi possível salvar. Verifique os campos destacados.")
         return super().form_invalid(form)
 
 
@@ -157,9 +153,7 @@ class DetalheEntregaView(LoginRequiredMixin, DetailView):
     context_object_name = "entrega"
 
     def get_queryset(self):
-        return Entrega.objects.select_related(
-            "colaborador", "epi", "solicitacao", "epi__categoria"
-        )
+        return Entrega.objects.select_related("colaborador", "epi", "solicitacao", "epi__categoria")
 
 
 # ===== SOLICITAÇÕES =====
@@ -172,13 +166,8 @@ class CriarSolicitacaoView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
     success_url = reverse_lazy("app_entregas:minhas_solicitacoes")
 
     def dispatch(self, request, *args, **kwargs):
-        if (
-            not hasattr(request.user, "colaborador")
-            or not request.user.colaborador.ativo
-        ):
-            messages.error(
-                request, "Sua conta não está vinculada a um Colaborador ativo."
-            )
+        if not hasattr(request.user, "colaborador") or not request.user.colaborador.ativo:
+            messages.error(request, "Sua conta não está vinculada a um Colaborador ativo.")
             return redirect("app_core:home")
         return super().dispatch(request, *args, **kwargs)
 
@@ -196,9 +185,9 @@ class MinhasSolicitacoesView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         if not hasattr(self.request.user, "colaborador"):
             return Solicitacao.objects.none()
-        return Solicitacao.objects.filter(
-            colaborador=self.request.user.colaborador
-        ).select_related("epi")
+        return Solicitacao.objects.filter(colaborador=self.request.user.colaborador).select_related(
+            "epi"
+        )
 
 
 class SolicitacoesGerenciarView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
@@ -240,9 +229,7 @@ def aprovar_solicitacao(request, pk):
 def reprovar_solicitacao(request, pk):
     s = get_object_or_404(Solicitacao, pk=pk)
     if s.status != Solicitacao.Status.PENDENTE:
-        messages.warning(
-            request, "Somente solicitações PENDENTES podem ser reprovadas."
-        )
+        messages.warning(request, "Somente solicitações PENDENTES podem ser reprovadas.")
         return redirect("app_entregas:solicitacoes_gerenciar")
     s.status = Solicitacao.Status.REPROVADA
     s.save(update_fields=["status"])
@@ -258,14 +245,10 @@ def atender_solicitacao(request, pk):
     Por padrão, cria como EMPRESTADO e define data_prevista_devolucao = agora + 7 dias
     (atende à validação do formulário).
     """
-    s = get_object_or_404(
-        Solicitacao.objects.select_related("colaborador", "epi"), pk=pk
-    )
+    s = get_object_or_404(Solicitacao.objects.select_related("colaborador", "epi"), pk=pk)
 
     if s.status not in {Solicitacao.Status.APROVADA, Solicitacao.Status.PENDENTE}:
-        messages.warning(
-            request, "Apenas solicitações PENDENTES/APROVADAS podem ser atendidas."
-        )
+        messages.warning(request, "Apenas solicitações PENDENTES/APROVADAS podem ser atendidas.")
         return redirect("app_entregas:solicitacoes_gerenciar")
 
     if request.method == "POST":

@@ -50,6 +50,4 @@ class Command(BaseCommand):
                 },
             )
 
-        self.stdout.write(
-            self.style.SUCCESS(f"Total de EPIs cadastrados: {EPI.objects.count()}")
-        )
+        self.stdout.write(self.style.SUCCESS(f"Total de EPIs cadastrados: {EPI.objects.count()}"))

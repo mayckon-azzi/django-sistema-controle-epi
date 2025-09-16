@@ -60,9 +60,7 @@ class EPIForm(forms.ModelForm):
             "codigo": forms.TextInput(attrs={"placeholder": "Ex.: LUV-010"}),
             "nome": forms.TextInput(attrs={"placeholder": "Nome do EPI"}),
             "tamanho": forms.Select(),
-            "estoque": forms.NumberInput(
-                attrs={"min": 0, "step": "1", "inputmode": "numeric"}
-            ),
+            "estoque": forms.NumberInput(attrs={"min": 0, "step": "1", "inputmode": "numeric"}),
             "estoque_minimo": forms.NumberInput(
                 attrs={"min": 0, "step": "1", "inputmode": "numeric"}
             ),

@@ -27,9 +27,7 @@ class ListaEPIView(ListView):
         # Exibe resultados sempre (removi o "gate" que escondia sem filtros)
         if q:
             qs = qs.filter(
-                Q(nome__icontains=q)
-                | Q(codigo__icontains=q)
-                | Q(categoria__nome__icontains=q)
+                Q(nome__icontains=q) | Q(codigo__icontains=q) | Q(categoria__nome__icontains=q)
             )
         if categoria_id:
             qs = qs.filter(categoria_id=categoria_id)
@@ -120,9 +118,7 @@ class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         return reverse("app_epis:editar", kwargs={"pk": self.object.pk})
 
     def form_invalid(self, form):
-        messages.error(
-            self.request, "Não foi possível atualizar. Verifique os campos destacados."
-        )
+        messages.error(self.request, "Não foi possível atualizar. Verifique os campos destacados.")
         return super().form_invalid(form)
 
 

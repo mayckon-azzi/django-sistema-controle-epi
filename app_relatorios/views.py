@@ -38,9 +38,7 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
         form, qs = _filtrar_qs(self.request)
 
         status_codes = [code for code, _ in Entrega.Status.choices]
-        fora_do_estoque = [
-            s for s in status_codes if s not in {"DEVOLVIDO", "CANCELADO"}
-        ]
+        fora_do_estoque = [s for s in status_codes if s not in {"DEVOLVIDO", "CANCELADO"}]
 
         agg = qs.aggregate(
             registros=Count("id"),
@@ -136,9 +134,7 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
         return ctx
 
 
-class ExportarEntregasCSVView(
-    LoginRequiredMixin, PermissionRequiredMixin, TemplateView
-):
+class ExportarEntregasCSVView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     permission_required = "app_entregas.view_entrega"
     raise_exception = True
     template_name = ""  # não usado

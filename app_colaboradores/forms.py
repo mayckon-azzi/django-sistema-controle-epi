@@ -75,9 +75,7 @@ class ColaboradorAdminForm(ColaboradorForm):
     username = forms.CharField(
         required=False, max_length=150, label="Username", widget=forms.TextInput()
     )
-    password1 = forms.CharField(
-        required=False, label="Senha", widget=forms.PasswordInput()
-    )
+    password1 = forms.CharField(required=False, label="Senha", widget=forms.PasswordInput())
     password2 = forms.CharField(
         required=False, label="Confirmar senha", widget=forms.PasswordInput()
     )
@@ -158,9 +156,7 @@ class RegisterForm(UserCreationForm):
         self.fields["username"].widget.attrs.setdefault("placeholder", "usuário")
         self.fields["email"].widget.attrs.setdefault("placeholder", "email@empresa.com")
         self.fields["password1"].widget.attrs.setdefault("placeholder", "Senha")
-        self.fields["password2"].widget.attrs.setdefault(
-            "placeholder", "Confirmar senha"
-        )
+        self.fields["password2"].widget.attrs.setdefault("placeholder", "Confirmar senha")
         self.fields["nome"].widget.attrs.setdefault("placeholder", "Nome completo")
         self.fields["matricula"].widget.attrs.setdefault("placeholder", "Ex.: C123")
         _bootstrapify_fields(self)
@@ -205,7 +201,5 @@ class ColaboradorFotoForm(forms.ModelForm):
         model = Colaborador
         fields = ["foto"]
         widgets = {
-            "foto": forms.ClearableFileInput(
-                attrs={"class": "form-control", "accept": "image/*"}
-            )
+            "foto": forms.ClearableFileInput(attrs={"class": "form-control", "accept": "image/*"})
         }

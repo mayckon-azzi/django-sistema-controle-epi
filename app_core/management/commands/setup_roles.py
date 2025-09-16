@@ -10,9 +10,7 @@ APPS_MODELS = {
 
 
 def perms_of(model, *actions):
-    ctype = ContentType.objects.get(
-        app_label=model._meta.app_label, model=model._meta.model_name
-    )
+    ctype = ContentType.objects.get(app_label=model._meta.app_label, model=model._meta.model_name)
     return Permission.objects.filter(
         content_type=ctype,
         codename__in=[f"{a}_{model._meta.model_name}" for a in actions],

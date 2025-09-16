@@ -25,9 +25,7 @@ ALLOWED_HOSTS = [
     h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h
 ]
 # (opcional) confiar em origens para CSRF, útil em deploy com domínio
-CSRF_TRUSTED_ORIGINS = [
-    o for o in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o
-]
+CSRF_TRUSTED_ORIGINS = [o for o in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o]
 
 # --- Apps ---
 INSTALLED_APPS = [
