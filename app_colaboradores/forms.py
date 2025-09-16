@@ -1,17 +1,16 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import Group, User
-
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.utils.crypto import get_random_string
 from .models import Colaborador
 
 
 def _bootstrapify_fields(form):
     """
-    Adiciona classes Bootstrap apropriadas a todos os widgets do form,
-    sem sobrescrever classes já definidas, e sem aplicar em HiddenInput.
-    - Checkbox -> form-check-input (com role="switch" se for booleano tipo "ativo")
-    - Select/SelectMultiple -> form-select
-    - Demais -> form-control
+    Aplica classes Bootstrap nos widgets, sem sobrescrever classes existentes
+    e ignorando HiddenInput.
     """
     for name, field in form.fields.items():
         w = field.widget
@@ -31,15 +30,15 @@ def _bootstrapify_fields(form):
         else:
             w.attrs["class"] = (base + " form-control").strip()
 
-
 # ===================================================================
 #                           Colaborador
 # ===================================================================
 
-
 class ColaboradorForm(forms.ModelForm):
     class Meta:
         model = Colaborador
+        # OBS: mantive "cargo" conforme seu formulário atual.
+        # Se sua model usar "funcao" no lugar, ajuste esta lista.
         fields = ["nome", "email", "matricula", "cargo", "setor", "telefone", "ativo"]
         widgets = {
             "nome": forms.TextInput(attrs={"placeholder": "Nome completo"}),
@@ -56,8 +55,19 @@ class ColaboradorForm(forms.ModelForm):
         _bootstrapify_fields(self)
 
     def clean_matricula(self):
-        return (self.cleaned_data["matricula"] or "").strip().upper()
-
+        """
+        Normaliza para UPPER e valida unicidade case-insensitive.
+        Faz o exclude do próprio registro em edições.
+        """
+        value = (self.cleaned_data.get("matricula") or "").strip().upper()
+        if not value:
+            return value
+        qs = Colaborador.objects.filter(matricula__iexact=value)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise ValidationError("Já existe um colaborador com esta matrícula.")
+        return value
 
 class ColaboradorAdminForm(ColaboradorForm):
     groups = forms.ModelMultipleChoiceField(
@@ -88,6 +98,7 @@ class ColaboradorAdminForm(ColaboradorForm):
 
         u = getattr(self.instance, "user", None)
         if u:
+            # Já tem usuário: esconder campos de criação e carregar grupos atuais
             self.fields["criar_usuario"].widget = forms.HiddenInput()
             self.fields["username"].widget = forms.HiddenInput()
             self.fields["password1"].widget = forms.HiddenInput()
@@ -98,42 +109,91 @@ class ColaboradorAdminForm(ColaboradorForm):
 
     def clean(self):
         cleaned = super().clean()
-        u = getattr(self.instance, "user", None)
-        if not u and cleaned.get("criar_usuario"):
-            username = (cleaned.get("username") or "").strip()
-            p1, p2 = cleaned.get("password1"), cleaned.get("password2")
-            if not username:
-                self.add_error("username", "Informe o username.")
-            elif User.objects.filter(username=username).exists():
-                self.add_error("username", "Este username já existe.")
+        # Normaliza username se vier preenchido
+        if cleaned.get("username"):
+            cleaned["username"] = cleaned["username"].strip()
+
+        # Se senha foi digitada, validar consistência
+        p1, p2 = cleaned.get("password1"), cleaned.get("password2")
+        if p1 or p2:
             if not p1 or not p2:
                 self.add_error("password1", "Informe e confirme a senha.")
             elif p1 != p2:
                 self.add_error("password2", "As senhas não conferem.")
+
+        # Se o usuário digitou 'username' e pediu para criar usuário, checar unicidade
+        if cleaned.get("criar_usuario") and cleaned.get("username"):
+            if User.objects.filter(username=cleaned["username"]).exists():
+                self.add_error("username", "Este username já existe.")
+
         return cleaned
 
+    def _build_unique_username(self):
+        """
+        Gera um username único a partir de:
+        1) username informado; 2) matrícula; 3) prefixo do e-mail; 4) 'user'
+        """
+        base = (self.cleaned_data.get("username") or "").strip()
+        if not base:
+            base = (self.cleaned_data.get("matricula") or "").strip()
+        if not base:
+            email = (self.cleaned_data.get("email") or "").strip()
+            base = email.split("@")[0] if email else "user"
+
+        candidate = base
+        i = 1
+        while User.objects.filter(username=candidate).exists():
+            candidate = f"{base}{i}"
+            i += 1
+        return candidate
+    
+    @transaction.atomic
     def save(self, commit=True):
         colab = super().save(commit=commit)
         u = getattr(colab, "user", None)
 
+        # Já tem usuário ligado? Sincroniza e-mail, ativo e grupos.
         if u:
+            # Sincroniza email/is_active com o form do colaborador
+            email = self.cleaned_data.get("email")
+            if email is not None:
+                u.email = email
+                
+            ativo = self.cleaned_data.get("ativo")
+            if ativo is not None:
+                u.is_active = bool(ativo)
+
             if "groups" in self.cleaned_data:
                 u.groups.set(self.cleaned_data["groups"])
-                if commit:
-                    u.save()
+
+            if commit:
+                u.save()
             return colab
 
+        # Criar usuário novo se marcado
         if self.cleaned_data.get("criar_usuario"):
-            u = User.objects.create_user(
-                username=self.cleaned_data["username"],
-                email=self.cleaned_data.get("email") or colab.email,
-                password=self.cleaned_data["password1"],
+            username = self._build_unique_username()
+            password = (
+                self.cleaned_data.get("password1")
+                or get_random_string(12)
             )
-            colab.user = u
-            if commit:
-                colab.save()
+            u = User.objects.create_user(
+                username=username,
+                email=self.cleaned_data.get("email") or colab.email,
+                password=password,
+            )
+            u.is_active = bool(self.cleaned_data.get("ativo", True))
+
             if "groups" in self.cleaned_data:
                 u.groups.set(self.cleaned_data["groups"])
+
+            if commit:
+                u.save()
+
+            colab.user = u
+            if commit:
+                colab.save(update_fields=["user"])
+
         return colab
 
 
@@ -164,19 +224,21 @@ class RegisterForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=commit)
         if commit:
+            # Garante Colaborador vinculado
             colab, _ = Colaborador.objects.get_or_create(
                 email=self.cleaned_data["email"],
                 defaults={
                     "nome": self.cleaned_data["nome"],
-                    "matricula": self.cleaned_data["matricula"],
+                    "matricula": (self.cleaned_data["matricula"] or "").strip().upper(),
                     "ativo": True,
                     "user": user,
                 },
             )
             if not colab.user:
                 colab.user = user
-                colab.save()
+                colab.save(update_fields=["user"])
 
+            # Atribui ao grupo "Colaborador" (se existir)
             try:
                 g, _ = Group.objects.get_or_create(name="Colaborador")
                 user.groups.add(g)

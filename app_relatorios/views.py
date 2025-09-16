@@ -1,8 +1,12 @@
+# app_relatorios/views.py
 import csv
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import Case, Count, F, IntegerField, Sum, Value, When
 from django.http import HttpResponse
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.views import redirect_to_login
+from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
 from app_entregas.models import Entrega
@@ -31,6 +35,7 @@ def _filtrar_qs(request):
 class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     permission_required = "app_entregas.view_entrega"
     raise_exception = True
+    login_url = reverse_lazy("app_colaboradores:entrar")
     template_name = "app_relatorios/pages/entregas.html"
 
     def get_context_data(self, **kwargs):
@@ -38,7 +43,8 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
         form, qs = _filtrar_qs(self.request)
 
         status_codes = [code for code, _ in Entrega.Status.choices]
-        fora_do_estoque = [s for s in status_codes if s not in {"DEVOLVIDO", "CANCELADO"}]
+        # Tudo que não é DEVOLVIDO é considerado "fora do estoque"
+        fora_do_estoque = [s for s in status_codes if s != "DEVOLVIDO"]
 
         agg = qs.aggregate(
             registros=Count("id"),
@@ -53,13 +59,6 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
             total_devolvido=Sum(
                 Case(
                     When(status="DEVOLVIDO", then=F("quantidade")),
-                    default=Value(0),
-                    output_field=IntegerField(),
-                )
-            ),
-            total_cancelado=Sum(
-                Case(
-                    When(status="CANCELADO", then=F("quantidade")),
                     default=Value(0),
                     output_field=IntegerField(),
                 )
@@ -79,13 +78,6 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
                 devolvidos=Sum(
                     Case(
                         When(status="DEVOLVIDO", then=F("quantidade")),
-                        default=Value(0),
-                        output_field=IntegerField(),
-                    )
-                ),
-                cancelados=Sum(
-                    Case(
-                        When(status="CANCELADO", then=F("quantidade")),
                         default=Value(0),
                         output_field=IntegerField(),
                     )
@@ -111,13 +103,6 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
                         output_field=IntegerField(),
                     )
                 ),
-                cancelados=Sum(
-                    Case(
-                        When(status="CANCELADO", then=F("quantidade")),
-                        default=Value(0),
-                        output_field=IntegerField(),
-                    )
-                ),
             )
             .order_by("colaborador__nome")
         )
@@ -125,19 +110,29 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
         ctx.update(
             {
                 "form": form,
-                "qs": qs[:200],  # evita tela gigante; paginar depois se quiser
+                "qs": qs[:200],  # lista (slice) para não estourar tela
                 "agg": agg,
                 "por_epi": por_epi,
                 "por_colab": por_colab,
             }
         )
         return ctx
+    
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect_to_login(
+                self.request.get_full_path(),
+                self.get_login_url(),
+                self.get_redirect_field_name(),
+            )
+        raise PermissionDenied
 
 
 class ExportarEntregasCSVView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     permission_required = "app_entregas.view_entrega"
     raise_exception = True
-    template_name = ""  # não usado
+    login_url = reverse_lazy("app_colaboradores:entrar")
+    template_name = ""
 
     def get(self, request, *args, **kwargs):
         form, qs = _filtrar_qs(request)
@@ -146,7 +141,8 @@ class ExportarEntregasCSVView(LoginRequiredMixin, PermissionRequiredMixin, Templ
         w = csv.writer(resp, delimiter=";")
         w.writerow(
             [
-                "Data",
+                "Data Entrega",
+                "Data Devolução Prevista",
                 "Data Devolução",
                 "Colaborador",
                 "EPI",
@@ -164,6 +160,7 @@ class ExportarEntregasCSVView(LoginRequiredMixin, PermissionRequiredMixin, Templ
                         if e.data_prevista_devolucao
                         else "-"
                     ),
+                    (e.data_devolucao.strftime("%d/%m/%Y %H:%M") if e.data_devolucao else "-"),
                     e.colaborador.nome,
                     f"{e.epi.nome} ({e.epi.codigo})",
                     e.quantidade,
@@ -172,3 +169,12 @@ class ExportarEntregasCSVView(LoginRequiredMixin, PermissionRequiredMixin, Templ
                 ]
             )
         return resp
+    
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect_to_login(
+                self.request.get_full_path(),
+                self.get_login_url(),
+                self.get_redirect_field_name(),
+            )
+        raise PermissionDenied

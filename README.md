@@ -305,3 +305,9 @@ A navbar é responsiva e possui um toggle simples implementado em static/js/app.
 Para ajustes de tema (cores, espaçamentos), altere static/css/variables.css.
 
 [🔝 Voltar ao Índice](#índice)
+
+---
+
+## Coverage de Testes com Codecov
+
+[![codecov](https://codecov.io/gh/<org-ou-usuario>/senai-imersao-sabadou/branch/main/graph/badge.svg)](https://app.codecov.io/gh/<org-ou-usuario>/senai-imersao-sabadou)
