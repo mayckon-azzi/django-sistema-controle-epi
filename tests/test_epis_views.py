@@ -3,7 +3,7 @@ from django.contrib.auth.models import Permission, User
 from django.db.models.deletion import ProtectedError
 from django.urls import reverse
 
-from app_epis.models import CategoriaEPI, EPI
+from app_epis.models import EPI, CategoriaEPI
 
 
 def _login_with_perms(client, *codenames):
@@ -18,9 +18,15 @@ def _login_with_perms(client, *codenames):
 def test_lista_filters_and_flags(client):
     cat1 = CategoriaEPI.objects.create(nome="Luvas")
     cat2 = CategoriaEPI.objects.create(nome="Capacete")
-    EPI.objects.create(codigo="L1", nome="Luva A", categoria=cat1, estoque=2, estoque_minimo=5)  # abaixo
-    EPI.objects.create(codigo="L2", nome="Luva B", categoria=cat1, estoque=10, estoque_minimo=5) # ok
-    EPI.objects.create(codigo="C1", nome="Capacete", categoria=cat2, estoque=0, estoque_minimo=0, ativo=False)
+    EPI.objects.create(
+        codigo="L1", nome="Luva A", categoria=cat1, estoque=2, estoque_minimo=5
+    )  # abaixo
+    EPI.objects.create(
+        codigo="L2", nome="Luva B", categoria=cat1, estoque=10, estoque_minimo=5
+    )  # ok
+    EPI.objects.create(
+        codigo="C1", nome="Capacete", categoria=cat2, estoque=0, estoque_minimo=0, ativo=False
+    )
 
     url = reverse("app_epis:lista")
 

@@ -1,12 +1,14 @@
 # tests/test_entregas_forms.py
+from datetime import timedelta
+
 import pytest
 from django.utils import timezone
-from datetime import timedelta
 
 from app_colaboradores.models import Colaborador
 from app_entregas.forms import EntregaForm, SolicitacaoForm
 from app_entregas.models import Entrega
-from app_epis.models import CategoriaEPI, EPI
+from app_epis.models import EPI, CategoriaEPI
+
 
 @pytest.mark.django_db
 def test_entrega_form_requires_future_prevista_and_prevista_when_emprestado():
@@ -15,36 +17,47 @@ def test_entrega_form_requires_future_prevista_and_prevista_when_emprestado():
     col = Colaborador.objects.create(nome="A", email="a@x.com", matricula="A1", ativo=True)
 
     # falta data_prevista para EMPRESTADO
-    form = EntregaForm(data={
-        "colaborador": col.pk,
-        "epi": epi.pk,
-        "quantidade": 1,
-        "status": Entrega.Status.EMPRESTADO,
-    })
+    form = EntregaForm(
+        data={
+            "colaborador": col.pk,
+            "epi": epi.pk,
+            "quantidade": 1,
+            "status": Entrega.Status.EMPRESTADO,
+        }
+    )
     assert not form.is_valid()
     assert "data_prevista_devolucao" in form.errors
 
     # data prevista no passado
-    form = EntregaForm(data={
-        "colaborador": col.pk,
-        "epi": epi.pk,
-        "quantidade": 1,
-        "status": Entrega.Status.EMPRESTADO,
-        "data_prevista_devolucao": (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M"),
-    })
+    form = EntregaForm(
+        data={
+            "colaborador": col.pk,
+            "epi": epi.pk,
+            "quantidade": 1,
+            "status": Entrega.Status.EMPRESTADO,
+            "data_prevista_devolucao": (timezone.now() - timedelta(days=1)).strftime(
+                "%Y-%m-%dT%H:%M"
+            ),
+        }
+    )
     assert not form.is_valid()
     assert "data_prevista_devolucao" in form.errors
 
     # ok com data futura
-    form = EntregaForm(data={
-        "colaborador": col.pk,
-        "epi": epi.pk,
-        "quantidade": 1,
-        "status": Entrega.Status.EMPRESTADO,
-        "data_prevista_devolucao": (timezone.now() + timedelta(days=2)).strftime("%Y-%m-%dT%H:%M"),
-    })
+    form = EntregaForm(
+        data={
+            "colaborador": col.pk,
+            "epi": epi.pk,
+            "quantidade": 1,
+            "status": Entrega.Status.EMPRESTADO,
+            "data_prevista_devolucao": (timezone.now() + timedelta(days=2)).strftime(
+                "%Y-%m-%dT%H:%M"
+            ),
+        }
+    )
     assert form.is_valid()
-    
+
+
 @pytest.mark.django_db
 def test_entrega_form_requires_devolucao_when_final_status():
     cat = CategoriaEPI.objects.create(nome="Luvas")
@@ -57,12 +70,15 @@ def test_entrega_form_requires_devolucao_when_final_status():
             "epi": epi.pk,
             "quantidade": 1,
             "status": Entrega.Status.DEVOLVIDO,
-            "data_prevista_devolucao": (timezone.now() + timedelta(days=1)).strftime("%Y-%m-%dT%H:%M"),
+            "data_prevista_devolucao": (timezone.now() + timedelta(days=1)).strftime(
+                "%Y-%m-%dT%H:%M"
+            ),
         },
         instance=Entrega(pk=1),
     )
     assert not form.is_valid()
     assert "data_devolucao" in form.errors
+
 
 @pytest.mark.django_db
 def test_solicitacao_form_basic_rules():

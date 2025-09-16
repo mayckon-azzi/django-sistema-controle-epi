@@ -1,7 +1,9 @@
 import pytest
 from django.contrib.auth.models import Group, User
+
 from app_colaboradores.forms import ColaboradorAdminForm
 from app_colaboradores.models import Colaborador
+
 
 @pytest.mark.django_db
 def test_adminform_creates_user_and_groups_when_checked():
@@ -28,11 +30,14 @@ def test_adminform_creates_user_and_groups_when_checked():
     assert colab.user.is_active is True
     assert colab.user.email == "joao@empresa.com"
 
+
 @pytest.mark.django_db
 def test_adminform_updates_existing_user_fields_and_groups():
     g = Group.objects.create(name="almoxarife")
     u = User.objects.create_user("maria", email="maria@x.com", password="x", is_active=True)
-    c = Colaborador.objects.create(nome="Maria", email="maria@x.com", matricula="M1", user=u, ativo=True)
+    c = Colaborador.objects.create(
+        nome="Maria", email="maria@x.com", matricula="M1", user=u, ativo=True
+    )
 
     form = ColaboradorAdminForm(
         instance=c,
@@ -54,6 +59,7 @@ def test_adminform_updates_existing_user_fields_and_groups():
     assert u.email == "novo@empresa.com"
     assert u.is_active is False
     assert list(u.groups.all()) == [g]
+
 
 @pytest.mark.django_db
 def test_adminform_clean_password_mismatch_raises_error():

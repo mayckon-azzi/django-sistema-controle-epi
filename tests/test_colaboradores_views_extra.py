@@ -1,16 +1,14 @@
 # tests/test_colaboradores_views_extra.py
-import io
-import types
+from itertools import count
+
 import pytest
-from django.contrib.auth.models import Group, Permission, User
-from django.core.files.base import ContentFile
+from django.contrib.auth.models import Permission, User
 from django.db import IntegrityError
-from django.test import override_settings
 from django.urls import reverse
-from itertools import count 
-_seq = count(1)
 
 from app_colaboradores.models import Colaborador
+
+_seq = count(1)
 
 
 def make_user_with_perms(*codenames, app_label="app_colaboradores"):
@@ -18,13 +16,13 @@ def make_user_with_perms(*codenames, app_label="app_colaboradores"):
     base = "_".join(codenames) if codenames else "noperm"
     u = User.objects.create_user(f"u_{base}_{suffix}", password="x")
     if codenames:
-        perms = Permission.objects.filter(
-            codename__in=codenames, content_type__app_label=app_label
-        )
+        perms = Permission.objects.filter(codename__in=codenames, content_type__app_label=app_label)
         u.user_permissions.add(*perms)
     return u
-  
+
+
 # ----------------------- EntrarView -----------------------
+
 
 @pytest.mark.django_db
 def test_login_respects_next_and_redirects_by_perms(client):
@@ -61,11 +59,13 @@ def test_login_respects_next_and_redirects_by_perms(client):
 
 # ----------------------- ListaColaboradoresView -----------------------
 
+
 @pytest.mark.django_db
 def test_lista_anonymous_redirects_to_login(client):
     r = client.get(reverse("app_colaboradores:lista"), follow=False)
     # LoginRequiredMixin via handle_no_permission => redirect
     assert r.status_code in (302, 303)
+
 
 @pytest.mark.django_db
 def test_lista_no_perm_returns_403(client):
@@ -74,12 +74,13 @@ def test_lista_no_perm_returns_403(client):
     r = client.get(reverse("app_colaboradores:lista"))
     assert r.status_code == 403
 
+
 @pytest.mark.django_db
 def test_lista_deleted_message_and_base_query(client):
     u = make_user_with_perms("view_colaborador")
     client.force_login(u)
 
-    for i in range(11): 
+    for i in range(11):
         Colaborador.objects.create(nome=f"Bob #{i}", matricula=f"B{i}", email=f"b{i}@x.com")
 
     r = client.get(reverse("app_colaboradores:lista"), {"q": "Bob", "page": 2, "deleted": "1"})
@@ -89,11 +90,13 @@ def test_lista_deleted_message_and_base_query(client):
 
     ctx = r.context[-1]
     assert "base_query" in ctx
-    assert "page=" not in ctx["base_query"]              
-    assert "q=Bob".lower() in ctx["base_query"].lower()  
-    assert "deleted=1" in ctx["base_query"]              
+    assert "page=" not in ctx["base_query"]
+    assert "q=Bob".lower() in ctx["base_query"].lower()
+    assert "deleted=1" in ctx["base_query"]
+
 
 # ----------------------- Criar / Atualizar -----------------------
+
 
 @pytest.mark.django_db
 def test_criar_integrity_error_shows_message(monkeypatch, client):
@@ -101,8 +104,10 @@ def test_criar_integrity_error_shows_message(monkeypatch, client):
     client.force_login(u)
     # força IntegrityError no save do form
     from app_colaboradores import views as v
+
     def boom_save(self, *a, **k):
         raise IntegrityError("dup")
+
     monkeypatch.setattr(v.ColaboradorAdminForm, "save", boom_save)
 
     r = client.post(
@@ -113,14 +118,17 @@ def test_criar_integrity_error_shows_message(monkeypatch, client):
     assert r.status_code == 200
     assert "não foi possível criar" in r.content.decode().lower()
 
+
 @pytest.mark.django_db
 def test_atualizar_integrity_error_shows_message(monkeypatch, client):
     u = make_user_with_perms("change_colaborador", "view_colaborador")
     client.force_login(u)
     c = Colaborador.objects.create(nome="Y", email="y@x.com", matricula="Y1")
     from app_colaboradores import views as v
+
     def boom_save(self, *a, **k):
         raise IntegrityError("conflict")
+
     monkeypatch.setattr(v.ColaboradorAdminForm, "save", boom_save)
 
     r = client.post(
@@ -133,6 +141,7 @@ def test_atualizar_integrity_error_shows_message(monkeypatch, client):
 
 
 # ----------------------- Excluir -----------------------
+
 
 @pytest.mark.django_db
 def test_excluir_appends_deleted_queryparam_and_list_shows_message(client):
@@ -150,6 +159,7 @@ def test_excluir_appends_deleted_queryparam_and_list_shows_message(client):
 
 
 # ----------------------- registrar -----------------------
+
 
 @pytest.mark.django_db
 def test_registrar_success_creates_user_and_colab(client):
@@ -174,6 +184,7 @@ def test_registrar_success_creates_user_and_colab(client):
 
 # ----------------------- PerfilView -----------------------
 
+
 @pytest.mark.django_db
 def test_perfil_autolinks_by_email_and_shows_info_message(client):
     u = User.objects.create_user("z", password="x", email="z@empresa.com")
@@ -188,6 +199,7 @@ def test_perfil_autolinks_by_email_and_shows_info_message(client):
     c.refresh_from_db()
     assert c.user == u
 
+
 @pytest.mark.django_db
 def test_perfil_missing_redirects_to_create_when_user_can_add(client):
     u = make_user_with_perms("add_colaborador")
@@ -201,6 +213,7 @@ def test_perfil_missing_redirects_to_create_when_user_can_add(client):
     assert final_url.endswith(reverse("app_colaboradores:criar"))
     assert "crie seu perfil" in r.content.decode().lower()
 
+
 @pytest.mark.django_db
 def test_perfil_missing_redirects_home_when_no_perm(client):
     u = make_user_with_perms()  # sem add_colaborador
@@ -212,9 +225,9 @@ def test_perfil_missing_redirects_home_when_no_perm(client):
     assert r.redirect_chain
     final_url, _ = r.redirect_chain[-1]
     # redirecionou para home com mensagem de erro
-    from app_core.urls import app_name as core_ns  # só para garantir reverso existe
     assert final_url.endswith(reverse("app_core:home"))
     assert "não possui um perfil de colaborador" in r.content.decode().lower()
+
 
 @pytest.mark.django_db
 def test_perfil_pk_requires_view_perm_when_not_own(client):
@@ -225,6 +238,7 @@ def test_perfil_pk_requires_view_perm_when_not_own(client):
     r = client.get(reverse("app_colaboradores:perfil_pk", kwargs={"pk": other.pk}))
     assert r.status_code == 403
 
+
 @pytest.mark.django_db
 def test_perfil_pk_allows_own_without_perm(client):
     u = make_user_with_perms()
@@ -234,6 +248,7 @@ def test_perfil_pk_allows_own_without_perm(client):
     assert r.status_code == 200
     # contexto deve trazer foto_form
     assert any("foto_form" in ctx for ctx in r.context)
+
 
 @pytest.mark.django_db
 def test_perfil_post_remove_photo_messages(client):
@@ -250,13 +265,15 @@ def test_perfil_post_remove_photo_messages(client):
     assert not c.foto
     assert "foto removida com sucesso" in r.content.decode().lower()
 
+
 @pytest.mark.django_db
 def test_perfil_post_remove_photo_when_none_shows_info(client):
     u = make_user_with_perms()
-    c = Colaborador.objects.create(nome="NoPic", email="n@x.com", matricula="N1", user=u)
+    Colaborador.objects.create(nome="NoPic", email="n@x.com", matricula="N1", user=u)
     client.force_login(u)
     r = client.post(reverse("app_colaboradores:perfil"), data={"remover": "1"}, follow=True)
     assert "não possui foto" in r.content.decode().lower()
+
 
 @pytest.mark.django_db
 def test_perfil_post_update_foto_success_with_fake_form(monkeypatch, client):
@@ -264,16 +281,22 @@ def test_perfil_post_update_foto_success_with_fake_form(monkeypatch, client):
     Evita dependência de Pillow simulando um form válido.
     """
     u = make_user_with_perms()
-    c = Colaborador.objects.create(nome="Pic2", email="p2@x.com", matricula="P2", user=u)
+    Colaborador.objects.create(nome="Pic2", email="p2@x.com", matricula="P2", user=u)
     client.force_login(u)
 
     # Falso form para injetar no view
     class FakeFotoForm:
-        def __init__(self, *a, **k): pass
-        def is_valid(self): return True
-        def save(self): return None
+        def __init__(self, *a, **k):
+            pass
+
+        def is_valid(self):
+            return True
+
+        def save(self):
+            return None
 
     from app_colaboradores import views as v
+
     monkeypatch.setattr(v, "ColaboradorFotoForm", FakeFotoForm)
 
     r = client.post(reverse("app_colaboradores:perfil"), data={}, follow=True)

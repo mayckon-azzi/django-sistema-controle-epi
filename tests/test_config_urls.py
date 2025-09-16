@@ -4,12 +4,13 @@ import importlib
 import pytest
 from django.conf import settings
 from django.test import override_settings
-from django.urls import Resolver404, resolve, reverse, clear_url_caches
+from django.urls import Resolver404, clear_url_caches, resolve, reverse
 
 
 def _reload_urls():
     """Recarrega o módulo de urls principal e limpa o cache do resolver."""
     import config.urls as urls_module
+
     importlib.reload(urls_module)
     clear_url_caches()
     return urls_module

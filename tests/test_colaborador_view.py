@@ -71,9 +71,7 @@ def test_editar_updates_user_email_and_active_and_groups(client):
     g1 = Group.objects.create(name="colaborador")
     g2 = Group.objects.create(name="almoxarife")
 
-    c = Colaborador.objects.create(
-        nome="Maria", matricula="M1", email="maria@x.com", ativo=True
-    )
+    c = Colaborador.objects.create(nome="Maria", matricula="M1", email="maria@x.com", ativo=True)
     # cria user vinculado manualmente para simular cenário real
     u = User.objects.create_user("maria", email="maria@x.com", password="x", is_active=True)
     c.user = u

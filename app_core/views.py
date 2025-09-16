@@ -34,25 +34,23 @@ def home(request):
     ctx = {
         "total_colaboradores": Colaborador.objects.only("id").count(),
         "total_epis": EPI.objects.only("id").count(),
-        "estoque_total": (
-            EPI.objects.aggregate(total=Coalesce(Sum("estoque"), 0)).get("total", 0)
-        ),
-        "entregas_ativas": Entrega.objects.filter(status__in=fora_do_estoque)
-        .only("id")
-        .count(),
+        "estoque_total": (EPI.objects.aggregate(total=Coalesce(Sum("estoque"), 0)).get("total", 0)),
+        "entregas_ativas": Entrega.objects.filter(status__in=fora_do_estoque).only("id").count(),
         "devolvidos_mes": devolvidos_mes,
-        "solicitacoes_pendentes": Solicitacao.objects.filter(
-            status=Solicitacao.Status.PENDENTE
-        )
+        "solicitacoes_pendentes": Solicitacao.objects.filter(status=Solicitacao.Status.PENDENTE)
         .only("id")
         .count(),
     }
 
     if request.user.is_authenticated and hasattr(request.user, "colaborador"):
-        ctx["minhas_solicitacoes_abertas"] = Solicitacao.objects.filter(
-            colaborador=request.user.colaborador,
-            status__in=[Solicitacao.Status.PENDENTE, Solicitacao.Status.APROVADA],
-        ).only("id").count()
+        ctx["minhas_solicitacoes_abertas"] = (
+            Solicitacao.objects.filter(
+                colaborador=request.user.colaborador,
+                status__in=[Solicitacao.Status.PENDENTE, Solicitacao.Status.APROVADA],
+            )
+            .only("id")
+            .count()
+        )
 
     return render(request, "app_core/pages/home.html", ctx)
 

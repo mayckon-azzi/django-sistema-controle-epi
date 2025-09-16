@@ -2,10 +2,10 @@
 import csv
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import PermissionDenied
 from django.db.models import Case, Count, F, IntegerField, Sum, Value, When
 from django.http import HttpResponse
-from django.core.exceptions import PermissionDenied
-from django.contrib.auth.views import redirect_to_login
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
@@ -117,7 +117,7 @@ class RelatorioEntregasView(LoginRequiredMixin, PermissionRequiredMixin, Templat
             }
         )
         return ctx
-    
+
     def handle_no_permission(self):
         if not self.request.user.is_authenticated:
             return redirect_to_login(
@@ -169,7 +169,7 @@ class ExportarEntregasCSVView(LoginRequiredMixin, PermissionRequiredMixin, Templ
                 ]
             )
         return resp
-    
+
     def handle_no_permission(self):
         if not self.request.user.is_authenticated:
             return redirect_to_login(

@@ -1,6 +1,6 @@
 # tests/test_app_core_urls.py
 import pytest
-from django.urls import reverse, resolve
+from django.urls import resolve, reverse
 
 pytestmark = pytest.mark.django_db
 

@@ -1,5 +1,5 @@
 import pytest
-from django.db import IntegrityError, DataError
+from django.db import DataError, IntegrityError
 
 from app_epis.models import EPI, CategoriaEPI
 

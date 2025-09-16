@@ -1,9 +1,10 @@
 import pytest
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.db import OperationalError
 from django.urls import reverse
 
 from app_colaboradores.models import Colaborador
+
 
 @pytest.mark.django_db
 def test_registrar_success_creates_user_and_colab(client):
@@ -24,6 +25,7 @@ def test_registrar_success_creates_user_and_colab(client):
     assert resp.status_code == 200
     assert User.objects.filter(username="novo").exists()
     assert Colaborador.objects.filter(email="novo@empresa.com").exists()
+
 
 @pytest.mark.django_db
 def test_registrar_handles_db_error_gracefully(client, monkeypatch):
