@@ -1,0 +1,22 @@
+codecov:
+  require_ci_to_pass: yes
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+status:
+  project:
+    default:
+      target: auto
+      threshold: 1%     # queda tolerada sem quebrar o check
+  patch:
+    default:
+      target: 90%
+      threshold: 1%
+
+comment:
+  layout: "reach, diff, files"
+  behavior: default
+  require_changes: false
