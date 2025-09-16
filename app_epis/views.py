@@ -4,7 +4,8 @@ from django.db.models import BooleanField, Case, F, ProtectedError, Q, Value, Wh
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
-
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.views import redirect_to_login
 from .forms import EPIForm
 from .models import EPI, CategoriaEPI
 
@@ -61,7 +62,7 @@ class ListaEPIView(ListView):
             {
                 "q": self.request.GET.get("q", ""),
                 "categoria_id": self.request.GET.get("categoria", ""),
-                "categorias": CategoriaEPI.objects.all(),
+                "categorias": CategoriaEPI.objects.filter(epis__in=self.object_list).distinct(),
                 "only_active": self.request.GET.get("ativos") == "1",
                 "below_min": self.request.GET.get("abaixo") == "1",
                 "ordenar": self.request.GET.get("ordenar") or "nome",
@@ -79,9 +80,15 @@ class ListaEPIView(ListView):
         params.pop("page", None)
         ctx["base_query"] = params.urlencode()
         return ctx
+    
+class PermissionAwareMixin:
+    """Redireciona anônimos para login, 403 para autenticados sem perm."""
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
+        raise PermissionDenied
 
-
-class CriarEPIView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+class CriarEPIView(PermissionAwareMixin, LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "app_epis.add_epi"
     raise_exception = True
     login_url = reverse_lazy("app_colaboradores:entrar")
@@ -104,7 +111,7 @@ class CriarEPIView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         return super().form_invalid(form)
 
 
-class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class AtualizarEPIView(PermissionAwareMixin, LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     permission_required = "app_epis.change_epi"
     raise_exception = True
     login_url = reverse_lazy("app_colaboradores:entrar")
@@ -122,7 +129,7 @@ class AtualizarEPIView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         return super().form_invalid(form)
 
 
-class ExcluirEPIView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class ExcluirEPIView(PermissionAwareMixin, LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     permission_required = "app_epis.delete_epi"
     raise_exception = True
     login_url = reverse_lazy("app_colaboradores:entrar")
@@ -130,15 +137,16 @@ class ExcluirEPIView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     template_name = "app_epis/pages/confirm_delete.html"
     success_url = reverse_lazy("app_epis:lista")
 
-    def delete(self, request, *args, **kwargs):
+    def form_valid(self, form):
         self.object = self.get_object()
         try:
-            resp = super().delete(request, *args, **kwargs)
-            messages.success(self.request, "EPI excluído com sucesso.")
-            return resp
+            self.object.delete()
         except ProtectedError:
             messages.error(
                 self.request,
                 "Não é possível excluir este EPI porque há entregas associadas.",
             )
             return redirect(self.success_url)
+        messages.success(self.request, "EPI excluído com sucesso")
+        return redirect(self.success_url)
+

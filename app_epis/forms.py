@@ -3,14 +3,14 @@ from django.db.utils import OperationalError, ProgrammingError
 
 from .models import EPI, CategoriaEPI
 
-# Categorias mais comuns em ambientes industriais/empresariais
+# Categorias mais comuns
 DEFAULT_CATEGORIAS = [
     "Luvas de proteção",
     "Óculos de proteção",
     "Capacete de segurança",
     "Protetor auricular",
     "Máscaras",
-    "Sapatão",
+    "Calçado de segurança",
     "Protetor facial",
     "Avental",
     "Creme protetor",
@@ -33,10 +33,7 @@ def _bootstrapify(widget: forms.Widget, extra_role_switch=False):
 
 
 def _ensure_default_categories():
-    """
-    Cria categorias padrão se a tabela estiver vazia (ou se alguma estiver faltando).
-    Ignora com segurança durante migrações iniciais.
-    """
+    """Cria categorias padrão se necessário (ignora com segurança em migrações iniciais)."""
     try:
         for nome in DEFAULT_CATEGORIAS:
             CategoriaEPI.objects.get_or_create(nome=nome)
@@ -81,13 +78,15 @@ class EPIForm(forms.ModelForm):
             pass
 
         for name, field in self.fields.items():
-            extra_switch = name == "ativo"
-            _bootstrapify(field.widget, extra_role_switch=extra_switch)
+            _bootstrapify(field.widget, extra_role_switch=(name == "ativo"))
 
     def clean(self):
         cleaned = super().clean()
-        est = cleaned.get("estoque") or 0
-        min_ = cleaned.get("estoque_minimo") or 0
-        if min_ < 0 or est < 0:
+        est = cleaned.get("estoque")
+        min_ = cleaned.get("estoque_minimo")
+        # marque o campo correto como inválido
+        if est is not None and est < 0:
             self.add_error("estoque", "Valores não podem ser negativos.")
+        if min_ is not None and min_ < 0:
+            self.add_error("estoque_minimo", "Valores não podem ser negativos.")
         return cleaned

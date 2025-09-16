@@ -75,7 +75,7 @@ def lista(request):
 # ===== ENTREGAS =====
 class CriarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "app_entregas.add_entrega"
-    raise_exception = True
+    raise_exception = False
     login_url = reverse_lazy("app_colaboradores:entrar")
     model = Entrega
     form_class = EntregaForm
@@ -101,7 +101,7 @@ class CriarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
 class AtualizarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     permission_required = "app_entregas.change_entrega"
-    raise_exception = True
+    raise_exception = False
     login_url = reverse_lazy("app_colaboradores:entrar")
     model = Entrega
     form_class = EntregaForm
@@ -128,7 +128,7 @@ class AtualizarEntregaView(LoginRequiredMixin, PermissionRequiredMixin, UpdateVi
 
 class ExcluirEntregaView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     permission_required = "app_entregas.delete_entrega"
-    raise_exception = True
+    raise_exception = False
     login_url = reverse_lazy("app_colaboradores:entrar")
     model = Entrega
     template_name = "app_entregas/pages/confirm_delete.html"

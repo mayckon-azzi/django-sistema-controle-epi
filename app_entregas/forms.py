@@ -76,25 +76,22 @@ class EntregaForm(forms.ModelForm):
         dt_dev = cleaned.get("data_devolucao")
         now = timezone.now()
 
-        # “Data prevista” deve ser futura quando houver (e recomendamos quando EMPRESTADO/EM_USO)
+        status_norm = (str(status or "").replace(" ", "_").upper())
+        # “Data prevista” precisa ser futura quando informada
         if dt_prev and dt_prev <= now:
             self.add_error(
                 "data_prevista_devolucao",
                 "A data prevista precisa ser posterior a agora.",
             )
 
-        if status in {Entrega.Status.EMPRESTADO, Entrega.Status.EM_USO} and not dt_prev:
+        if status_norm in {"EMPRESTADO", "EM_USO"} and not dt_prev:
             self.add_error(
                 "data_prevista_devolucao",
                 "Informe a data prevista de devolução para este status.",
             )
-
-        # Campos de devolução exigidos para devolvido/danificado/perdido
-        if status in {
-            Entrega.Status.DEVOLVIDO,
-            Entrega.Status.DANIFICADO,
-            Entrega.Status.PERDIDO,
-        }:
+            
+       
+        if status_norm in {"DEVOLVIDO", "DANIFICADO", "PERDIDO"}:
             if not dt_dev:
                 self.add_error("data_devolucao", "Informe a data da devolução.")
             elif dt_dev < cleaned.get("data_entrega", now):
@@ -102,9 +99,7 @@ class EntregaForm(forms.ModelForm):
                     "data_devolucao",
                     "A data da devolução não pode ser anterior à entrega.",
                 )
-
         return cleaned
-
 
 class SolicitacaoForm(forms.ModelForm):
     class Meta:
