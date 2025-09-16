@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
@@ -133,7 +132,6 @@ class ExcluirColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, Delete
         return super().delete(request, *args, **kwargs)
 
 
-#@staff_member_required(login_url="app_colaboradores:entrar")
 def registrar(request):
     erro_banco = None
     if request.method == "POST":
