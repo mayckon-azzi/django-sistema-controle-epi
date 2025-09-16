@@ -133,7 +133,7 @@ class ExcluirColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, Delete
         return super().delete(request, *args, **kwargs)
 
 
-@staff_member_required(login_url="app_colaboradores:entrar")
+#@staff_member_required(login_url="app_colaboradores:entrar")
 def registrar(request):
     erro_banco = None
     if request.method == "POST":
