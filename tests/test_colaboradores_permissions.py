@@ -1,6 +1,7 @@
 import pytest
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import Permission, User
 from django.urls import reverse
+
 
 @pytest.mark.django_db
 def test_lista_requires_login(client):
@@ -9,6 +10,7 @@ def test_lista_requires_login(client):
     assert resp.status_code == 302
     assert reverse("app_colaboradores:entrar") in resp.url
 
+
 @pytest.mark.django_db
 def test_lista_requires_permission_403(client):
     u = User.objects.create_user("sem_permissao", password="x")
@@ -16,6 +18,7 @@ def test_lista_requires_permission_403(client):
     url = reverse("app_colaboradores:lista")
     resp = client.get(url)
     assert resp.status_code == 403  # PermissionRequiredMixin + raise_exception=True
+
 
 @pytest.mark.django_db
 def test_lista_with_permission_ok(client):

@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.crypto import get_random_string
+
 from .models import Colaborador
 
 
@@ -30,9 +31,11 @@ def _bootstrapify_fields(form):
         else:
             w.attrs["class"] = (base + " form-control").strip()
 
+
 # ===================================================================
 #                           Colaborador
 # ===================================================================
+
 
 class ColaboradorForm(forms.ModelForm):
     class Meta:
@@ -68,6 +71,7 @@ class ColaboradorForm(forms.ModelForm):
         if qs.exists():
             raise ValidationError("Já existe um colaborador com esta matrícula.")
         return value
+
 
 class ColaboradorAdminForm(ColaboradorForm):
     groups = forms.ModelMultipleChoiceField(
@@ -146,7 +150,7 @@ class ColaboradorAdminForm(ColaboradorForm):
             candidate = f"{base}{i}"
             i += 1
         return candidate
-    
+
     @transaction.atomic
     def save(self, commit=True):
         colab = super().save(commit=commit)
@@ -158,7 +162,7 @@ class ColaboradorAdminForm(ColaboradorForm):
             email = self.cleaned_data.get("email")
             if email is not None:
                 u.email = email
-                
+
             ativo = self.cleaned_data.get("ativo")
             if ativo is not None:
                 u.is_active = bool(ativo)
@@ -173,10 +177,7 @@ class ColaboradorAdminForm(ColaboradorForm):
         # Criar usuário novo se marcado
         if self.cleaned_data.get("criar_usuario"):
             username = self._build_unique_username()
-            password = (
-                self.cleaned_data.get("password1")
-                or get_random_string(12)
-            )
+            password = self.cleaned_data.get("password1") or get_random_string(12)
             u = User.objects.create_user(
                 username=username,
                 email=self.cleaned_data.get("email") or colab.email,

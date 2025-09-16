@@ -6,8 +6,15 @@ from django.db import IntegrityError
 from django.db.utils import OperationalError, ProgrammingError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
-from django.utils.http import urlencode  
+from django.utils.http import urlencode
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
+
 from .forms import (
     ColaboradorAdminForm,
     ColaboradorFotoForm,
@@ -71,7 +78,7 @@ class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListVi
         if self.request.GET.get("deleted") == "1":
             messages.success(self.request, "Colaborador excluído.")
         return ctx
-    
+
     def handle_no_permission(self):
         # anônimo -> redireciona ao login (302)
         if not self.request.user.is_authenticated:

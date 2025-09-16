@@ -1,11 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import PermissionDenied
 from django.db.models import BooleanField, Case, F, ProtectedError, Q, Value, When
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
-from django.core.exceptions import PermissionDenied
-from django.contrib.auth.views import redirect_to_login
+
 from .forms import EPIForm
 from .models import EPI, CategoriaEPI
 
@@ -80,13 +81,18 @@ class ListaEPIView(ListView):
         params.pop("page", None)
         ctx["base_query"] = params.urlencode()
         return ctx
-    
+
+
 class PermissionAwareMixin:
     """Redireciona anônimos para login, 403 para autenticados sem perm."""
+
     def handle_no_permission(self):
         if not self.request.user.is_authenticated:
-            return redirect_to_login(self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name())
+            return redirect_to_login(
+                self.request.get_full_path(), self.get_login_url(), self.get_redirect_field_name()
+            )
         raise PermissionDenied
+
 
 class CriarEPIView(PermissionAwareMixin, LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     permission_required = "app_epis.add_epi"
@@ -111,7 +117,9 @@ class CriarEPIView(PermissionAwareMixin, LoginRequiredMixin, PermissionRequiredM
         return super().form_invalid(form)
 
 
-class AtualizarEPIView(PermissionAwareMixin, LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class AtualizarEPIView(
+    PermissionAwareMixin, LoginRequiredMixin, PermissionRequiredMixin, UpdateView
+):
     permission_required = "app_epis.change_epi"
     raise_exception = True
     login_url = reverse_lazy("app_colaboradores:entrar")
@@ -149,4 +157,3 @@ class ExcluirEPIView(PermissionAwareMixin, LoginRequiredMixin, PermissionRequire
             return redirect(self.success_url)
         messages.success(self.request, "EPI excluído com sucesso")
         return redirect(self.success_url)
-

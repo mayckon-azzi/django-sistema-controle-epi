@@ -1,7 +1,9 @@
 import pytest
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import User
 from django.urls import reverse
+
 from app_colaboradores.models import Colaborador
+
 
 @pytest.mark.django_db
 def test_perfil_autolinka_por_email_quando_possivel(client):

@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from app_colaboradores.models import Colaborador
 from app_entregas.models import Entrega
-from app_epis.models import CategoriaEPI, EPI
+from app_epis.models import EPI, CategoriaEPI
 from app_relatorios.forms import RelatorioEntregasForm
 
 
@@ -112,7 +112,7 @@ def test_export_csv_filters_and_format(client):
     Entrega.objects.create(
         colaborador=col, epi=epi, quantidade=1, status=Entrega.Status.EMPRESTADO, data_entrega=now
     )
-    e2 = Entrega.objects.create(
+    Entrega.objects.create(
         colaborador=col,
         epi=epi,
         quantidade=4,

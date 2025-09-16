@@ -37,7 +37,7 @@ class EPI(models.Model):
 
     def __str__(self):
         return f"{self.nome} ({self.codigo})" if self.codigo else self.nome
-    
+
     def save(self, *args, **kwargs):
         if self.estoque is not None and self.estoque < 0:
             raise IntegrityError("Estoque não pode ser negativo.")

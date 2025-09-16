@@ -1,5 +1,4 @@
 import pytest
-from django.core.exceptions import ValidationError
 
 from app_colaboradores.forms import ColaboradorForm
 from app_colaboradores.models import Colaborador

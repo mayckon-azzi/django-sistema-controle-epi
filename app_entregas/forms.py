@@ -76,7 +76,7 @@ class EntregaForm(forms.ModelForm):
         dt_dev = cleaned.get("data_devolucao")
         now = timezone.now()
 
-        status_norm = (str(status or "").replace(" ", "_").upper())
+        status_norm = str(status or "").replace(" ", "_").upper()
         # “Data prevista” precisa ser futura quando informada
         if dt_prev and dt_prev <= now:
             self.add_error(
@@ -89,8 +89,7 @@ class EntregaForm(forms.ModelForm):
                 "data_prevista_devolucao",
                 "Informe a data prevista de devolução para este status.",
             )
-            
-       
+
         if status_norm in {"DEVOLVIDO", "DANIFICADO", "PERDIDO"}:
             if not dt_dev:
                 self.add_error("data_devolucao", "Informe a data da devolução.")
@@ -100,6 +99,7 @@ class EntregaForm(forms.ModelForm):
                     "A data da devolução não pode ser anterior à entrega.",
                 )
         return cleaned
+
 
 class SolicitacaoForm(forms.ModelForm):
     class Meta:
