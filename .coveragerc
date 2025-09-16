@@ -1,0 +1,19 @@
+[run]
+branch = True
+source =
+    app_core
+    app_colaboradores
+    app_epis
+    app_entregas
+    app_relatorios
+omit =
+    */migrations/*
+    manage.py
+    config/asgi.py
+    config/wsgi.py
+    config/settings.py
+
+[report]
+show_missing = True
+skip_covered = True
+precision = 2
