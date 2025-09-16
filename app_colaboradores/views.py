@@ -1,21 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, redirect_to_login
 from django.core.exceptions import PermissionDenied
+from django.db import IntegrityError
 from django.db.utils import OperationalError, ProgrammingError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import (
-    CreateView,
-    DeleteView,
-    ListView,
-    TemplateView,
-    UpdateView,
-)
-
+from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
+from django.utils.http import urlencode  
 from .forms import (
     ColaboradorAdminForm,
-    ColaboradorForm,
     ColaboradorFotoForm,
     LoginFormBootstrap,
     RegisterForm,
@@ -29,6 +23,7 @@ class EntrarView(LoginView):
     redirect_authenticated_user = True
 
     def get_success_url(self):
+        # respeita ?next=...
         next_url = self.get_redirect_url()
         if next_url:
             return next_url
@@ -52,7 +47,7 @@ class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListVi
     paginate_by = 10
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().select_related("user")
         q = (self.request.GET.get("q") or "").strip()
         if q:
             from django.db.models import Q
@@ -72,27 +67,46 @@ class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListVi
         params.pop("page", None)
         ctx["q"] = self.request.GET.get("q", "")
         ctx["base_query"] = params.urlencode()
+
+        if self.request.GET.get("deleted") == "1":
+            messages.success(self.request, "Colaborador excluído.")
         return ctx
+    
+    def handle_no_permission(self):
+        # anônimo -> redireciona ao login (302)
+        if not self.request.user.is_authenticated:
+            return redirect_to_login(
+                self.request.get_full_path(),
+                login_url=self.get_login_url(),
+                redirect_field_name=self.get_redirect_field_name(),
+            )
+        # logado sem permissão -> 403
+        raise PermissionDenied
 
 
-# CRIAR
 class CriarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     login_url = reverse_lazy("app_colaboradores:entrar")
     permission_required = "app_colaboradores.add_colaborador"
     raise_exception = True
+
     model = Colaborador
     template_name = "app_colaboradores/pages/form.html"
+    # RNF: manter usuário na tela após cadastro -> volta para a própria criação
     success_url = reverse_lazy("app_colaboradores:criar")
 
     def get_form_class(self):
-        u = self.request.user
-        if u.is_superuser or u.groups.filter(name="Almoxarife").exists():
-            return ColaboradorAdminForm
-        return ColaboradorForm
+        return ColaboradorAdminForm
 
     def form_valid(self, form):
-        resp = super().form_valid(form)
-        messages.success(self.request, "Colaborador criado.")
+        try:
+            resp = super().form_valid(form)
+        except IntegrityError:
+            messages.error(
+                self.request,
+                "Não foi possível criar: dados já existentes (ex.: matrícula).",
+            )
+            return self.form_invalid(form)
+        messages.success(self.request, "Colaborador cadastrado com sucesso.")
         return resp
 
 
@@ -100,20 +114,23 @@ class AtualizarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, Upda
     login_url = reverse_lazy("app_colaboradores:entrar")
     permission_required = "app_colaboradores.change_colaborador"
     raise_exception = True
+
     model = Colaborador
     template_name = "app_colaboradores/pages/form.html"
     success_url = reverse_lazy("app_colaboradores:lista")
 
     def get_form_class(self):
-        u = self.request.user
-        return (
-            ColaboradorAdminForm
-            if (u.is_superuser or u.groups.filter(name="Almoxarife").exists())
-            else ColaboradorForm
-        )
+        return ColaboradorAdminForm
 
     def form_valid(self, form):
-        resp = super().form_valid(form)
+        try:
+            resp = super().form_valid(form)
+        except IntegrityError:
+            messages.error(
+                self.request,
+                "Não foi possível atualizar: conflito de dados (ex.: matrícula).",
+            )
+            return self.form_invalid(form)
         messages.success(self.request, "Colaborador atualizado.")
         return resp
 
@@ -127,26 +144,36 @@ class ExcluirColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, Delete
     template_name = "app_colaboradores/pages/confirm_delete.html"
     success_url = reverse_lazy("app_colaboradores:lista")
 
-    def delete(self, request, *args, **kwargs):
-        messages.success(self.request, "Colaborador excluído.")
-        return super().delete(request, *args, **kwargs)
+    def get_success_url(self):
+        base = super().get_success_url()
+        return f"{base}?{urlencode({'deleted': '1'})}"
 
 
 def registrar(request):
+    """
+    Registro de usuário + criação/associação de Colaborador (via RegisterForm).
+    Trata erro de banco (sem migração).
+    """
     erro_banco = None
     if request.method == "POST":
         form = RegisterForm(request.POST)
         try:
             if form.is_valid():
                 form.save()
+                messages.success(
+                    request,
+                    "Cadastro realizado com sucesso. Faça login para continuar.",
+                )
                 return redirect("app_colaboradores:entrar")
         except (OperationalError, ProgrammingError):
             erro_banco = (
                 "Banco de dados não inicializado. "
-                "Execute as migrações antes de registrar usuários: "
-                "python manage.py makemigrations"
-                "python manage.py migrate"
+                "Execute as migrações antes de registrar usuários:\n"
+                "python manage.py makemigrations\n"
+                "python manage.py migrate\n"
             )
+            # garante que o texto aparece no HTML via partial de messages
+            messages.error(request, erro_banco)
     else:
         form = RegisterForm()
     return render(
@@ -158,7 +185,7 @@ def registrar(request):
 
 class PerfilView(LoginRequiredMixin, TemplateView):
     """
-    - /colaboradores/perfil/         -> perfil do usuário logado (com auto-vínculo por e-mail)
+    - /colaboradores/perfil/         -> perfil do usuário logado (autovínculo por e-mail se possível)
     - /colaboradores/perfil/<pk>/    -> requer permissão 'view_colaborador', exceto se for o próprio
     """
 
@@ -167,7 +194,10 @@ class PerfilView(LoginRequiredMixin, TemplateView):
 
     # --- helpers -------------------------------------------------------------
     def _get_or_autolink_user_colab(self):
-        """Retorna o Colaborador do usuário. Se não houver, tenta vincular por e-mail (único)."""
+        """
+        Retorna o Colaborador do usuário atual. Se não houver, tenta vincular automaticamente
+        por e-mail (quando existir exatamente um Colaborador sem user com o mesmo e-mail).
+        """
         user = self.request.user
         colab = Colaborador.objects.filter(user=user).first()
         if colab:
@@ -182,7 +212,7 @@ class PerfilView(LoginRequiredMixin, TemplateView):
                 colab.save(update_fields=["user"])
                 messages.info(
                     self.request,
-                    "Vinculamos automaticamente seu usuário ao perfil de colaborador existente.",
+                    "Seu usuário foi vinculado automaticamente ao perfil de colaborador existente.",
                 )
                 return colab
         return None
@@ -245,7 +275,7 @@ class PerfilView(LoginRequiredMixin, TemplateView):
             if colab.foto:
                 colab.foto.delete(save=False)
                 colab.foto = None
-                colab.save()
+                colab.save(update_fields=["foto"])
                 messages.success(request, "Foto removida com sucesso.")
             else:
                 messages.info(request, "Este perfil não possui foto.")

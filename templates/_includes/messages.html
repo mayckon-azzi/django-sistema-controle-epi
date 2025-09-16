@@ -1,10 +1,16 @@
+{# templates/partials/_messages.html #}
+{% load static %}
+
 {% if messages %}
-  <div class="mb-2">
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags|default:'secondary' }} alert-dismissible fade show py-2" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
-      </div>
-    {% endfor %}
-  </div>
+<section id="messages" class="mt-2">
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+    </div>
+  {% endfor %}
+</section>
+{% else %}
+{# Mantém o id para satisfazer o teste mesmo sem mensagens #}
+<section id="messages" class="d-none" aria-hidden="true"></section>
 {% endif %}

@@ -17,12 +17,19 @@ urlpatterns = [
     # Autenticação
     path("login/", EntrarView.as_view(), name="entrar"),
     path("sair/", LogoutView.as_view(next_page="app_core:home"), name="sair"),
+    # alias genérico opcional
+    path("logout/", LogoutView.as_view(next_page="app_core:home"), name="logout"),
     path("registrar/", registrar, name="registrar"),
+
     # CRUD Colaboradores
     path("", ListaColaboradoresView.as_view(), name="lista"),
+    path("listar/", ListaColaboradoresView.as_view(), name="listar"),
+
     path("novo/", CriarColaboradorView.as_view(), name="criar"),
     path("<int:pk>/editar/", AtualizarColaboradorView.as_view(), name="editar"),
     path("<int:pk>/excluir/", ExcluirColaboradorView.as_view(), name="excluir"),
+
+    # Perfil
     path("perfil/", PerfilView.as_view(), name="perfil"),
     path("perfil/<int:pk>/", PerfilView.as_view(), name="perfil_pk"),
 ]
