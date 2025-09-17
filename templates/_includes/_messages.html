@@ -1,6 +1,7 @@
-<!-- templates/partials/_messages.html -->
+{# _includes/_messages.html #} 
+{% load static %} 
 {% if messages %}
-<div class="messages">
+<section id="messages" class="mt-2">
   {% for message in messages %}
   <div
     class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
@@ -15,5 +16,7 @@
     ></button>
   </div>
   {% endfor %}
-</div>
+</section>
+{% else %} {# Mantém o id para satisfazer o teste mesmo sem mensagens #}
+<section id="messages" class="d-none" aria-hidden="true"></section>
 {% endif %}

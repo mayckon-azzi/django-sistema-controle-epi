@@ -1,3 +1,4 @@
+<!-- templates/base.html -->
 {% load static %}
 <!doctype html>
 <html lang="pt-br">
@@ -23,7 +24,7 @@
   <main id="app-content" class="app-content">
     <div class="content-container container-fluid pt-3">
 
-      {% include "app_core/partials/_messages.html" %}
+      {% include "_includes/_messages.html" %}
       {% block pagebar %}{% endblock %}
       {% block content %}{% endblock %}
 
