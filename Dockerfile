@@ -1,17 +1,24 @@
 FROM python:3.12-slim
 
+# Evita .pyc e ativa stdout sem buffer
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-# Sistema: deps para compilar mysqlclient (libmariadb-dev funciona bem p/ MySQL 8)
+# Deps para compilar mysqlclient
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential default-libmysqlclient-dev pkg-config \
+        build-essential default-libmysqlclient-dev pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Evita pyc + buffer
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
+# Instala dependências Python
 COPY requirements.txt /app/requirements.txt
-RUN pip install --upgrade pip && pip install -r /app/requirements.txt
+RUN pip install --upgrade pip \
+    && pip install -r /app/requirements.txt
 
+# Copia o projeto e garante permissão do entrypoint
 COPY . /app
+RUN chmod +x /app/entrypoint.sh
+
+EXPOSE 8000
+ENTRYPOINT ["sh","/app/entrypoint.sh"]

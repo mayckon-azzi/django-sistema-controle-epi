@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 set -e
 
 echo "Esperando MySQL em ${DB_HOST}:${DB_PORT}..."
@@ -20,10 +20,10 @@ do
   sleep 2
 done
 
-echo "Aplicando migrações..."
+echo "Aplicando migraÃ§Ãµes..."
 python manage.py migrate --noinput
 
-# Opcional: coletar estáticos em produção
+# Opcional: coletar estÃ¡ticos em produÃ§Ã£o
 # python manage.py collectstatic --noinput
 
 echo "Subindo Django em 0.0.0.0:8000"
