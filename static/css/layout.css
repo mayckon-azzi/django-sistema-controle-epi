@@ -15,7 +15,7 @@ body {
 /* ============ Topbar ============ */
 .topbar {
   height: var(--topbar-h);
-  z-index: 1030;
+  z-index: 1030 !;
 }
 
 /* ============ Sidebar ============ */

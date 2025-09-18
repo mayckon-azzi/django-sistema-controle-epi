@@ -1,217 +1,214 @@
 {# templates/_includes/sidebar.html #} 
 {% with rm=request.resolver_match %}
   {% with ns=rm.namespace|default:'' url_name=rm.url_name|default:'' %}
-    {% with entregas_open=(ns == 'app_entregas' or url_name == 'minhas_solicitacoes' or url_name == 'criar_solicitacao' or url_name == 'solicitacoes_gerenciar')
-            epis_open=(ns == 'app_epis')
-            colabs_open=(ns == 'app_colaboradores') %}
-      <aside id="app-sidebar" class="app-sidebar" aria-label="Menu principal">
-        <nav class="h-100 d-flex flex-column">
-          <!-- Brand / MENU PRINCIPAL -->
-          <div class="menu-title">
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Menu principal">
+      <nav class="h-100 d-flex flex-column">
+        <!-- Brand / MENU PRINCIPAL -->
+        <div class="menu-title">
+          <a
+            href="{% url 'app_core:home' %}"
+            class="d-flex align-items-center text-decoration-none text-white"
+            aria-label="Início"
+          >
+            <i class="bi bi-lightning-charge-fill me-2" aria-hidden="true"></i>
+            <span class="label fw-bold">MENU PRINCIPAL</span>
+          </a>
+        </div>
+
+        <ul class="nav flex-column px-2">
+          <!-- Início -->
+          <li class="nav-item">
             <a
               href="{% url 'app_core:home' %}"
-              class="d-flex align-items-center text-decoration-none text-white"
-              aria-label="Início"
+              class="nav-link {% if ns == 'app_core' %}active{% endif %}"
+              aria-current="{% if ns == 'app_core' %}page{% endif %}"
             >
-              <i class="bi bi-lightning-charge-fill me-2" aria-hidden="true"></i>
-              <span class="label fw-bold">MENU PRINCIPAL</span>
+              <i class="bi bi-house-door" aria-hidden="true"></i>
+              <span class="label">Início</span>
             </a>
-          </div>
+          </li>
 
-          <ul class="nav flex-column px-2">
-            <!-- Início -->
-            <li class="nav-item">
-              <a
-                href="{% url 'app_core:home' %}"
-                class="nav-link {% if ns == 'app_core' %}active{% endif %}"
-                aria-current="{% if ns == 'app_core' %}page{% endif %}"
-              >
-                <i class="bi bi-house-door" aria-hidden="true"></i>
-                <span class="label">Início</span>
-              </a>
-            </li>
+          <!-- Entregas -->
+          <li class="nav-item">
+            <button
+              class="nav-link w-100 text-start btn btn-link btn-toggle {% if entregas_open %}showing{% endif %}"
+              data-bs-toggle="collapse"
+              data-bs-target="#menu-entregas"
+              aria-controls="menu-entregas"
+              aria-expanded="{{ entregas_open|yesno:'true,false' }}"
+              type="button"
+            >
+              <i class="bi bi-truck" aria-hidden="true"></i>
+              <span class="label">Entregas</span>
+              <i
+                class="bi bi-caret-down-fill chevron ms-auto"
+                aria-hidden="true"
+              ></i>
+            </button>
 
-            <!-- Entregas -->
-            <li class="nav-item">
-              <button
-                class="nav-link w-100 text-start btn btn-link btn-toggle {% if entregas_open %}showing{% endif %}"
-                data-bs-toggle="collapse"
-                data-bs-target="#menu-entregas"
-                aria-controls="menu-entregas"
-                aria-expanded="{{ entregas_open|yesno:'true,false' }}"
-                type="button"
-              >
-                <i class="bi bi-truck" aria-hidden="true"></i>
-                <span class="label">Entregas</span>
-                <i
-                  class="bi bi-caret-down-fill chevron ms-auto"
-                  aria-hidden="true"
-                ></i>
-              </button>
+            <div
+              id="menu-entregas"
+              class="collapse {% if entregas_open %}show{% endif %}"
+            >
+              <ul class="nav flex-column ms-4 my-1 sub">
+                <li class="nav-item">
+                  <a
+                    class="nav-link text-white-50 {% if url_name == 'lista' and ns == 'app_entregas' %}active{% endif %}"
+                    aria-current="{% if url_name == 'lista' and ns == 'app_entregas' %}page{% endif %}"
+                    href="{% url 'app_entregas:lista' %}"
+                    >Listar Entregas</a
+                  >
+                </li>
 
-              <div
-                id="menu-entregas"
-                class="collapse {% if entregas_open %}show{% endif %}"
-              >
-                <ul class="nav flex-column ms-4 my-1 sub">
-                  <li class="nav-item">
-                    <a
-                      class="nav-link text-white-50 {% if url_name == 'lista' and ns == 'app_entregas' %}active{% endif %}"
-                      aria-current="{% if url_name == 'lista' and ns == 'app_entregas' %}page{% endif %}"
-                      href="{% url 'app_entregas:lista' %}"
-                      >Listar Entregas</a
-                    >
-                  </li>
+                {% if perms.app_entregas.add_solicitacao %}
+                <li class="nav-item">
+                  <a
+                    class="nav-link text-white-50 {% if url_name == 'criar_solicitacao' %}active{% endif %}"
+                    aria-current="{% if url_name == 'criar_solicitacao' %}page{% endif %}"
+                    href="{% url 'app_entregas:criar_solicitacao' %}"
+                    >Solicitar EPI</a
+                  >
+                </li>
+                <li class="nav-item">
+                  <a
+                    class="nav-link text-white-50 {% if url_name == 'minhas_solicitacoes' %}active{% endif %}"
+                    aria-current="{% if url_name == 'minhas_solicitacoes' %}page{% endif %}"
+                    href="{% url 'app_entregas:minhas_solicitacoes' %}"
+                    >Minhas Solicitações</a
+                  >
+                </li>
+                {% endif %} {% if perms.app_entregas.change_solicitacao %}
+                <li class="nav-item">
+                  <a
+                    class="nav-link text-white-50 {% if url_name == 'solicitacoes_gerenciar' %}active{% endif %}"
+                    aria-current="{% if url_name == 'solicitacoes_gerenciar' %}page{% endif %}"
+                    href="{% url 'app_entregas:solicitacoes_gerenciar' %}"
+                    >Gerenciar Solicitações</a
+                  >
+                </li>
+                {% endif %}
+              </ul>
+            </div>
+          </li>
 
-                  {% if perms.app_entregas.add_solicitacao %}
-                  <li class="nav-item">
-                    <a
-                      class="nav-link text-white-50 {% if url_name == 'criar_solicitacao' %}active{% endif %}"
-                      aria-current="{% if url_name == 'criar_solicitacao' %}page{% endif %}"
-                      href="{% url 'app_entregas:criar_solicitacao' %}"
-                      >Solicitar EPI</a
-                    >
-                  </li>
-                  <li class="nav-item">
-                    <a
-                      class="nav-link text-white-50 {% if url_name == 'minhas_solicitacoes' %}active{% endif %}"
-                      aria-current="{% if url_name == 'minhas_solicitacoes' %}page{% endif %}"
-                      href="{% url 'app_entregas:minhas_solicitacoes' %}"
-                      >Minhas Solicitações</a
-                    >
-                  </li>
-                  {% endif %} {% if perms.app_entregas.change_solicitacao %}
-                  <li class="nav-item">
-                    <a
-                      class="nav-link text-white-50 {% if url_name == 'solicitacoes_gerenciar' %}active{% endif %}"
-                      aria-current="{% if url_name == 'solicitacoes_gerenciar' %}page{% endif %}"
-                      href="{% url 'app_entregas:solicitacoes_gerenciar' %}"
-                      >Gerenciar Solicitações</a
-                    >
-                  </li>
-                  {% endif %}
-                </ul>
-              </div>
-            </li>
+          <!-- EPIs -->
+          <li class="nav-item">
+            <button
+              class="nav-link w-100 text-start btn btn-link btn-toggle {% if epis_open %}showing{% endif %}"
+              data-bs-toggle="collapse"
+              data-bs-target="#menu-epis"
+              aria-controls="menu-epis"
+              aria-expanded="{{ epis_open|yesno:'true,false' }}"
+              type="button"
+            >
+              <i class="bi bi-box-seam" aria-hidden="true"></i>
+              <span class="label">EPIs</span>
+              <i
+                class="bi bi-caret-down-fill chevron ms-auto"
+                aria-hidden="true"
+              ></i>
+            </button>
 
-            <!-- EPIs -->
-            <li class="nav-item">
-              <button
-                class="nav-link w-100 text-start btn btn-link btn-toggle {% if epis_open %}showing{% endif %}"
-                data-bs-toggle="collapse"
-                data-bs-target="#menu-epis"
-                aria-controls="menu-epis"
-                aria-expanded="{{ epis_open|yesno:'true,false' }}"
-                type="button"
-              >
-                <i class="bi bi-box-seam" aria-hidden="true"></i>
-                <span class="label">EPIs</span>
-                <i
-                  class="bi bi-caret-down-fill chevron ms-auto"
-                  aria-hidden="true"
-                ></i>
-              </button>
+            <div id="menu-epis" class="collapse {% if epis_open %}show{% endif %}">
+              <ul class="nav flex-column ms-4 my-1 sub">
+                <li class="nav-item">
+                  <a
+                    class="nav-link text-white-50 {% if url_name == 'lista' and ns == 'app_epis' %}active{% endif %}"
+                    aria-current="{% if url_name == 'lista' and ns == 'app_epis' %}page{% endif %}"
+                    href="{% url 'app_epis:lista' %}"
+                    >Listar EPIs</a
+                  >
+                </li>
+                {% if perms.app_epis.add_epi %}
+                <li class="nav-item">
+                  <a
+                    class="nav-link text-white-50 {% if url_name == 'criar' and ns == 'app_epis' %}active{% endif %}"
+                    aria-current="{% if url_name == 'criar' and ns == 'app_epis' %}page{% endif %}"
+                    href="{% url 'app_epis:criar' %}"
+                    >Cadastrar EPI</a
+                  >
+                </li>
+                {% endif %}
+              </ul>
+            </div>
+          </li>
 
-              <div id="menu-epis" class="collapse {% if epis_open %}show{% endif %}">
-                <ul class="nav flex-column ms-4 my-1 sub">
-                  <li class="nav-item">
-                    <a
-                      class="nav-link text-white-50 {% if url_name == 'lista' and ns == 'app_epis' %}active{% endif %}"
-                      aria-current="{% if url_name == 'lista' and ns == 'app_epis' %}page{% endif %}"
-                      href="{% url 'app_epis:lista' %}"
-                      >Listar EPIs</a
-                    >
-                  </li>
-                  {% if perms.app_epis.add_epi %}
-                  <li class="nav-item">
-                    <a
-                      class="nav-link text-white-50 {% if url_name == 'criar' and ns == 'app_epis' %}active{% endif %}"
-                      aria-current="{% if url_name == 'criar' and ns == 'app_epis' %}page{% endif %}"
-                      href="{% url 'app_epis:criar' %}"
-                      >Cadastrar EPI</a
-                    >
-                  </li>
-                  {% endif %}
-                </ul>
-              </div>
-            </li>
+          <!-- Colaboradores -->
+          {% if perms.app_colaboradores.view_colaborador %}
+          <li class="nav-item">
+            <button
+              class="nav-link w-100 text-start btn btn-link btn-toggle {% if colabs_open %}showing{% endif %}"
+              data-bs-toggle="collapse"
+              data-bs-target="#menu-colabs"
+              aria-controls="menu-colabs"
+              aria-expanded="{{ colabs_open|yesno:'true,false' }}"
+              type="button"
+            >
+              <i class="bi bi-people" aria-hidden="true"></i>
+              <span class="label">Colaboradores</span>
+              <i
+                class="bi bi-caret-down-fill chevron ms-auto"
+                aria-hidden="true"
+              ></i>
+            </button>
 
-            <!-- Colaboradores -->
-            {% if perms.app_colaboradores.view_colaborador %}
-            <li class="nav-item">
-              <button
-                class="nav-link w-100 text-start btn btn-link btn-toggle {% if colabs_open %}showing{% endif %}"
-                data-bs-toggle="collapse"
-                data-bs-target="#menu-colabs"
-                aria-controls="menu-colabs"
-                aria-expanded="{{ colabs_open|yesno:'true,false' }}"
-                type="button"
-              >
-                <i class="bi bi-people" aria-hidden="true"></i>
-                <span class="label">Colaboradores</span>
-                <i
-                  class="bi bi-caret-down-fill chevron ms-auto"
-                  aria-hidden="true"
-                ></i>
-              </button>
-
-              <div
-                id="menu-colabs"
-                class="collapse {% if colabs_open %}show{% endif %}"
-              >
-                <ul class="nav flex-column ms-4 my-1 sub">
-                  <li class="nav-item">
-                    <a
-                      class="nav-link text-white-50 {% if url_name == 'lista' and ns == 'app_colaboradores' %}active{% endif %}"
-                      aria-current="{% if url_name == 'lista' and ns == 'app_colaboradores' %}page{% endif %}"
-                      href="{% url 'app_colaboradores:lista' %}"
-                      >Listar Colaboradores</a
-                    >
-                  </li>
-                  {% if perms.app_colaboradores.add_colaborador %}
-                  <li class="nav-item">
-                    <a
-                      class="nav-link text-white-50 {% if url_name == 'criar' and ns == 'app_colaboradores' %}active{% endif %}"
-                      aria-current="{% if url_name == 'criar' and ns == 'app_colaboradores' %}page{% endif %}"
-                      href="{% url 'app_colaboradores:criar' %}"
-                      >Criar novo perfil</a
-                    >
-                  </li>
-                  {% endif %}
-                </ul>
-              </div>
-            </li>
-            {% endif %}
-
-            <!-- Relatórios -->
-            {% if perms.app_entregas.view_entrega %}
-            <li class="nav-item">
-              <a
-                href="{% url 'app_relatorios:index' %}"
-                class="nav-link {% if ns == 'app_relatorios' %}active{% endif %}"
-                aria-current="{% if ns == 'app_relatorios' %}page{% endif %}"
-              >
-                <i class="bi bi-graph-up" aria-hidden="true"></i>
-                <span class="label">Relatórios</span>
-              </a>
-            </li>
-            {% endif %}
-          </ul>
-
-          <!-- Footer / Sair -->
-          {% if request.user.is_authenticated %}
-          <div class="menu-footer px-2">
-            <form method="post" action="{% url 'app_colaboradores:sair' %}">
-              {% csrf_token %}
-              <button type="submit" class="logout-link">
-                <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-                <span class="label">Sair</span>
-              </button>
-            </form>
-          </div>
+            <div
+              id="menu-colabs"
+              class="collapse {% if colabs_open %}show{% endif %}"
+            >
+              <ul class="nav flex-column ms-4 my-1 sub">
+                <li class="nav-item">
+                  <a
+                    class="nav-link text-white-50 {% if url_name == 'lista' and ns == 'app_colaboradores' %}active{% endif %}"
+                    aria-current="{% if url_name == 'lista' and ns == 'app_colaboradores' %}page{% endif %}"
+                    href="{% url 'app_colaboradores:lista' %}"
+                    >Listar Colaboradores</a
+                  >
+                </li>
+                {% if perms.app_colaboradores.add_colaborador %}
+                <li class="nav-item">
+                  <a
+                    class="nav-link text-white-50 {% if url_name == 'criar' and ns == 'app_colaboradores' %}active{% endif %}"
+                    aria-current="{% if url_name == 'criar' and ns == 'app_colaboradores' %}page{% endif %}"
+                    href="{% url 'app_colaboradores:criar' %}"
+                    >Criar novo perfil</a
+                  >
+                </li>
+                {% endif %}
+              </ul>
+            </div>
+          </li>
           {% endif %}
-        </nav>
-      </aside>
-    {% endwith %} 
+
+          <!-- Relatórios -->
+          {% if perms.app_entregas.view_entrega %}
+          <li class="nav-item">
+            <a
+              href="{% url 'app_relatorios:index' %}"
+              class="nav-link {% if ns == 'app_relatorios' %}active{% endif %}"
+              aria-current="{% if ns == 'app_relatorios' %}page{% endif %}"
+            >
+              <i class="bi bi-graph-up" aria-hidden="true"></i>
+              <span class="label">Relatórios</span>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+
+        <!-- Footer / Sair -->
+        {% if request.user.is_authenticated %}
+        <div class="menu-footer px-2">
+          <form method="post" action="{% url 'app_colaboradores:sair' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-link">
+              <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+              <span class="label">Sair</span>
+            </button>
+          </form>
+        </div>
+        {% endif %}
+      </nav>
+    </aside>
   {% endwith %} 
+{% endwith %} 
 
