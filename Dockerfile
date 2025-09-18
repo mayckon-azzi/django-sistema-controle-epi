@@ -18,7 +18,3 @@ RUN pip install --upgrade pip \
 
 # Copia o projeto e garante permissão do entrypoint
 COPY . /app
-RUN chmod +x /app/entrypoint.sh
-
-EXPOSE 8000
-ENTRYPOINT ["sh","/app/entrypoint.sh"]
