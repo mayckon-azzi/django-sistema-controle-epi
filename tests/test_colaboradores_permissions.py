@@ -1,3 +1,4 @@
+# tests/test_colaboradores_permissions.py
 import pytest
 from django.contrib.auth.models import Permission, User
 from django.urls import reverse
@@ -17,7 +18,7 @@ def test_lista_requires_permission_403(client):
     client.force_login(u)
     url = reverse("app_colaboradores:lista")
     resp = client.get(url)
-    assert resp.status_code == 403  # PermissionRequiredMixin + raise_exception=True
+    assert resp.status_code == 403  
 
 
 @pytest.mark.django_db

@@ -1,8 +1,8 @@
+# tests/test_colaboradores_register_view.py
 import pytest
 from django.contrib.auth.models import Group, User
 from django.db import OperationalError
 from django.urls import reverse
-
 from app_colaboradores.models import Colaborador
 
 
@@ -30,8 +30,6 @@ def test_registrar_success_creates_user_and_colab(client):
 @pytest.mark.django_db
 def test_registrar_handles_db_error_gracefully(client, monkeypatch):
     url = reverse("app_colaboradores:registrar")
-
-    # Monkeypatch: força erro ao salvar
     from app_colaboradores import views as colab_views
 
     def boom(*a, **k):

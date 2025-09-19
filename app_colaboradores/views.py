@@ -14,7 +14,6 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
-
 from .forms import (
     ColaboradorAdminForm,
     ColaboradorFotoForm,
@@ -30,7 +29,6 @@ class EntrarView(LoginView):
     redirect_authenticated_user = True
 
     def get_success_url(self):
-        # respeita ?next=...
         next_url = self.get_redirect_url()
         if next_url:
             return next_url
@@ -80,14 +78,12 @@ class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListVi
         return ctx
 
     def handle_no_permission(self):
-        # anônimo -> redireciona ao login (302)
         if not self.request.user.is_authenticated:
             return redirect_to_login(
                 self.request.get_full_path(),
                 login_url=self.get_login_url(),
                 redirect_field_name=self.get_redirect_field_name(),
             )
-        # logado sem permissão -> 403
         raise PermissionDenied
 
 
@@ -95,10 +91,8 @@ class CriarColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateVi
     login_url = reverse_lazy("app_colaboradores:entrar")
     permission_required = "app_colaboradores.add_colaborador"
     raise_exception = True
-
     model = Colaborador
     template_name = "app_colaboradores/pages/form.html"
-    # RNF: manter usuário na tela após cadastro -> volta para a própria criação
     success_url = reverse_lazy("app_colaboradores:criar")
 
     def get_form_class(self):
@@ -179,7 +173,6 @@ def registrar(request):
                 "python manage.py makemigrations\n"
                 "python manage.py migrate\n"
             )
-            # garante que o texto aparece no HTML via partial de messages
             messages.error(request, erro_banco)
     else:
         form = RegisterForm()
@@ -195,11 +188,9 @@ class PerfilView(LoginRequiredMixin, TemplateView):
     - /colaboradores/perfil/         -> perfil do usuário logado (autovínculo por e-mail se possível)
     - /colaboradores/perfil/<pk>/    -> requer permissão 'view_colaborador', exceto se for o próprio
     """
-
     login_url = reverse_lazy("app_colaboradores:entrar")
     template_name = "app_colaboradores/pages/perfil.html"
 
-    # --- helpers -------------------------------------------------------------
     def _get_or_autolink_user_colab(self):
         """
         Retorna o Colaborador do usuário atual. Se não houver, tenta vincular automaticamente
@@ -225,14 +216,12 @@ class PerfilView(LoginRequiredMixin, TemplateView):
         return None
 
     def _resolve_colab(self):
-        # cache caso já resolvido no dispatch
         if hasattr(self, "_colab"):
             return self._colab
 
         pk = self.kwargs.get("pk")
         my_colab = Colaborador.objects.filter(user=self.request.user).first()
 
-        # Se pediu um PK e é o próprio, libera sem exigir view_colaborador
         if pk is not None and my_colab and my_colab.pk == pk:
             return my_colab
 
@@ -241,12 +230,9 @@ class PerfilView(LoginRequiredMixin, TemplateView):
                 raise PermissionDenied
             return get_object_or_404(Colaborador, pk=pk)
 
-        # Sem PK: perfil próprio (já garantido no dispatch)
         return get_object_or_404(Colaborador, user=self.request.user)
 
-    # --- dispatch / GET / POST ----------------------------------------------
     def dispatch(self, request, *args, **kwargs):
-        # Quando acessa /perfil/ (sem pk), garanta que temos um Colaborador
         if "pk" not in kwargs:
             colab = self._get_or_autolink_user_colab()
             if not colab:
@@ -263,7 +249,6 @@ class PerfilView(LoginRequiredMixin, TemplateView):
                     "Solicite a um administrador para criar seu perfil.",
                 )
                 return redirect("app_core:home")
-            # cache para reaproveitar
             self._colab = colab
 
         return super().dispatch(request, *args, **kwargs)

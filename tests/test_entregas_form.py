@@ -1,9 +1,7 @@
 # tests/test_entregas_forms.py
 from datetime import timedelta
-
 import pytest
 from django.utils import timezone
-
 from app_colaboradores.models import Colaborador
 from app_entregas.forms import EntregaForm, SolicitacaoForm
 from app_entregas.models import Entrega
@@ -16,7 +14,6 @@ def test_entrega_form_requires_future_prevista_and_prevista_when_emprestado():
     epi = EPI.objects.create(codigo="L1", nome="Luva", categoria=cat, estoque=10)
     col = Colaborador.objects.create(nome="A", email="a@x.com", matricula="A1", ativo=True)
 
-    # falta data_prevista para EMPRESTADO
     form = EntregaForm(
         data={
             "colaborador": col.pk,
@@ -28,7 +25,6 @@ def test_entrega_form_requires_future_prevista_and_prevista_when_emprestado():
     assert not form.is_valid()
     assert "data_prevista_devolucao" in form.errors
 
-    # data prevista no passado
     form = EntregaForm(
         data={
             "colaborador": col.pk,
@@ -43,7 +39,6 @@ def test_entrega_form_requires_future_prevista_and_prevista_when_emprestado():
     assert not form.is_valid()
     assert "data_prevista_devolucao" in form.errors
 
-    # ok com data futura
     form = EntregaForm(
         data={
             "colaborador": col.pk,

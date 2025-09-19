@@ -1,6 +1,6 @@
+# tests/test_models_epi.py
 import pytest
-from django.db import DataError, IntegrityError  # <- adicione DataError
-
+from django.db import DataError, IntegrityError 
 from app_epis.models import EPI, CategoriaEPI
 
 
@@ -16,11 +16,10 @@ def test_epi_str():
 @pytest.mark.django_db
 def test_epi_estoque_nao_negativo_constraint():
     cat = CategoriaEPI.objects.create(nome="Mãos")
-    # MySQL: DataError; SQLite/Postgres: IntegrityError (ou CheckConstraint)
     with pytest.raises((IntegrityError, DataError)):
         EPI.objects.create(
             codigo="LUV-001",
             nome="Luva Nitrílica",
             categoria=cat,
-            estoque=-1,  # viola o campo positivo / constraint
+            estoque=-1, 
         )

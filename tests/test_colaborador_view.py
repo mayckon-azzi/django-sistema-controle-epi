@@ -1,7 +1,7 @@
+# tests/test_colaborador_view.py
 import pytest
 from django.contrib.auth.models import Group, Permission, User
 from django.urls import reverse
-
 from app_colaboradores.models import Colaborador
 
 
@@ -55,11 +55,10 @@ def test_criar_stays_on_page_and_may_create_user_and_groups(client):
         },
         follow=True,
     )
-    assert resp.status_code == 200  # permanece na tela de criação
+    assert resp.status_code == 200
     colab = Colaborador.objects.get(matricula="C123")
     assert colab.user is not None
     assert g in colab.user.groups.all()
-    # mensagem de sucesso exibida
     assert "cadastrado com sucesso" in resp.content.decode().lower()
 
 
@@ -67,12 +66,9 @@ def test_criar_stays_on_page_and_may_create_user_and_groups(client):
 def test_editar_updates_user_email_and_active_and_groups(client):
     user = make_user_with_perms("change_colaborador", "view_colaborador")
     client.force_login(user)
-
     g1 = Group.objects.create(name="colaborador")
     g2 = Group.objects.create(name="almoxarife")
-
     c = Colaborador.objects.create(nome="Maria", matricula="M1", email="maria@x.com", ativo=True)
-    # cria user vinculado manualmente para simular cenário real
     u = User.objects.create_user("maria", email="maria@x.com", password="x", is_active=True)
     c.user = u
     c.save()
@@ -87,8 +83,8 @@ def test_editar_updates_user_email_and_active_and_groups(client):
             "funcao": "",
             "setor": "",
             "telefone": "",
-            "ativo": "",  # desativa
-            "groups": [g2.id],  # troca grupos
+            "ativo": "", 
+            "groups": [g2.id],  
         },
         follow=True,
     )

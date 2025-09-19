@@ -1,10 +1,10 @@
+# app_colaboradores/forms.py
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.crypto import get_random_string
-
 from .models import Colaborador
 
 
@@ -40,8 +40,6 @@ def _bootstrapify_fields(form):
 class ColaboradorForm(forms.ModelForm):
     class Meta:
         model = Colaborador
-        # OBS: mantive "cargo" conforme seu formulário atual.
-        # Se sua model usar "funcao" no lugar, ajuste esta lista.
         fields = ["nome", "email", "matricula", "cargo", "setor", "telefone", "ativo"]
         widgets = {
             "nome": forms.TextInput(attrs={"placeholder": "Nome completo"}),
@@ -102,7 +100,6 @@ class ColaboradorAdminForm(ColaboradorForm):
 
         u = getattr(self.instance, "user", None)
         if u:
-            # Já tem usuário: esconder campos de criação e carregar grupos atuais
             self.fields["criar_usuario"].widget = forms.HiddenInput()
             self.fields["username"].widget = forms.HiddenInput()
             self.fields["password1"].widget = forms.HiddenInput()
@@ -113,11 +110,9 @@ class ColaboradorAdminForm(ColaboradorForm):
 
     def clean(self):
         cleaned = super().clean()
-        # Normaliza username se vier preenchido
         if cleaned.get("username"):
             cleaned["username"] = cleaned["username"].strip()
 
-        # Se senha foi digitada, validar consistência
         p1, p2 = cleaned.get("password1"), cleaned.get("password2")
         if p1 or p2:
             if not p1 or not p2:
@@ -125,7 +120,6 @@ class ColaboradorAdminForm(ColaboradorForm):
             elif p1 != p2:
                 self.add_error("password2", "As senhas não conferem.")
 
-        # Se o usuário digitou 'username' e pediu para criar usuário, checar unicidade
         if cleaned.get("criar_usuario") and cleaned.get("username"):
             if User.objects.filter(username=cleaned["username"]).exists():
                 self.add_error("username", "Este username já existe.")
@@ -156,9 +150,7 @@ class ColaboradorAdminForm(ColaboradorForm):
         colab = super().save(commit=commit)
         u = getattr(colab, "user", None)
 
-        # Já tem usuário ligado? Sincroniza e-mail, ativo e grupos.
         if u:
-            # Sincroniza email/is_active com o form do colaborador
             email = self.cleaned_data.get("email")
             if email is not None:
                 u.email = email
@@ -174,7 +166,6 @@ class ColaboradorAdminForm(ColaboradorForm):
                 u.save()
             return colab
 
-        # Criar usuário novo se marcado
         if self.cleaned_data.get("criar_usuario"):
             username = self._build_unique_username()
             password = self.cleaned_data.get("password1") or get_random_string(12)
@@ -225,7 +216,6 @@ class RegisterForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=commit)
         if commit:
-            # Garante Colaborador vinculado
             colab, _ = Colaborador.objects.get_or_create(
                 email=self.cleaned_data["email"],
                 defaults={
@@ -239,7 +229,6 @@ class RegisterForm(UserCreationForm):
                 colab.user = user
                 colab.save(update_fields=["user"])
 
-            # Atribui ao grupo "Colaborador" (se existir)
             try:
                 g, _ = Group.objects.get_or_create(name="Colaborador")
                 user.groups.add(g)

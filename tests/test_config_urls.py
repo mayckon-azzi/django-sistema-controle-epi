@@ -1,6 +1,5 @@
 # tests/test_config_urls.py
 import importlib
-
 import pytest
 from django.conf import settings
 from django.test import override_settings
@@ -40,20 +39,17 @@ def test_admin_login_page_accessible(client):
 def test_static_urlpatterns_toggle_with_debug():
     original_debug = settings.DEBUG
 
-    # DEBUG=True -> deve adicionar padrões estáticos
     with override_settings(DEBUG=True):
-        _reload_urls()  # também limpa cache
+        _reload_urls() 
         path = f"{settings.MEDIA_URL.rstrip('/')}/test.txt"
         match = resolve(path)
         assert match is not None
 
-    # DEBUG=False -> não deve resolver MEDIA_URL
     with override_settings(DEBUG=False):
-        _reload_urls()  # também limpa cache
+        _reload_urls()  
         path = f"{settings.MEDIA_URL.rstrip('/')}/test.txt"
         with pytest.raises(Resolver404):
             resolve(path)
 
-    # restaura
     with override_settings(DEBUG=original_debug):
         _reload_urls()

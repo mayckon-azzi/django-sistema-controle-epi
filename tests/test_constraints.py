@@ -1,6 +1,5 @@
 import pytest
 from django.db import IntegrityError
-
 from app_epis.models import EPI
 
 

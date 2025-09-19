@@ -1,8 +1,8 @@
+# tests/test_epis_views.py
 import pytest
 from django.contrib.auth.models import Permission, User
 from django.db.models.deletion import ProtectedError
 from django.urls import reverse
-
 from app_epis.models import EPI, CategoriaEPI
 
 
@@ -20,38 +20,34 @@ def test_lista_filters_and_flags(client):
     cat2 = CategoriaEPI.objects.create(nome="Capacete")
     EPI.objects.create(
         codigo="L1", nome="Luva A", categoria=cat1, estoque=2, estoque_minimo=5
-    )  # abaixo
+    )  
     EPI.objects.create(
         codigo="L2", nome="Luva B", categoria=cat1, estoque=10, estoque_minimo=5
-    )  # ok
+    )  
     EPI.objects.create(
         codigo="C1", nome="Capacete", categoria=cat2, estoque=0, estoque_minimo=0, ativo=False
     )
 
     url = reverse("app_epis:lista")
 
-    # sem filtros
     resp = client.get(url)
     assert resp.status_code == 200
     html = resp.content.decode().lower()
     assert "luva a" in html and "luva b" in html and "capacete" in html
 
-    # filtro por q
     resp = client.get(url + "?q=luva")
     html = resp.content.decode().lower()
     assert "luva a" in html and "luva b" in html and "capacete" not in html
 
-    # filtro categoria
     resp = client.get(url + f"?categoria={cat2.id}")
     html = resp.content.decode().lower()
     assert "capacete" in html and "luva a" not in html
 
-    # somente ativos
     resp = client.get(url + "?ativos=1")
     html = resp.content.decode().lower()
-    assert "capacete" not in html  # estava inativo
+    assert "capacete" not in html  
 
-    # abaixo do mínimo
+ 
     resp = client.get(url + "?abaixo=1")
     html = resp.content.decode().lower()
     assert "luva a" in html and "luva b" not in html
@@ -60,11 +56,10 @@ def test_lista_filters_and_flags(client):
 @pytest.mark.django_db
 def test_criar_requires_login_and_perm(client):
     url = reverse("app_epis:criar")
-    # não logado -> redirect
+
     resp = client.get(url)
     assert resp.status_code in (302, 303)
 
-    # logado sem perm -> 403
     u = User.objects.create_user("u1", password="x")
     client.force_login(u)
     assert client.get(url).status_code == 403
@@ -115,7 +110,6 @@ def test_editar_success_message_and_redirects_to_same_page(client):
     assert resp.status_code == 200
     epi.refresh_from_db()
     assert epi.nome == "Luva Editada"
-    # nossa view mostra mensagem e permanece na tela de edição
     assert "atualizado com sucesso" in resp.content.decode().lower()
 
 
@@ -137,7 +131,6 @@ def test_excluir_protected_error_shows_error_message(monkeypatch, client):
     cat = CategoriaEPI.objects.create(nome="Luvas")
     epi = EPI.objects.create(codigo="L1", nome="Luva", categoria=cat, estoque=1)
 
-    # força erro de proteção de FK (simula entregas associadas)
     def boom(*a, **k):
         raise ProtectedError("tem fk", [])
 

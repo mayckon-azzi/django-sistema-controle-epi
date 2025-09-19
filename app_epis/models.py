@@ -1,3 +1,4 @@
+# app_epis/models.py
 from django.db import IntegrityError, models
 
 
@@ -27,11 +28,8 @@ class EPI(models.Model):
     categoria = models.ForeignKey(CategoriaEPI, on_delete=models.PROTECT, related_name="epis")
     tamanho = models.CharField(max_length=3, choices=TAMANHO_CHOICES, blank=True)
     ativo = models.BooleanField(default=True)
-
-    # Estoque
     estoque = models.PositiveIntegerField(default=0)
     estoque_minimo = models.PositiveIntegerField(default=0, blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
