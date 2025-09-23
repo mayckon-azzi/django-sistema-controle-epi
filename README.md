@@ -236,17 +236,19 @@ cd senai-imersao-sabadou
 # 2) Criar o arquivo .env (exemplo abaixo)
 
 DJANGO_DEBUG=1
-DJANGO_SECRET_KEY=dev-secret-change-me
+DJANGO_SECRET_KEY=dev-secret
 DJANGO_ALLOWED_HOSTS=*
 
 DB_ENGINE=mysql
 DB_NAME=controle_epi
 DB_USER=root
-DB_PASSWORD=
+DB_PASSWORD=root
 DB_HOST=db
 DB_PORT=3306
 
 TZ=America/Sao_Paulo
+
+MYSQL_ROOT_PASSWORD=rootpass123
 
 # Linux/Mac:
 cp .env.example .env
@@ -321,7 +323,37 @@ Para ajustes de tema (cores, espaçamentos), altere static/css/variables.css.
 
 ## Coverage de Testes com Codecov
 
+```bash
+# Criar arquivo de configuração .coveragerc (exemplo abaixo)
+
+[run]
+branch = True
+source =
+    app_core
+    app_colaboradores
+    app_epis
+    app_entregas
+    app_relatorios
+omit =
+    */migrations/*
+    manage.py
+    config/asgi.py
+    config/wsgi.py
+    config/settings.py
+    */admin.py
+    */apps.py
+
+[report]
+show_missing = True
+skip_covered = True
+precision = 2
+
+```
+### Testes realizados usando Codecov podem ser analisados logo abaixo:
+
+
 [![codecov](https://codecov.io/gh/jonathaneichenberger/senai-imersao-sabadou/branch/main/graph/badge.svg)](https://app.codecov.io/gh/<org-ou-usuario>/senai-imersao-sabadou)
+
 
 [🔝 Voltar ao Índice](#índice)
 

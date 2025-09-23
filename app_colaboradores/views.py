@@ -1,3 +1,4 @@
+# app_colaboradores/views.py
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LoginView, redirect_to_login
