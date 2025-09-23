@@ -5,6 +5,7 @@ from django.contrib.auth.models import Group, User
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.crypto import get_random_string
+
 from .models import Colaborador
 
 

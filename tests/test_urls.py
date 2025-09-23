@@ -4,4 +4,4 @@ from django.urls import reverse
 
 def test_urls():
     assert reverse("app_core:home")
-    assert reverse("app_colaboradores:lista")  
+    assert reverse("app_colaboradores:lista")

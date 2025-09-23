@@ -1,6 +1,7 @@
 # tests/test_app_core_templates.py
 import pytest
 from django.urls import reverse
+
 pytestmark = pytest.mark.django_db
 
 
@@ -13,4 +14,4 @@ def test_messages_partial_is_included(client, settings):
     resp = client.get(url)
     assert resp.status_code == 200
     html = resp.content.decode("utf-8")
-    assert "messages" in html  
+    assert "messages" in html

@@ -3,6 +3,7 @@ import pytest
 from django.contrib.auth.models import Group, User
 from django.db import OperationalError
 from django.urls import reverse
+
 from app_colaboradores.models import Colaborador
 
 

@@ -2,10 +2,12 @@
 import csv
 import io
 from datetime import timedelta
+
 import pytest
 from django.contrib.auth.models import Permission, User
 from django.urls import reverse
 from django.utils import timezone
+
 from app_colaboradores.models import Colaborador
 from app_entregas.models import Entrega
 from app_epis.models import EPI, CategoriaEPI
@@ -23,7 +25,7 @@ def test_form_date_range_validation():
     form = RelatorioEntregasForm(
         data={
             "data_de": "2025-01-10",
-            "data_ate": "2025-01-01", 
+            "data_ate": "2025-01-01",
         }
     )
     assert not form.is_valid()

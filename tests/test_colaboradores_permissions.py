@@ -18,7 +18,7 @@ def test_lista_requires_permission_403(client):
     client.force_login(u)
     url = reverse("app_colaboradores:lista")
     resp = client.get(url)
-    assert resp.status_code == 403  
+    assert resp.status_code == 403
 
 
 @pytest.mark.django_db

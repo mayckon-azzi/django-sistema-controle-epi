@@ -1,6 +1,7 @@
 # tests/test_app_core_views.py
 import pytest
 from django.urls import reverse
+
 pytestmark = pytest.mark.django_db
 
 

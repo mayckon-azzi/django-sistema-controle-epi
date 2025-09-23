@@ -1,5 +1,6 @@
 # tests/test_config_urls.py
 import importlib
+
 import pytest
 from django.conf import settings
 from django.test import override_settings
@@ -40,13 +41,13 @@ def test_static_urlpatterns_toggle_with_debug():
     original_debug = settings.DEBUG
 
     with override_settings(DEBUG=True):
-        _reload_urls() 
+        _reload_urls()
         path = f"{settings.MEDIA_URL.rstrip('/')}/test.txt"
         match = resolve(path)
         assert match is not None
 
     with override_settings(DEBUG=False):
-        _reload_urls()  
+        _reload_urls()
         path = f"{settings.MEDIA_URL.rstrip('/')}/test.txt"
         with pytest.raises(Resolver404):
             resolve(path)

@@ -2,6 +2,7 @@
 import pytest
 from django.contrib.auth.models import User
 from django.urls import reverse
+
 from app_colaboradores.models import Colaborador
 
 
@@ -17,4 +18,4 @@ def test_perfil_autolinka_por_email_quando_possivel(client):
 
     c = Colaborador.objects.get(matricula="A1")
     c.refresh_from_db()
-    assert c.user == u 
+    assert c.user == u

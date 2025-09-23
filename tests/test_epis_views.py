@@ -3,6 +3,7 @@ import pytest
 from django.contrib.auth.models import Permission, User
 from django.db.models.deletion import ProtectedError
 from django.urls import reverse
+
 from app_epis.models import EPI, CategoriaEPI
 
 
@@ -18,12 +19,8 @@ def _login_with_perms(client, *codenames):
 def test_lista_filters_and_flags(client):
     cat1 = CategoriaEPI.objects.create(nome="Luvas")
     cat2 = CategoriaEPI.objects.create(nome="Capacete")
-    EPI.objects.create(
-        codigo="L1", nome="Luva A", categoria=cat1, estoque=2, estoque_minimo=5
-    )  
-    EPI.objects.create(
-        codigo="L2", nome="Luva B", categoria=cat1, estoque=10, estoque_minimo=5
-    )  
+    EPI.objects.create(codigo="L1", nome="Luva A", categoria=cat1, estoque=2, estoque_minimo=5)
+    EPI.objects.create(codigo="L2", nome="Luva B", categoria=cat1, estoque=10, estoque_minimo=5)
     EPI.objects.create(
         codigo="C1", nome="Capacete", categoria=cat2, estoque=0, estoque_minimo=0, ativo=False
     )
@@ -45,9 +42,8 @@ def test_lista_filters_and_flags(client):
 
     resp = client.get(url + "?ativos=1")
     html = resp.content.decode().lower()
-    assert "capacete" not in html  
+    assert "capacete" not in html
 
- 
     resp = client.get(url + "?abaixo=1")
     html = resp.content.decode().lower()
     assert "luva a" in html and "luva b" not in html

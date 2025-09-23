@@ -15,6 +15,7 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
+
 from .forms import (
     ColaboradorAdminForm,
     ColaboradorFotoForm,
@@ -189,6 +190,7 @@ class PerfilView(LoginRequiredMixin, TemplateView):
     - /colaboradores/perfil/         -> perfil do usuário logado (autovínculo por e-mail se possível)
     - /colaboradores/perfil/<pk>/    -> requer permissão 'view_colaborador', exceto se for o próprio
     """
+
     login_url = reverse_lazy("app_colaboradores:entrar")
     template_name = "app_colaboradores/pages/perfil.html"
 

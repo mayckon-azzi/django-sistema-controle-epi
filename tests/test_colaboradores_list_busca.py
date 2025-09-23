@@ -2,6 +2,7 @@
 import pytest
 from django.contrib.auth.models import Permission, User
 from django.urls import reverse
+
 from app_colaboradores.models import Colaborador
 
 

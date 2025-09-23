@@ -2,6 +2,7 @@
 import pytest
 from django.contrib.auth.models import Group, Permission, User
 from django.urls import reverse
+
 from app_colaboradores.models import Colaborador
 
 
@@ -83,8 +84,8 @@ def test_editar_updates_user_email_and_active_and_groups(client):
             "funcao": "",
             "setor": "",
             "telefone": "",
-            "ativo": "", 
-            "groups": [g2.id],  
+            "ativo": "",
+            "groups": [g2.id],
         },
         follow=True,
     )

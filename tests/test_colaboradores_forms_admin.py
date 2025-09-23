@@ -1,6 +1,7 @@
 # tests/test_colaboradores_forms_admin.py
 import pytest
 from django.contrib.auth.models import Group, User
+
 from app_colaboradores.forms import ColaboradorAdminForm
 from app_colaboradores.models import Colaborador
 
@@ -47,7 +48,7 @@ def test_adminform_updates_existing_user_fields_and_groups():
             "cargo": "",
             "setor": "",
             "telefone": "",
-            "ativo": "",  
+            "ativo": "",
             "groups": [g.id],
         },
     )
@@ -74,7 +75,7 @@ def test_adminform_clean_password_mismatch_raises_error():
             "criar_usuario": "on",
             "username": "teste",
             "password1": "a",
-            "password2": "b", 
+            "password2": "b",
         }
     )
     assert not form.is_valid()

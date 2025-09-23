@@ -1,6 +1,7 @@
 # tests/test_epis_models.py
 import pytest
 from django.db import DataError, IntegrityError
+
 from app_epis.models import EPI, CategoriaEPI
 
 

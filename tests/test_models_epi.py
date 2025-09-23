@@ -1,6 +1,7 @@
 # tests/test_models_epi.py
 import pytest
-from django.db import DataError, IntegrityError 
+from django.db import DataError, IntegrityError
+
 from app_epis.models import EPI, CategoriaEPI
 
 
@@ -21,5 +22,5 @@ def test_epi_estoque_nao_negativo_constraint():
             codigo="LUV-001",
             nome="Luva Nitrílica",
             categoria=cat,
-            estoque=-1, 
+            estoque=-1,
         )

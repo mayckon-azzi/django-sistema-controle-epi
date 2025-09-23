@@ -1,10 +1,13 @@
 # tests/test_colaboradores_views_extra.py
 from itertools import count
+
 import pytest
 from django.contrib.auth.models import Permission, User
 from django.db import IntegrityError
 from django.urls import reverse
+
 from app_colaboradores.models import Colaborador
+
 _seq = count(1)
 
 
@@ -60,7 +63,7 @@ def test_lista_anonymous_redirects_to_login(client):
 
 @pytest.mark.django_db
 def test_lista_no_perm_returns_403(client):
-    u = make_user_with_perms() 
+    u = make_user_with_perms()
     client.force_login(u)
     r = client.get(reverse("app_colaboradores:lista"))
     assert r.status_code == 403
@@ -189,7 +192,7 @@ def test_perfil_autolinks_by_email_and_shows_info_message(client):
 @pytest.mark.django_db
 def test_perfil_missing_redirects_to_create_when_user_can_add(client):
     u = make_user_with_perms("add_colaborador")
-    u.email = "" 
+    u.email = ""
     u.save(update_fields=["email"])
     client.force_login(u)
 
@@ -202,8 +205,8 @@ def test_perfil_missing_redirects_to_create_when_user_can_add(client):
 
 @pytest.mark.django_db
 def test_perfil_missing_redirects_home_when_no_perm(client):
-    u = make_user_with_perms() 
-    u.email = ""  
+    u = make_user_with_perms()
+    u.email = ""
     u.save(update_fields=["email"])
     client.force_login(u)
 
