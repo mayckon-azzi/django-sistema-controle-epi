@@ -1,9 +1,9 @@
-﻿#!/bin/sh
+#!/bin/sh
 set -e
 
 echo "Esperando MySQL em ${DB_HOST}:${DB_PORT}..."
 until python - <<'PYCODE'
-import os, socket, time
+import os, socket
 host = os.environ.get("DB_HOST","db")
 port = int(os.environ.get("DB_PORT","3306"))
 s = socket.socket()
@@ -20,11 +20,8 @@ do
   sleep 2
 done
 
-echo "Aplicando migraÃ§Ãµes..."
+echo "Aplicando migrações..."
 python manage.py migrate --noinput
-
-# Opcional: coletar estÃ¡ticos em produÃ§Ã£o
-# python manage.py collectstatic --noinput
 
 echo "Subindo Django em 0.0.0.0:8000"
 python manage.py runserver 0.0.0.0:8000

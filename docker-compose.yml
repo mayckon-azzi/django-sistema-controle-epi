@@ -28,9 +28,9 @@ services:
 
   web:
     image: djohnni/sistema-controle-epi:latest
-    build: .
+    #build: .
     container_name: epi_web
-    command: ["/bin/sh", "/app/entrypoint.sh"]
+    command: ["/app/entrypoint.sh"]
     env_file:
       - .env
     environment:
