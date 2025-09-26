@@ -1,26 +1,24 @@
 FROM python:3.12-slim
 
-# Evita .pyc e ativa stdout sem buffer
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Dependências do sistema para compilar mysqlclient
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential default-libmysqlclient-dev pkg-config dos2unix \
+      build-essential default-libmysqlclient-dev pkg-config dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
-# Copia e instala dependências Python
-COPY requirements.txt /app/requirements.txt
-RUN pip install --upgrade pip && pip install -r /app/requirements.txt
-
-# Copia o projeto
+# copia tudo (incluindo entrypoint.sh)
 COPY . /app
 
-# Converte entrypoint para Unix LF (remove CRLF do Windows) e garante permissão
-RUN dos2unix /app/entrypoint.sh || true
-RUN chmod +x /app/entrypoint.sh
+# garante que entrypoint exista, conserta line endings e permissão
+RUN if [ -f /app/entrypoint.sh ]; then \
+      sed -i '1s/^\xEF\xBB\xBF//' /app/entrypoint.sh || true; \
+      dos2unix /app/entrypoint.sh || true; \
+      chmod +x /app/entrypoint.sh; \
+    else echo "WARN: /app/entrypoint.sh not found during build"; fi
 
-# Define entrypoint
+RUN pip install --upgrade pip && pip install -r /app/requirements.txt
+
 ENTRYPOINT ["/app/entrypoint.sh"]

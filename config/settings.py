@@ -18,6 +18,12 @@ load_dotenv(BASE_DIR / ".env")
 IN_DOCKER = os.path.exists("/.dockerenv") or os.getenv("IN_DOCKER") == "1"
 IS_TEST = ("PYTEST_CURRENT_TEST" in os.environ) or ("test" in sys.argv)
 
+# --- Compatibilidade MySQL no Windows ---
+ON_WINDOWS = sys.platform.startswith("win")
+if ON_WINDOWS:
+    import pymysql
+    pymysql.install_as_MySQLdb()
+
 # --- Segurança / Debug ---
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-change-me")
 DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"

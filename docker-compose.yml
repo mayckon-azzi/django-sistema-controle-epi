@@ -11,14 +11,13 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}   # << OBRIGATÓRIO
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} 
       TZ: ${TZ}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      # use credencial válida (root com senha OU o usuário admin)
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p${MYSQL_ROOT_PASSWORD} --silent"]
       interval: 5s
       timeout: 5s
@@ -27,18 +26,15 @@ services:
     restart: unless-stopped
 
   web:
+    build: .
     image: djohnni/sistema-controle-epi:latest
-    #build: .
     container_name: epi_web
-    command: ["/app/entrypoint.sh"]
     env_file:
       - .env
     environment:
       TZ: ${TZ}
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
     depends_on:
       db:
         condition: service_healthy
