@@ -22,6 +22,7 @@ IS_TEST = ("PYTEST_CURRENT_TEST" in os.environ) or ("test" in sys.argv)
 ON_WINDOWS = sys.platform.startswith("win")
 if ON_WINDOWS:
     import pymysql
+
     pymysql.install_as_MySQLdb()
 
 # --- Segurança / Debug ---
