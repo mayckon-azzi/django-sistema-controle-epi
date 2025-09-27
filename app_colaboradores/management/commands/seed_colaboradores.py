@@ -1,3 +1,5 @@
+# app_colaboradores/management/commands/seed_colaboradores.py
+from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 
 from app_colaboradores.models import Colaborador
@@ -83,13 +85,44 @@ SEED = [
         "setor": "TI",
         "telefone": "11999990010",
     },
+    # extras
+    {
+        "nome": "João Pereira",
+        "email": "joao@empresa.com",
+        "matricula": "C011",
+        "cargo": "Operador",
+        "setor": "Produção",
+        "telefone": "11999990011",
+    },
+    {
+        "nome": "Mariana Costa",
+        "email": "mariana@empresa.com",
+        "matricula": "C012",
+        "cargo": "Engenheira",
+        "setor": "Projetos",
+        "telefone": "11999990012",
+    },
 ]
 
 
 class Command(BaseCommand):
-    help = "Popula colaboradores de exemplo"
+    help = "Popula colaboradores de exemplo (idempotente)."
 
-    def handle(self, *args, **kwargs):
+    def handle(self, *args, **options):
+        created = 0
         for d in SEED:
-            Colaborador.objects.get_or_create(email=d["email"], defaults=d)
-        self.stdout.write(self.style.SUCCESS("Seed de colaboradores concluído."))
+            colab, was_created = Colaborador.objects.get_or_create(email=d["email"], defaults=d)
+            if was_created:
+                created += 1
+            else:
+                changed = False
+                for key in ("nome", "matricula", "cargo", "setor", "telefone"):
+                    if d.get(key) and getattr(colab, key) != d.get(key):
+                        setattr(colab, key, d.get(key))
+                        changed = True
+                if changed:
+                    colab.save()
+        total = Colaborador.objects.count()
+        Group.objects.get_or_create(name="almoxarife")
+        Group.objects.get_or_create(name="colaborador")
+        self.stdout.write(self.style.SUCCESS(f"Colaboradores: criados={created} total={total}"))
