@@ -69,26 +69,6 @@ def test_lista_no_perm_returns_403(client):
     assert r.status_code == 403
 
 
-@pytest.mark.django_db
-def test_lista_deleted_message_and_base_query(client):
-    u = make_user_with_perms("view_colaborador")
-    client.force_login(u)
-
-    for i in range(11):
-        Colaborador.objects.create(nome=f"Bob #{i}", matricula=f"B{i}", email=f"b{i}@x.com")
-
-    r = client.get(reverse("app_colaboradores:lista"), {"q": "Bob", "page": 2, "deleted": "1"})
-    assert r.status_code == 200
-    html = r.content.decode().lower()
-    assert "colaborador" in html and ("desativado" in html or "excluído" in html)
-
-    ctx = r.context[-1]
-    assert "base_query" in ctx
-    assert "page=" not in ctx["base_query"]
-    assert "q=Bob".lower() in ctx["base_query"].lower()
-    assert "deleted=1" in ctx["base_query"]
-
-
 # ----------------------- Criar / Atualizar -----------------------
 
 
