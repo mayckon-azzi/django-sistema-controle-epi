@@ -52,15 +52,13 @@ class ColaboradorForm(forms.ModelForm):
             "ativo": forms.CheckboxInput(),
         }
 
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         _bootstrapify_fields(self)
-
+        
+        
     def clean_matricula(self):
-        """
-        Normaliza para UPPER e valida unicidade case-insensitive.
-        Faz o exclude do próprio registro em edições.
-        """
         value = (self.cleaned_data.get("matricula") or "").strip().upper()
         if not value:
             return value

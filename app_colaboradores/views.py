@@ -5,6 +5,7 @@ from django.contrib.auth.views import LoginView, redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
 from django.db.utils import OperationalError, ProgrammingError
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils.http import urlencode
@@ -68,16 +69,6 @@ class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListVi
             )
         return qs.order_by("nome", "id")
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        params = self.request.GET.copy()
-        params.pop("page", None)
-        ctx["q"] = self.request.GET.get("q", "")
-        ctx["base_query"] = params.urlencode()
-
-        if self.request.GET.get("deleted") == "1":
-            messages.success(self.request, "Colaborador excluído.")
-        return ctx
 
     def handle_no_permission(self):
         if not self.request.user.is_authenticated:
@@ -147,16 +138,27 @@ class ExcluirColaboradorView(LoginRequiredMixin, PermissionRequiredMixin, Delete
     template_name = "app_colaboradores/pages/confirm_delete.html"
     success_url = reverse_lazy("app_colaboradores:lista")
 
+    def post(self, request, *args, **kwargs):
+        colab = get_object_or_404(Colaborador, pk=kwargs.get("pk"))
+        if not colab.ativo:
+            messages.info(request, "Colaborador já está desativado.")
+            return HttpResponseRedirect(self.get_success_url())
+
+        colab.ativo = False
+        colab.save(update_fields=["ativo"])
+        messages.success(request, "Colaborador desativado com sucesso.")
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get(self, request, *args, **kwargs):
+        colab = get_object_or_404(Colaborador, pk=kwargs.get("pk"))
+        return render(request, "app_colaboradores/pages/confirm_delete.html", {"object": colab})
+
     def get_success_url(self):
-        base = super().get_success_url()
+        base = str(self.success_url)
         return f"{base}?{urlencode({'deleted': '1'})}"
 
 
 def registrar(request):
-    """
-    Registro de usuário + criação/associação de Colaborador (via RegisterForm).
-    Trata erro de banco (sem migração).
-    """
     erro_banco = None
     if request.method == "POST":
         form = RegisterForm(request.POST)
@@ -195,10 +197,6 @@ class PerfilView(LoginRequiredMixin, TemplateView):
     template_name = "app_colaboradores/pages/perfil.html"
 
     def _get_or_autolink_user_colab(self):
-        """
-        Retorna o Colaborador do usuário atual. Se não houver, tenta vincular automaticamente
-        por e-mail (quando existir exatamente um Colaborador sem user com o mesmo e-mail).
-        """
         user = self.request.user
         colab = Colaborador.objects.filter(user=user).first()
         if colab:

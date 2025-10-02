@@ -145,8 +145,10 @@ def test_excluir_appends_deleted_queryparam_and_list_shows_message(client):
     assert r.redirect_chain
     final_url, _ = r.redirect_chain[-1]
     assert "deleted=1" in final_url
-    assert "colaborador excluído" in r.content.decode().lower()
-    assert not Colaborador.objects.filter(pk=c.pk).exists()
+    assert "desativado" in r.content.decode().lower()
+    assert Colaborador.objects.filter(pk=c.pk).exists()
+    c.refresh_from_db()
+    assert c.ativo is False
 
 
 # ----------------------- registrar -----------------------

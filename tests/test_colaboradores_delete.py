@@ -7,7 +7,7 @@ from app_colaboradores.models import Colaborador
 
 
 @pytest.mark.django_db
-def test_delete_colaborador_shows_message_and_removes(client):
+def test_delete_colaborador_shows_message_and_soft_deactivates(client):
     u = User.objects.create_user("adm", password="x")
     u.user_permissions.add(
         Permission.objects.get(codename="view_colaborador"),
@@ -19,5 +19,7 @@ def test_delete_colaborador_shows_message_and_removes(client):
     url = reverse("app_colaboradores:excluir", kwargs={"pk": c.pk})
     resp = client.post(url, follow=True)
     assert resp.status_code == 200
-    assert not Colaborador.objects.filter(pk=c.pk).exists()
-    assert "excluído" in resp.content.decode().lower()
+    assert Colaborador.objects.filter(pk=c.pk).exists()
+    c.refresh_from_db()
+    assert c.ativo is False
+    assert "desativado" in resp.content.decode().lower()

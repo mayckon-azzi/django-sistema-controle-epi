@@ -98,11 +98,13 @@ def test_editar_updates_user_email_and_active_and_groups(client):
 
 
 @pytest.mark.django_db
-def test_delete_redirects_and_removes(client):
+def test_delete_redirects_and_soft_deactivates(client):
     user = make_user_with_perms("delete_colaborador", "view_colaborador")
     client.force_login(user)
     c = Colaborador.objects.create(nome="X", matricula="Z9")
     url = reverse("app_colaboradores:excluir", kwargs={"pk": c.pk})
     resp = client.post(url, follow=True)
     assert resp.status_code == 200
-    assert not Colaborador.objects.filter(pk=c.pk).exists()
+    assert Colaborador.objects.filter(pk=c.pk).exists()
+    c.refresh_from_db()
+    assert c.ativo is False
