@@ -18,11 +18,21 @@
 
   <div class="card-body">
     <form method="get" class="row g-2 align-items-end mb-3">
-      <div class="col-12 col-md-8 col-lg-6">
+      <div class="col-12 col-md-6 col-lg-5">
         <label class="form-label">Buscar</label>
         <input type="text" name="q" value="{{ q }}" class="form-control"
                placeholder="Nome, e-mail, matrícula, cargo ou setor">
       </div>
+
+      <div class="col-12 col-md-3 col-lg-2">
+        <label class="form-label" for="id_ativo">Status</label>
+        <select name="ativo" id="id_ativo" class="form-select">
+          <option value="" {% if ativo == "" or not ativo %}selected{% endif %}>Todos</option>
+          <option value="1" {% if ativo == "1" %}selected{% endif %}>Ativos</option>
+          <option value="0" {% if ativo == "0" %}selected{% endif %}>Inativos</option>
+        </select>
+      </div>
+
       <div class="col-12 col-md-auto">
         <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Filtrar</button>
         <a class="btn btn-outline-secondary" href="{% url 'app_colaboradores:lista' %}">

@@ -57,6 +57,8 @@ class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListVi
     def get_queryset(self):
         qs = super().get_queryset().select_related("user")
         q = (self.request.GET.get("q") or "").strip()
+        ativo = self.request.GET.get("ativo", "").strip()
+
         if q:
             from django.db.models import Q
 
@@ -67,8 +69,19 @@ class ListaColaboradoresView(LoginRequiredMixin, PermissionRequiredMixin, ListVi
                 | Q(cargo__icontains=q)
                 | Q(setor__icontains=q)
             )
+
+        if ativo == "1":  # apenas ativos
+            qs = qs.filter(ativo=True)
+        elif ativo == "0":  # apenas inativos
+            qs = qs.filter(ativo=False)
+
         return qs.order_by("nome", "id")
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["q"] = self.request.GET.get("q", "")
+        ctx["ativo"] = self.request.GET.get("ativo", "")
+        return ctx
 
     def handle_no_permission(self):
         if not self.request.user.is_authenticated:
