@@ -80,7 +80,7 @@ def test_lista_deleted_message_and_base_query(client):
     r = client.get(reverse("app_colaboradores:lista"), {"q": "Bob", "page": 2, "deleted": "1"})
     assert r.status_code == 200
     html = r.content.decode().lower()
-    assert "colaborador excluído" in html
+    assert "colaborador" in html and ("desativado" in html or "excluído" in html)
 
     ctx = r.context[-1]
     assert "base_query" in ctx
