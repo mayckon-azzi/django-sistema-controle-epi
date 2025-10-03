@@ -4,7 +4,11 @@ from django.urls import reverse
 
 
 @pytest.mark.django_db
-def test_home_ok(client):
+def test_pagina_home_disponivel(client):
+    """
+    Verifica se a página inicial (home) está disponível
+    e retorna status HTTP 200.
+    """
     url = reverse("app_core:home")
-    resp = client.get(url)
-    assert resp.status_code == 200
+    resposta = client.get(url)
+    assert resposta.status_code == 200

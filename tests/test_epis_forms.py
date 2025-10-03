@@ -6,7 +6,11 @@ from app_epis.models import CategoriaEPI
 
 
 @pytest.mark.django_db
-def test_epi_form_creates_default_categories_and_bootstrap_classes():
+def test_formulario_epi_cria_categorias_padrao_e_classes_bootstrap():
+    """
+    Verifica se o formulário EPI cria categorias padrão quando não existem
+    e se os campos possuem as classes CSS corretas do Bootstrap.
+    """
     CategoriaEPI.objects.all().delete()
     form = EPIForm()
     for nome in DEFAULT_CATEGORIAS:
@@ -18,9 +22,15 @@ def test_epi_form_creates_default_categories_and_bootstrap_classes():
 
 
 @pytest.mark.django_db
-def test_epi_form_rejects_negative_values():
+def test_formulario_epi_rejeita_valores_negativos():
+    """
+    Testa se o formulário EPI valida corretamente valores negativos
+    nos campos 'estoque' e 'estoque_minimo'.
+    """
     cat = CategoriaEPI.objects.create(nome="Luvas")
-    data = {
+
+    # Estoque negativo
+    dados = {
         "nome": "Luva X",
         "codigo": "LUV-1",
         "categoria": cat.id,
@@ -29,11 +39,12 @@ def test_epi_form_rejects_negative_values():
         "estoque": -1,
         "estoque_minimo": 0,
     }
-    form = EPIForm(data=data)
+    form = EPIForm(data=dados)
     assert not form.is_valid()
     assert "estoque" in form.errors
 
-    data2 = data | {"codigo": "LUV-2", "estoque": 1, "estoque_minimo": -5}
-    form2 = EPIForm(data=data2)
+    # Estoque mínimo negativo
+    dados2 = dados | {"codigo": "LUV-2", "estoque": 1, "estoque_minimo": -5}
+    form2 = EPIForm(data=dados2)
     assert not form2.is_valid()
     assert "estoque_minimo" in form2.errors

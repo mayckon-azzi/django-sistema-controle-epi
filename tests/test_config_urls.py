@@ -7,8 +7,10 @@ from django.test import override_settings
 from django.urls import Resolver404, clear_url_caches, resolve, reverse
 
 
-def _reload_urls():
-    """Recarrega o módulo de urls principal e limpa o cache do resolver."""
+def recarregar_urls():
+    """
+    Recarrega o módulo de URLs principal e limpa o cache do resolver.
+    """
     import config.urls as urls_module
 
     importlib.reload(urls_module)
@@ -17,40 +19,55 @@ def _reload_urls():
 
 
 @pytest.mark.django_db
-def test_accounts_login_redirects_to_colaboradores_login(client):
-    resp = client.get("/accounts/login/", follow=False)
-    assert resp.status_code in (302, 303)
-    assert resp.headers["Location"].endswith(reverse("app_colaboradores:entrar"))
+def test_redirect_login_accounts_para_login_colaboradores(client):
+    """
+    Verifica se o acesso à URL '/accounts/login/' redireciona
+    corretamente para a página de login de colaboradores.
+    """
+    resposta = client.get("/accounts/login/", follow=False)
+    assert resposta.status_code in (302, 303)
+    assert resposta.headers["Location"].endswith(reverse("app_colaboradores:entrar"))
 
 
-def test_included_url_prefixes():
+def test_prefixos_urls_incluidas_sao_corretos():
+    """
+    Verifica se os prefixos das URLs incluídas em cada app estão corretos.
+    """
     assert reverse("app_colaboradores:lista").startswith("/colaboradores/")
     assert reverse("app_epis:lista").startswith("/epis/")
     assert reverse("app_entregas:lista").startswith("/entregas/")
     assert reverse("app_relatorios:index").startswith("/relatorios/")
 
 
-def test_admin_login_page_accessible(client):
-    resp = client.get("/admin/login/")
-    assert resp.status_code == 200
-    html = resp.content.decode().lower()
+def test_pagina_login_admin_disponivel(client):
+    """
+    Verifica se a página de login do admin está acessível
+    e contém campos de username e password.
+    """
+    resposta = client.get("/admin/login/")
+    assert resposta.status_code == 200
+    html = resposta.content.decode().lower()
     assert "username" in html and "password" in html
 
 
-def test_static_urlpatterns_toggle_with_debug():
-    original_debug = settings.DEBUG
+def test_toggle_static_urlpatterns_com_debug():
+    """
+    Testa se os padrões de URL estáticos funcionam corretamente
+    quando DEBUG=True e geram Resolver404 quando DEBUG=False.
+    """
+    debug_original = settings.DEBUG
 
     with override_settings(DEBUG=True):
-        _reload_urls()
-        path = f"{settings.MEDIA_URL.rstrip('/')}/test.txt"
-        match = resolve(path)
+        recarregar_urls()
+        caminho = f"{settings.MEDIA_URL.rstrip('/')}/test.txt"
+        match = resolve(caminho)
         assert match is not None
 
     with override_settings(DEBUG=False):
-        _reload_urls()
-        path = f"{settings.MEDIA_URL.rstrip('/')}/test.txt"
+        recarregar_urls()
+        caminho = f"{settings.MEDIA_URL.rstrip('/')}/test.txt"
         with pytest.raises(Resolver404):
-            resolve(path)
+            resolve(caminho)
 
-    with override_settings(DEBUG=original_debug):
-        _reload_urls()
+    with override_settings(DEBUG=debug_original):
+        recarregar_urls()

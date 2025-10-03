@@ -5,13 +5,13 @@ from django.urls import reverse
 pytestmark = pytest.mark.django_db
 
 
-def test_messages_partial_is_included(client, settings):
+def test_inclusao_parcial_de_mensagens_na_pagina_inicial(client, settings):
     """
-    Garante que o partial de mensagens esteja sendo renderizado
-    (verifica uma classe do alert do Bootstrap).
+    Verifica se o partial de mensagens está sendo corretamente incluído na página inicial,
+    conferindo se a classe de alert do Bootstrap aparece no HTML.
     """
     url = reverse("app_core:home")
-    resp = client.get(url)
-    assert resp.status_code == 200
-    html = resp.content.decode("utf-8")
+    resposta = client.get(url)
+    assert resposta.status_code == 200
+    html = resposta.content.decode("utf-8")
     assert "messages" in html

@@ -6,8 +6,13 @@ from app_colaboradores.models import Colaborador
 
 
 @pytest.mark.django_db
-def test_matricula_unica():
+def test_validacao_matricula_unica():
+    """
+    Verifica se o formulário de Colaborador valida corretamente
+    a restrição de matrícula única, impedindo duplicatas.
+    """
     Colaborador.objects.create(nome="X", matricula="ABC")
+
     form = ColaboradorForm(
         data={
             "nome": "Y",
@@ -19,5 +24,6 @@ def test_matricula_unica():
             "ativo": "on",
         }
     )
+
     assert not form.is_valid()
     assert "matrícula" in str(form.errors.get("matricula", "[]")).lower()

@@ -8,10 +8,14 @@ from app_colaboradores.models import Colaborador
 
 
 @pytest.mark.django_db
-def test_registrar_success_creates_user_and_colab(client):
+def test_registro_colaborador_cria_usuario_e_colaborador(client):
+    """
+    Verifica se o registro de um novo colaborador cria corretamente
+    o usuário e o colaborador no sistema.
+    """
     Group.objects.get_or_create(name="Colaborador")  # grupo padrão usado no form
     url = reverse("app_colaboradores:registrar")
-    resp = client.post(
+    resposta = client.post(
         url,
         data={
             "username": "novo",
@@ -23,22 +27,25 @@ def test_registrar_success_creates_user_and_colab(client):
         },
         follow=True,
     )
-    assert resp.status_code == 200
+    assert resposta.status_code == 200
     assert User.objects.filter(username="novo").exists()
     assert Colaborador.objects.filter(email="novo@empresa.com").exists()
 
 
 @pytest.mark.django_db
-def test_registrar_handles_db_error_gracefully(client, monkeypatch):
+def test_registro_trata_erro_banco_de_dados(client, monkeypatch):
+    """
+    Testa se o formulário de registro trata erros de banco de dados
+    de forma graciosa, exibindo mensagem adequada sem quebrar a página.
+    """
     url = reverse("app_colaboradores:registrar")
     from app_colaboradores import views as colab_views
 
-    def boom(*a, **k):
+    def falha(*args, **kwargs):
         raise OperationalError("db down")
 
-    monkeypatch.setattr(colab_views.RegisterForm, "save", boom)
-
-    resp = client.post(
+    monkeypatch.setattr(colab_views.RegisterForm, "save", falha)
+    resposta = client.post(
         url,
         data={
             "username": "x",
@@ -50,5 +57,5 @@ def test_registrar_handles_db_error_gracefully(client, monkeypatch):
         },
         follow=True,
     )
-    assert resp.status_code == 200
-    assert "Banco de dados não inicializado".lower() in resp.content.decode().lower()
+    assert resposta.status_code == 200
+    assert "Banco de dados não inicializado".lower() in resposta.content.decode().lower()

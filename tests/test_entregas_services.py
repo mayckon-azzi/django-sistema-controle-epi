@@ -8,36 +8,52 @@ from app_epis.models import EPI, CategoriaEPI
 
 
 @pytest.mark.django_db
-def test_movimenta_por_entrega_create_and_update_and_delete():
-    cat = CategoriaEPI.objects.create(nome="Luvas")
-    epi = EPI.objects.create(codigo="L1", nome="Luva", categoria=cat, estoque=10, estoque_minimo=0)
+def test_movimenta_epi_por_entrega_create_update_e_delete():
+    """
+    Testa se a função movimenta_por_entrega ajusta corretamente o estoque
+    ao criar, atualizar e excluir uma entrega.
+    """
+    categoria = CategoriaEPI.objects.create(nome="Luvas")
+    epi = EPI.objects.create(
+        codigo="L1", nome="Luva", categoria=categoria, estoque=10, estoque_minimo=0
+    )
 
-    e = Entrega(epi=epi, quantidade=3, status=Entrega.Status.EMPRESTADO)
-    movimenta_por_entrega(e, antiga=None)
+    # Criar entrega EMPRESTADO
+    entrega = Entrega(epi=epi, quantidade=3, status=Entrega.Status.EMPRESTADO)
+    movimenta_por_entrega(entrega, antiga=None)
     epi.refresh_from_db()
     assert epi.estoque == 7
 
+    # Atualizar entrega para DEVOLVIDO
     antiga = Entrega(epi=epi, quantidade=3, status=Entrega.Status.EMPRESTADO)
-    e2 = Entrega(epi=epi, quantidade=3, status=Entrega.Status.DEVOLVIDO)
-    movimenta_por_entrega(e2, antiga=antiga)
+    entrega2 = Entrega(epi=epi, quantidade=3, status=Entrega.Status.DEVOLVIDO)
+    movimenta_por_entrega(entrega2, antiga=antiga)
     epi.refresh_from_db()
     assert epi.estoque == 10
 
-    e3 = Entrega(epi=epi, quantidade=2, status=Entrega.Status.PERDIDO)
-    movimenta_por_entrega(e3, antiga=None)
+    # Criar entrega PERDIDO
+    entrega3 = Entrega(epi=epi, quantidade=2, status=Entrega.Status.PERDIDO)
+    movimenta_por_entrega(entrega3, antiga=None)
     epi.refresh_from_db()
     assert epi.estoque == 8
-    movimenta_por_exclusao(e3)
+
+    # Exclusão da entrega
+    movimenta_por_exclusao(entrega3)
     epi.refresh_from_db()
     assert epi.estoque == 10
 
 
 @pytest.mark.django_db
-def test_movimenta_por_entrega_insuficiente():
-    cat = CategoriaEPI.objects.create(nome="Capacete")
+def test_movimenta_epi_gera_erro_quando_estoque_insuficiente():
+    """
+    Testa se movimenta_por_entrega lança ValidationError
+    quando a quantidade solicitada excede o estoque disponível.
+    """
+    categoria = CategoriaEPI.objects.create(nome="Capacete")
     epi = EPI.objects.create(
-        codigo="C1", nome="Capacete", categoria=cat, estoque=2, estoque_minimo=0
+        codigo="C1", nome="Capacete", categoria=categoria, estoque=2, estoque_minimo=0
     )
-    e = Entrega(epi=epi, quantidade=5, status=Entrega.Status.EMPRESTADO)
+
+    entrega = Entrega(epi=epi, quantidade=5, status=Entrega.Status.EMPRESTADO)
     with pytest.raises(ValidationError):
-        movimenta_por_entrega(e, antiga=None)
+        movimenta_por_entrega(entrega, antiga=None)

@@ -6,42 +6,53 @@ from django.urls import reverse
 from app_colaboradores.models import Colaborador
 
 
-def make_user_with_perms(*codenames):
-    user = User.objects.create_user("admin_test", password="x")
-    perms = Permission.objects.filter(
+def criar_usuario_com_permissao(*codenames):
+    """
+    Cria um usuário de teste com permissões específicas.
+    """
+    usuario = User.objects.create_user("admin_test", password="x")
+    permissoes = Permission.objects.filter(
         codename__in=codenames, content_type__app_label="app_colaboradores"
     )
-    user.user_permissions.add(*perms)
-    user.is_staff = True
-    user.is_superuser = False
-    user.save()
-    return user
+    usuario.user_permissions.add(*permissoes)
+    usuario.is_staff = True
+    usuario.is_superuser = False
+    usuario.save()
+    return usuario
 
 
 @pytest.mark.django_db
-def test_lista_requires_perm_and_filters(client):
-    user = make_user_with_perms("view_colaborador")
-    client.force_login(user)
+def test_lista_colaboradores_requer_permissao_e_aplica_filtros(client):
+    """
+    Testa se a listagem de colaboradores requer permissão específica
+    e se os filtros de pesquisa funcionam corretamente.
+    """
+    usuario = criar_usuario_com_permissao("view_colaborador")
+    client.force_login(usuario)
 
     Colaborador.objects.create(nome="Alice", matricula="A1", email="a@x.com")
     Colaborador.objects.create(nome="Bob", matricula="B1", email="b@x.com")
 
     url = reverse("app_colaboradores:lista")
-    resp = client.get(url, {"q": "ali"})
-    assert resp.status_code == 200
-    html = resp.content.decode()
+    resposta = client.get(url, {"q": "ali"})
+    assert resposta.status_code == 200
+    html = resposta.content.decode()
     assert "Alice" in html and "Bob" not in html
 
 
 @pytest.mark.django_db
-def test_criar_stays_on_page_and_may_create_user_and_groups(client):
-    user = make_user_with_perms("add_colaborador", "view_colaborador")
-    client.force_login(user)
+def test_criar_colaborador_permanece_na_pagina_e_cria_usuario_e_grupos(client):
+    """
+    Testa a criação de um colaborador, verificando se o usuário e os grupos
+    associados são criados corretamente, permanecendo na página de criação.
+    """
+    usuario = criar_usuario_com_permissao("add_colaborador", "view_colaborador")
+    client.force_login(usuario)
 
-    g = Group.objects.create(name="almoxarife")
+    grupo = Group.objects.create(name="almoxarife")
 
     url = reverse("app_colaboradores:criar")
-    resp = client.post(
+    resposta = client.post(
         url,
         data={
             "nome": "João da Silva",
@@ -52,30 +63,41 @@ def test_criar_stays_on_page_and_may_create_user_and_groups(client):
             "telefone": "9999-0000",
             "ativo": "on",
             "criar_usuario": "on",
-            "groups": [g.id],
+            "groups": [grupo.id],
         },
         follow=True,
     )
-    assert resp.status_code == 200
-    colab = Colaborador.objects.get(matricula="C123")
-    assert colab.user is not None
-    assert g in colab.user.groups.all()
-    assert "cadastrado com sucesso" in resp.content.decode().lower()
+
+    assert resposta.status_code == 200
+    colaborador = Colaborador.objects.get(matricula="C123")
+    assert colaborador.user is not None
+    assert grupo in colaborador.user.groups.all()
+    assert "cadastrado com sucesso" in resposta.content.decode().lower()
 
 
 @pytest.mark.django_db
-def test_editar_updates_user_email_and_active_and_groups(client):
-    user = make_user_with_perms("change_colaborador", "view_colaborador")
-    client.force_login(user)
-    g1 = Group.objects.create(name="colaborador")
-    g2 = Group.objects.create(name="almoxarife")
-    c = Colaborador.objects.create(nome="Maria", matricula="M1", email="maria@x.com", ativo=True)
-    u = User.objects.create_user("maria", email="maria@x.com", password="x", is_active=True)
-    c.user = u
-    c.save()
+def test_editar_colaborador_atualiza_email_status_e_grupos(client):
+    """
+    Testa a edição de um colaborador, verificando se o email do usuário,
+    status ativo e grupos são atualizados corretamente.
+    """
+    usuario = criar_usuario_com_permissao("change_colaborador", "view_colaborador")
+    client.force_login(usuario)
 
-    url = reverse("app_colaboradores:editar", kwargs={"pk": c.pk})
-    resp = client.post(
+    grupo1 = Group.objects.create(name="colaborador")
+    grupo2 = Group.objects.create(name="almoxarife")
+
+    colaborador = Colaborador.objects.create(
+        nome="Maria", matricula="M1", email="maria@x.com", ativo=True
+    )
+    usuario_maria = User.objects.create_user(
+        "maria", email="maria@x.com", password="x", is_active=True
+    )
+    colaborador.user = usuario_maria
+    colaborador.save()
+
+    url = reverse("app_colaboradores:editar", kwargs={"pk": colaborador.pk})
+    resposta = client.post(
         url,
         data={
             "nome": "Maria",
@@ -85,26 +107,33 @@ def test_editar_updates_user_email_and_active_and_groups(client):
             "setor": "",
             "telefone": "",
             "ativo": "",
-            "groups": [g2.id],
+            "groups": [grupo2.id],
         },
         follow=True,
     )
-    assert resp.status_code == 200
-    c.refresh_from_db()
-    u.refresh_from_db()
-    assert u.email == "novo@empresa.com"
-    assert u.is_active is False
-    assert g2 in u.groups.all() and g1 not in u.groups.all()
+
+    assert resposta.status_code == 200
+    colaborador.refresh_from_db()
+    usuario_maria.refresh_from_db()
+    assert usuario_maria.email == "novo@empresa.com"
+    assert usuario_maria.is_active is False
+    assert grupo2 in usuario_maria.groups.all() and grupo1 not in usuario_maria.groups.all()
 
 
 @pytest.mark.django_db
-def test_delete_redirects_and_soft_deactivates(client):
-    user = make_user_with_perms("delete_colaborador", "view_colaborador")
-    client.force_login(user)
-    c = Colaborador.objects.create(nome="X", matricula="Z9")
-    url = reverse("app_colaboradores:excluir", kwargs={"pk": c.pk})
-    resp = client.post(url, follow=True)
-    assert resp.status_code == 200
-    assert Colaborador.objects.filter(pk=c.pk).exists()
-    c.refresh_from_db()
-    assert c.ativo is False
+def test_excluir_colaborador_redireciona_e_desativa_soft(client):
+    """
+    Testa a exclusão de um colaborador, verificando se ele é
+    desativado (soft delete) e a operação redireciona corretamente.
+    """
+    usuario = criar_usuario_com_permissao("delete_colaborador", "view_colaborador")
+    client.force_login(usuario)
+
+    colaborador = Colaborador.objects.create(nome="X", matricula="Z9")
+    url = reverse("app_colaboradores:excluir", kwargs={"pk": colaborador.pk})
+    resposta = client.post(url, follow=True)
+
+    assert resposta.status_code == 200
+    assert Colaborador.objects.filter(pk=colaborador.pk).exists()
+    colaborador.refresh_from_db()
+    assert colaborador.ativo is False
