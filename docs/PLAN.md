@@ -1,13 +1,13 @@
-# 🧪 Plano de Testes — Sistema de Controle de EPI
+# Plano de Testes — Sistema de Controle de EPI
 
 **Versão:** 1.0  
-**Autor:** Jonathan Eichenberger  
+**Autores:** Jonathan Eichenberger e Felipe fernandes Ribeiro
 **Data:** 2025-10-06  
 **Cobertura mínima esperada:** **93%**
 
 ---
 
-##  Índice
+## Índice
 
 1. [Identificação do Projeto](#1-identificação-do-projeto)  
 2. [Objetivo do Plano de Testes](#2-objetivo-do-plano-de-testes)  
@@ -159,7 +159,9 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 | **CT18** | Validação de constraints de modelo EPI | Unitário | app_epis | Impede criação de EPI com estoque ou estoque mínimo negativo |
 | **CT19** | Testes de modelos (str e criação de usuário) | Unitário | models gerais | Retorna representação textual correta e cria usuário com PK válida |
 | **CT20** | URLs gerais do sistema | Unitário | config / app_core | Confirma reverses válidos e resolução de rotas principais |
-
+| **CT21** | Marcar entrega como **perdida** via POST mantém efeito no estoque | Integração | app_entregas | Atualiza status para **PERDIDO**, define `data_devolucao`, mantém o estoque do EPI inalterado e exibe mensagem de sucesso |
+| **CT22** | Impedir “marcar perdido” para status inválidos | Integração | app_entregas | Para entregas em **FORNECIDO**/**DEVOLVIDO**, não altera o status e exibe **mensagem de aviso** |
+| **CT23** | Rejeitar GET em “marcar perdido” | Integração | app_entregas | Apenas **POST** é aceito: requisições **GET** redirecionam sem efeitos colaterais no registro |
 
 [🔝 Voltar ao Índice](#índice)
 
@@ -196,7 +198,9 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 
 | Papel | Responsável | Atividade |
 |--------|--------------|-----------|
-| **Desenvolvedor** | Jonathan Eichenberger | Implementar testes unitários e integração |
+| **Desenvolvedor** | Felipe Fernandes Ribeiro | Implementar testes unitários |
+| **Desenvolvedor** | Jonathan Eichenberger | Implementar testes de integração |
+| **Desenvolvedor** | Jonathan Eichenberger e Felipe Fernandes Ribeiro | Implementar testes de funcionais automatizados com TestCase Studio (Teste de sistemas End-to-End) |
 | **Revisor Técnico** | Jonathan Eichenberger | Revisão de PRs e verificação de cobertura |
 | **DevOps/CI** | GitHub Actions | Execução automática da suíte e envio ao Codecov |
 
