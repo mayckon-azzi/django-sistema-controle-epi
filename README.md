@@ -187,8 +187,8 @@ Observações:
 
 ```bash
 # Clonar o repositório
-git clone https://github.com/seu-usuario/senai-imersao-sabadou.git
-cd senai-imersao-sabadou
+git clone https://github.com/seu-usuario/django-sistema-controle-epi.git
+cd django-sistema-controle-epi
 
 # Criar e ativar ambiente virtual (opcional, mas recomendado)
 python -m venv .venv
@@ -230,25 +230,10 @@ python manage.py runserver
 
 ```bash
 # 1) Clonar o repositório
-git clone https://github.com/seu-usuario/senai-imersao-sabadou.git
-cd senai-imersao-sabadou
+git clone https://github.com/seu-usuario/django-sistema-controle-epi.git
+cd django-sistema-controle-epi
 
 # 2) Criar o arquivo .env (exemplo abaixo)
-
-DJANGO_DEBUG=1
-DJANGO_SECRET_KEY=dev-secret
-DJANGO_ALLOWED_HOSTS=*
-
-DB_ENGINE=mysql
-DB_NAME=controle_epi
-DB_USER=root
-DB_PASSWORD=root
-DB_HOST=db
-DB_PORT=3306
-
-TZ=America/Sao_Paulo
-
-MYSQL_ROOT_PASSWORD=rootpass123
 
 # Linux/Mac:
 cp .env.example .env
@@ -342,6 +327,7 @@ omit =
     config/settings.py
     */admin.py
     */apps.py
+    tests/*
 
 [report]
 show_missing = True
@@ -352,7 +338,7 @@ precision = 2
 ### Testes realizados usando Codecov podem ser analisados logo abaixo:
 
 
-[![codecov](https://codecov.io/gh/jonathaneichenberger/senai-imersao-sabadou/branch/main/graph/badge.svg)](https://app.codecov.io/gh/<org-ou-usuario>/senai-imersao-sabadou)
+[![codecov](https://codecov.io/gh/jonathaneichenberger/django-sistema-controle-epi/branch/main/graph/badge.svg)](https://app.codecov.io/gh/<org-ou-usuario>/django-sistema-controle-epi)
 
 
 [🔝 Voltar ao Índice](#índice)

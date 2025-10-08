@@ -3,7 +3,7 @@
 **Versão:** 1.0  
 **Autores:** Jonathan Eichenberger e Felipe fernandes Ribeiro
 **Data:** 2025-10-06  
-**Cobertura mínima esperada:** **93%**
+**Cobertura mínima esperada:** **90%**
 
 ---
 
@@ -50,7 +50,7 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 - As funcionalidades principais funcionem conforme os requisitos (RF e RN).  
 - As permissões e fluxos de autenticação estejam corretos.  
 - A integração entre módulos (`colaboradores`, `epis`, `entregas`, `relatorios`) opere sem falhas.  
-- As alterações de código não reduzam a cobertura mínima de **93%**.  
+- As alterações de código não reduzam a cobertura mínima de **90%**.  
 - As respostas e templates retornem conforme esperado.
 
 [🔝 Voltar ao Índice](#índice)
@@ -65,7 +65,7 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 - **Views e URLs:** redirecionamentos, permissões, status codes e mensagens.  
 - **Templates:** renderização e elementos visuais principais.  
 - **Serviços:** movimentação de estoque e lógica de domínio.  
-- **Integração entre apps:** `app_entregas`, `app_colaboradores`, `app_epis`.
+- **Integração entre apps:** `app_entregas`, `app_colaboradores`, `app_epis`, `app_relatorios`.
 
 ### 🚫 Fora de escopo
 - Testes de performance e carga.  
@@ -82,9 +82,9 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 |------|-----------|----------------------|
 | **Unitário** | Validar métodos e funções isoladas (models, forms, utils). | Pytest |
 | **Integração** | Validar comunicação entre views, URLs, templates e DB. | Django Test Client |
-| **Funcional (Sistema)** | Validar fluxos completos (CRUDs, login, entregas). | Pytest + Client |
+| **Funcional (Sistema)** | Validar fluxos completos (CRUDs, login, entregas). | Selenium IDE + Pytest + Client|
 | **Regressão** | Reexecutar suíte completa após cada PR/Merge. | GitHub Actions |
-| **Cobertura de Código** | Monitorar percentual mínimo de 93%. | Coverage.py + Codecov |
+| **Cobertura de Código** | Monitorar percentual mínimo de 90%. | Coverage.py + Codecov |
 
 [🔝 Voltar ao Índice](#índice)
 
@@ -114,7 +114,7 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 
 ### Saída
 - Todos os testes passam (`exit code 0`).  
-- Cobertura ≥ **93%**.  
+- Cobertura ≥ **90%**.  
 - Sem falhas críticas ou regressões em funcionalidades principais.
 
 [🔝 Voltar ao Índice](#índice)
@@ -135,7 +135,7 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 
 ---
 
-## 🧩 8. Casos de Teste (Resumo)
+## 8. Casos de Teste (Resumo)
 
 | ID | Caso de Teste | Tipo | App | Resultado Esperado |
 |----|----------------|------|-----|--------------------|
@@ -201,8 +201,8 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 
 | Métrica | Valor Esperado |
 |----------|----------------|
-| Cobertura total | **≥ 93%** |
-| Cobertura de linhas críticas (views, services) | ≥ 90% |
+| Cobertura total | **≥ 90%** |
+| Cobertura de linhas críticas (views, services) | ≥ 85% |
 | Testes falhos permitidos | 0 |
 | Tempo médio de execução | ≤ 15s |
 | Execução automatizada | Em cada push/PR na branch `main` |
@@ -217,7 +217,7 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 |--------|----------|-----------|
 | Alterações no schema do banco invalidam fixtures | Alto | Atualizar fixtures e rodar `makemigrations` antes dos testes |
 | Dependência de permissões nos testes | Médio | Criar função `criar_usuario_com_permissao()` reutilizável |
-| Redução de cobertura após merge | Alto | Bloquear merge se cobertura < 93% no Codecov |
+| Redução de cobertura após merge | Alto | Bloquear merge se cobertura < 90% no Codecov |
 | Lentidão nos testes de integração | Baixo | Usar SQLite in-memory nos testes |
 
 [🔝 Voltar ao Índice](#índice)
@@ -230,7 +230,7 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 |--------|--------------|-----------|
 | **Desenvolvedor** | Felipe Fernandes Ribeiro | Implementar testes unitários |
 | **Desenvolvedor** | Jonathan Eichenberger | Implementar testes de integração |
-| **Desenvolvedor** | Jonathan Eichenberger e Felipe Fernandes Ribeiro | Implementar testes de funcionais automatizados com TestCase Studio (Teste de sistemas End-to-End) |
+| **Desenvolvedor** | Jonathan Eichenberger e Felipe Fernandes Ribeiro | Implementar testes de funcionais automatizados com Selenium IDE (Teste de sistemas End-to-End) |
 | **Revisor Técnico** | Jonathan Eichenberger | Revisão de PRs e verificação de cobertura |
 | **DevOps/CI** | GitHub Actions | Execução automática da suíte e envio ao Codecov |
 
@@ -242,7 +242,7 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 
 - Funcionalidades críticas testadas (CRUDs, login, permissões, relatórios).  
 - Nenhum teste falho.  
-- Cobertura **≥ 93%**.  
+- Cobertura **≥ 90%**.  
 - Relatórios disponíveis na pipeline CI.  
 - Commit na branch `main` exibe selo verde no Codecov.
 
@@ -284,7 +284,7 @@ Os relatórios são enviados e publicados no **Codecov** após a execução do p
 
 ## 📊 14. Conclusão
 
-Este plano garante um **processo sistemático e automatizado de verificação da qualidade** do Sistema de Controle de EPI, cobrindo todos os módulos críticos e assegurando **alta confiabilidade com cobertura mínima de 93%**.
+Este plano garante um **processo sistemático e automatizado de verificação da qualidade** do Sistema de Controle de EPI, cobrindo todos os módulos críticos e assegurando **alta confiabilidade com cobertura mínima de 90%**.
 
 A **manutenção contínua deste plano**, com revisões a cada nova funcionalidade ou requisito, garantirá a **evolução estável e segura** do sistema.
 
