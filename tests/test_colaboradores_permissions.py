@@ -31,7 +31,7 @@ def test_lista_colaboradores_sem_permissao_retorna_403(client):
 
 
 @pytest.mark.django_db
-def test_lista_colaboradores_com_permissao_exibe_pagina(client):
+def test_lista_colaboradores_com_permissao_retorna_status_200_e_renderiza(client):
     """
     Verifica se usuário autenticado com a permissão 'view_colaborador'
     consegue acessar a página de listagem corretamente (status 200).

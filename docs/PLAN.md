@@ -128,7 +128,7 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 | **Sistema Operacional** | Ubuntu 22.04 (Docker container) |
 | **Banco de Dados** | SQLite para testes, MySQL em produção |
 | **Ferramentas** | Pytest, Coverage.py, Codecov |
-| **Execução local** | `pytest --cov=.` |
+| **Execução local** | `pytest --cov=. --cov-report=term-missing --cov-report=html` |
 | **CI/CD** | GitHub Actions (`.github/workflows/tests.yml`) |
 
 [🔝 Voltar ao Índice](#índice)
