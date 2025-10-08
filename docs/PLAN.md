@@ -176,6 +176,21 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 | **CT35** | Ação **“remover foto”** sem imagem associada exibe mensagem informativa | Integração | app_colaboradores | Exibe mensagem “colaborador não possui foto” e não realiza alterações no modelo |
 | **CT36** | Ação **“remover foto”** com imagem salva remove arquivo e confirma sucesso | Integração | app_colaboradores | Remove o arquivo da instância e exibe mensagem de sucesso “foto removida com sucesso” |
 | **CT37** | POST inválido de upload de foto re-renderiza página mantendo contexto | Integração | app_colaboradores | Retorna status 200, renderiza `perfil.html` novamente e mantém `colaborador` e `foto_form` no contexto |
+| **CT38** | Validação de formulário de entrega com campos obrigatórios | Unitário | app_entregas | Garante que o form exibe erros apropriados quando campos obrigatórios não são preenchidos |
+| **CT39** | Validação de quantidade negativa em formulário de entrega | Unitário | app_entregas | Impede o envio de quantidade menor ou igual a zero e retorna erro de validação |
+| **CT40** | Criação de entrega reduz o estoque do EPI conforme quantidade e status | Integração | app_entregas | Ao criar uma entrega com status **EMPRESTADO**, o estoque do EPI é reduzido corretamente |
+| **CT41** | Atualização de entrega com mesmo EPI e status ajusta estoque conforme diferença de quantidade | Integração | app_entregas | Atualiza o estoque apenas pelo delta entre a quantidade antiga e a nova, mantendo a consistência |
+| **CT42** | Atualização de entrega com troca de EPI reverte estoque do antigo e aplica no novo | Unitário | app_entregas | Reverte o delta no EPI antigo e aplica o novo delta no EPI novo, garantindo consistência entre EPIs |
+| **CT43** | Exclusão de entrega bem-sucedida remove o registro e atualiza estoque | Integração | app_entregas | Após exclusão via POST, o registro é removido e o estoque do EPI é restaurado corretamente |
+| **CT44** | Exclusão de entrega com falha no service redireciona e preserva estoque | Integração | app_entregas | Quando `movimenta_por_exclusao` lança exceção, a view redireciona à lista e o estoque permanece inalterado |
+| **CT45** | Listagem de entregas filtra por nome, colaborador, EPI e status | Integração | app_entregas | Aplica filtros conforme querystring (`q`, `colaborador`, `epi`, `status`) e monta `base_query` sem `page` |
+| **CT46** | Contexto da listagem contém parâmetros e resultados filtrados corretamente | Integração | app_entregas | Inclui `q`, `colaborador_id`, `epi_id` e `status` no contexto, exibindo apenas registros compatíveis |
+| **CT47** | Marcar entrega como **perdida** via POST mantém efeito no estoque | Integração | app_entregas | Atualiza status para **PERDIDO**, define `data_devolucao`, mantém o estoque do EPI inalterado e exibe mensagem de sucesso |
+| **CT48** | Impedir “marcar perdido” para status inválidos | Integração | app_entregas | Para entregas em **FORNECIDO**/**DEVOLVIDO**, não altera o status e exibe mensagem de aviso |
+| **CT49** | Rejeitar GET em “marcar perdido” | Integração | app_entregas | Apenas **POST** é aceito: requisições **GET** redirecionam sem efeitos colaterais no registro |
+| **CT50** | Atender solicitação GET renderiza página de confirmação | Integração | app_entregas | GET de solicitação **pendente** retorna status 200 e renderiza `solicitacao_atender_confirm.html` |
+| **CT51** | POST em solicitação com status inválido (REPROVADA) exibe aviso e redireciona | Integração | app_entregas | Exibe mensagem “apenas solicitações pendentes/aprovadas podem ser atendidas” e redireciona para `solicitacoes_gerenciar` |
+
 
 
 [🔝 Voltar ao Índice](#índice)
