@@ -1,8 +1,7 @@
 # tests/test_entregas_services.py
-from datetime import timezone
-
 import pytest
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from app_colaboradores.models import Colaborador
 from app_entregas.models import Entrega
