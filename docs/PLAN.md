@@ -162,6 +162,21 @@ Garantir a **qualidade funcional, estrutural e regressiva** do Sistema de Contro
 | **CT21** | Marcar entrega como **perdida** via POST mantém efeito no estoque | Integração | app_entregas | Atualiza status para **PERDIDO**, define `data_devolucao`, mantém o estoque do EPI inalterado e exibe mensagem de sucesso |
 | **CT22** | Impedir “marcar perdido” para status inválidos | Integração | app_entregas | Para entregas em **FORNECIDO**/**DEVOLVIDO**, não altera o status e exibe **mensagem de aviso** |
 | **CT23** | Rejeitar GET em “marcar perdido” | Integração | app_entregas | Apenas **POST** é aceito: requisições **GET** redirecionam sem efeitos colaterais no registro |
+| **CT24** | Listagem filtra corretamente apenas colaboradores **ativos** (`ativo=1`) | Integração | app_colaboradores | Retorna status 200, exibe apenas registros com `ativo=True` e exclui os inativos da página |
+| **CT25** | Listagem filtra corretamente apenas colaboradores **inativos** (`ativo=0`) | Integração | app_colaboradores | Retorna status 200, exibe somente colaboradores com `ativo=False` e oculta os ativos |
+| **CT26** | Contexto da listagem contém parâmetros de busca e filtro (`q` e `ativo`) | Integração | app_colaboradores | Inclui no contexto os valores informados na querystring para manter filtros ativos na navegação |
+| **CT27** | Página de exclusão (GET) renderiza corretamente o **template de confirmação** | Integração | app_colaboradores | Retorna status 200, renderiza o template de confirmação e inclui o objeto colaborador no contexto |
+| **CT28** | Tentar excluir colaborador já **inativo** apenas informa sem alterar dados | Integração | app_colaboradores | Exibe mensagem informativa “já está desativado” e mantém o registro sem alterações no banco |
+| **CT29** | Página de **registro** (GET) é exibida com formulário válido | Integração | app_colaboradores | Retorna status 200 e inclui `form` no contexto pronto para preenchimento |
+| **CT30** | Envio de **registro inválido** permanece na página exibindo erros | Integração | app_colaboradores | Retorna status 200, mantém o contexto com `form` e mensagens de erro de validação |
+| **CT31** | Usuário sem perfil mas com permissão de criar é redirecionado para **criação** | Integração | app_colaboradores | Redireciona para rota de criação (`app_colaboradores:criar`) e exibe mensagem informativa para criação do perfil |
+| **CT32** | Usuário sem perfil e **sem permissão** é redirecionado à **home** com erro | Integração | app_colaboradores | Direciona para `app_core:home` e exibe mensagem de erro informando ausência de perfil de colaborador |
+| **CT33** | Acesso ao perfil de **outro colaborador sem permissão** retorna **403** | Integração | app_colaboradores | Bloqueia acesso via `PermissionDenied`, retornando HTTP 403 Forbidden |
+| **CT34** | Contexto do perfil contém dados do **colaborador logado** e form de foto | Integração | app_colaboradores | Renderiza página com chaves `colaborador` e `foto_form` no contexto |
+| **CT35** | Ação **“remover foto”** sem imagem associada exibe mensagem informativa | Integração | app_colaboradores | Exibe mensagem “colaborador não possui foto” e não realiza alterações no modelo |
+| **CT36** | Ação **“remover foto”** com imagem salva remove arquivo e confirma sucesso | Integração | app_colaboradores | Remove o arquivo da instância e exibe mensagem de sucesso “foto removida com sucesso” |
+| **CT37** | POST inválido de upload de foto re-renderiza página mantendo contexto | Integração | app_colaboradores | Retorna status 200, renderiza `perfil.html` novamente e mantém `colaborador` e `foto_form` no contexto |
+
 
 [🔝 Voltar ao Índice](#índice)
 

@@ -61,7 +61,9 @@ def test_perfil_pk_de_terceiro_sem_permissao_retornando_403(client):
 
 @pytest.mark.django_db
 def test_perfil_get_contexto_traz_colaborador_e_form_de_foto(client):
-    """Confere que o contexto do perfil inclui 'colaborador' e 'foto_form'."""
+    """
+    Confere que o contexto do perfil inclui 'colaborador' e 'foto_form'.
+    """
     u = User.objects.create_user("u3", email="u3@x.com", password="x")
     colab = Colaborador.objects.create(nome="U3", email="u3@x.com", matricula="U3", user=u)
     client.force_login(u)
