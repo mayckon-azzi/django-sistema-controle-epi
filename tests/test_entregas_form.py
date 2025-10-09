@@ -20,7 +20,6 @@ def test_formulario_entrega_requer_data_prevista_para_emprestado():
     epi = EPI.objects.create(codigo="L1", nome="Luva", categoria=categoria, estoque=10)
     colaborador = Colaborador.objects.create(nome="A", email="a@x.com", matricula="A1", ativo=True)
 
-    # Data prevista ausente
     form = EntregaForm(
         data={
             "colaborador": colaborador.pk,
@@ -32,7 +31,6 @@ def test_formulario_entrega_requer_data_prevista_para_emprestado():
     assert not form.is_valid()
     assert "data_prevista_devolucao" in form.errors
 
-    # Data prevista passada
     form = EntregaForm(
         data={
             "colaborador": colaborador.pk,
@@ -47,7 +45,6 @@ def test_formulario_entrega_requer_data_prevista_para_emprestado():
     assert not form.is_valid()
     assert "data_prevista_devolucao" in form.errors
 
-    # Data prevista futura
     form = EntregaForm(
         data={
             "colaborador": colaborador.pk,
@@ -98,12 +95,10 @@ def test_formulario_solicitacao_valida_regras_basicas():
     categoria = CategoriaEPI.objects.create(nome="Luvas")
     epi = EPI.objects.create(codigo="L1", nome="Luva", categoria=categoria, estoque=10, ativo=True)
 
-    # Quantidade inválida
     form = SolicitacaoForm(data={"epi": epi.pk, "quantidade": 0})
     assert not form.is_valid()
     assert "quantidade" in form.errors
 
-    # EPI inativo
     epi.ativo = False
     epi.save()
     form = SolicitacaoForm(data={"epi": epi.pk, "quantidade": 1})

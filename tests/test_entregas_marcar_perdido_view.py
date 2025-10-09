@@ -47,7 +47,7 @@ def test_marcar_perdido_aceita_post_e_mantem_efeito_no_estoque(client):
     url = reverse("app_entregas:marcar_perdido", kwargs={"pk": entrega.pk})
     resp = client.post(url, follow=True)
 
-    assert resp.status_code == 200  # após follow=True
+    assert resp.status_code == 200
     entrega.refresh_from_db()
     epi.refresh_from_db()
 

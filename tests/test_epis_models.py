@@ -24,11 +24,9 @@ def test_constraints_de_valores_nao_negativos_do_epi():
     """
     categoria = CategoriaEPI.objects.create(nome="Capacete")
 
-    # Estoque negativo
     with pytest.raises((IntegrityError, DataError, ValueError)):
         EPI.objects.create(codigo="X-1", nome="X", categoria=categoria, estoque=-1)
 
-    # Estoque mínimo negativo
     with pytest.raises((IntegrityError, DataError, ValueError)):
         EPI.objects.create(
             codigo="X-2", nome="X", categoria=categoria, estoque=0, estoque_minimo=-1

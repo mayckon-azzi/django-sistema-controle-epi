@@ -47,19 +47,16 @@ def test_permissoes_acesso_relatorios(client):
     url_index = reverse("app_relatorios:index")
     url_exportar = reverse("app_relatorios:exportar")
 
-    # Usuário anônimo
     resp = client.get(url_index)
     assert resp.status_code in (302, 303)
     resp = client.get(url_exportar)
     assert resp.status_code in (302, 303)
 
-    # Usuário sem permissão
     usuario = User.objects.create_user("nope", password="x")
     client.force_login(usuario)
     assert client.get(url_index).status_code == 403
     assert client.get(url_exportar).status_code == 403
 
-    # Usuário com permissão
     usuario2 = criar_usuario_com_permissao_view_entrega()
     client.force_login(usuario2)
     assert client.get(url_index).status_code == 200
@@ -79,7 +76,6 @@ def test_agregacoes_e_filtros_contexto_relatorio(client):
     )
     agora = timezone.now()
 
-    # Criar entregas
     Entrega.objects.create(
         colaborador=colaborador,
         epi=epi,
@@ -160,7 +156,6 @@ def test_exportacao_csv_relatorio(client):
     leitor = csv.reader(io.StringIO(conteudo), delimiter=";")
     linhas = list(leitor)
 
-    # Cabeçalho CSV
     assert linhas[0] == [
         "Data Entrega",
         "Data Devolução Prevista",
@@ -172,7 +167,6 @@ def test_exportacao_csv_relatorio(client):
         "Observação",
     ]
 
-    # Linha de dados
     assert len(linhas) == 2
     linha_dado = linhas[1]
     assert linha_dado[3] == "Bruno"

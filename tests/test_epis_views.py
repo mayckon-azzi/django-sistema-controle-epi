@@ -34,27 +34,22 @@ def test_lista_epi_filtra_por_nome_categoria_ativos_e_estoque(client):
 
     url = reverse("app_epis:lista")
 
-    # Sem filtros
     resp = client.get(url)
     html = resp.content.decode().lower()
     assert "luva a" in html and "luva b" in html and "capacete" in html
 
-    # Filtro por nome
     resp = client.get(url + "?q=luva")
     html = resp.content.decode().lower()
     assert "luva a" in html and "luva b" in html and "capacete" not in html
 
-    # Filtro por categoria
     resp = client.get(url + f"?categoria={cat2.id}")
     html = resp.content.decode().lower()
     assert "capacete" in html and "luva a" not in html
 
-    # Filtro apenas ativos
     resp = client.get(url + "?ativos=1")
     html = resp.content.decode().lower()
     assert "capacete" not in html
 
-    # Filtro abaixo do estoque mínimo
     resp = client.get(url + "?abaixo=1")
     html = resp.content.decode().lower()
     assert "luva a" in html and "luva b" not in html
@@ -68,11 +63,9 @@ def test_criar_epi_requer_login_e_permissao(client):
     """
     url = reverse("app_epis:criar")
 
-    # Usuário anônimo
     resp = client.get(url)
     assert resp.status_code in (302, 303)
 
-    # Usuário sem permissão
     usuario = User.objects.create_user("u1", password="x")
     client.force_login(usuario)
     assert client.get(url).status_code == 403
@@ -160,7 +153,6 @@ def test_excluir_epi_protected_error_exibe_mensagem_erro(monkeypatch, client):
     cat = CategoriaEPI.objects.create(nome="Luvas")
     epi = EPI.objects.create(codigo="L1", nome="Luva", categoria=cat, estoque=1)
 
-    # Força ProtectedError ao excluir
     def boom(*a, **k):
         raise ProtectedError("tem fk", [])
 

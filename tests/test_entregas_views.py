@@ -76,7 +76,6 @@ def test_atualizar_e_excluir_entrega_ajusta_estoque_e_mensagens(client):
     epi = EPI.objects.create(codigo="C1", nome="Cap", categoria=categoria, estoque=4)
     colaborador = Colaborador.objects.create(nome="Y", email="y@x.com", matricula="Y1", ativo=True)
 
-    # Criar entrega
     url_create = reverse("app_entregas:criar")
     client.post(
         url_create,
@@ -96,7 +95,6 @@ def test_atualizar_e_excluir_entrega_ajusta_estoque_e_mensagens(client):
 
     entrega = Entrega.objects.latest("id")
 
-    # Atualizar entrega
     url_edit = reverse("app_entregas:editar", kwargs={"pk": entrega.pk})
     resposta = client.post(
         url_edit,
@@ -117,7 +115,6 @@ def test_atualizar_e_excluir_entrega_ajusta_estoque_e_mensagens(client):
     assert epi.estoque == 4
     assert "atualizada com sucesso" in resposta.content.decode().lower()
 
-    # Excluir entrega
     url_del = reverse("app_entregas:excluir", kwargs={"pk": entrega.pk})
     resposta = client.post(url_del, follow=True)
     assert resposta.status_code == 200
@@ -142,7 +139,6 @@ def test_solicitacoes_criar_aprovar_reprovar_atender(client):
     categoria = CategoriaEPI.objects.create(nome="Óculos")
     epi = EPI.objects.create(codigo="O1", nome="Óculos", categoria=categoria, estoque=10)
 
-    # Criar solicitação
     url_new = reverse("app_entregas:criar_solicitacao")
     resposta = client.post(
         url_new, data={"epi": epi.pk, "quantidade": 2, "observacao": ""}, follow=True
@@ -151,14 +147,12 @@ def test_solicitacoes_criar_aprovar_reprovar_atender(client):
     solicitacao = Solicitacao.objects.get()
     assert solicitacao.colaborador == colaborador
 
-    # Aprovar solicitação
     url_aprovar = reverse("app_entregas:aprovar_solicitacao", kwargs={"pk": solicitacao.pk})
     resposta = client.post(url_aprovar, follow=True)
     assert resposta.status_code == 200
     solicitacao.refresh_from_db()
     assert solicitacao.status == Solicitacao.Status.APROVADA
 
-    # Atender solicitação
     url_atender = reverse("app_entregas:atender_solicitacao", kwargs={"pk": solicitacao.pk})
     resposta = client.post(url_atender, follow=True)
     assert resposta.status_code == 200
@@ -167,7 +161,6 @@ def test_solicitacoes_criar_aprovar_reprovar_atender(client):
     epi.refresh_from_db()
     assert epi.estoque == 8
 
-    # Marcar devolvido
     entrega = Entrega.objects.latest("id")
     url_devolvido = reverse("app_entregas:marcar_devolvido", kwargs={"pk": entrega.pk})
     resposta = client.post(url_devolvido, follow=True)
@@ -176,7 +169,6 @@ def test_solicitacoes_criar_aprovar_reprovar_atender(client):
     assert epi.estoque == 10
     assert "devolvida" in resposta.content.decode().lower()
 
-    # Reprovar solicitação
     solicitacao2 = Solicitacao.objects.create(colaborador=colaborador, epi=epi, quantidade=1)
     url_reprovar = reverse("app_entregas:reprovar_solicitacao", kwargs={"pk": solicitacao2.pk})
     resposta = client.post(url_reprovar, follow=True)

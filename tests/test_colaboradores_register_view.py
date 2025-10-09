@@ -13,7 +13,7 @@ def test_registro_colaborador_cria_usuario_e_colaborador(client):
     Verifica se o registro de um novo colaborador cria corretamente
     o usuário e o colaborador no sistema.
     """
-    Group.objects.get_or_create(name="Colaborador")  # grupo padrão usado no form
+    Group.objects.get_or_create(name="Colaborador")
     url = reverse("app_colaboradores:registrar")
     resposta = client.post(
         url,

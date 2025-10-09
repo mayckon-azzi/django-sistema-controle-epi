@@ -29,7 +29,6 @@ def test_formulario_epi_rejeita_valores_negativos():
     """
     cat = CategoriaEPI.objects.create(nome="Luvas")
 
-    # Estoque negativo
     dados = {
         "nome": "Luva X",
         "codigo": "LUV-1",
@@ -43,7 +42,6 @@ def test_formulario_epi_rejeita_valores_negativos():
     assert not form.is_valid()
     assert "estoque" in form.errors
 
-    # Estoque mínimo negativo
     dados2 = dados | {"codigo": "LUV-2", "estoque": 1, "estoque_minimo": -5}
     form2 = EPIForm(data=dados2)
     assert not form2.is_valid()
