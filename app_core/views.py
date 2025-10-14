@@ -11,10 +11,9 @@ from app_epis.models import EPI
 
 
 def home(request):
-    # Descobre dinamicamente os códigos de status de Entrega
+
     status_codes = {code for code, _ in Entrega.Status.choices}
 
-    # "Fora do estoque" = qualquer status que NÃO seja DEVOLVIDO nem CANCELADO
     fora_do_estoque = [s for s in status_codes if s not in {"DEVOLVIDO", "CANCELADO"}]
 
     agora = timezone.now()
@@ -27,7 +26,7 @@ def home(request):
                 data_entrega__year=agora.year,
                 data_entrega__month=agora.month,
             )
-            .only("id")  # micro-otimização
+            .only("id")
             .count()
         )
 

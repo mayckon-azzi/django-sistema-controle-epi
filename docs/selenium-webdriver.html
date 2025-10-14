@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guia Didático — Selenium WebDriver (Sistema de Controle de EPI)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { scroll-behavior: smooth; }
+    pre code { white-space: pre; }
+    .toc a { text-decoration: none; }
+    .bd-callout { padding:1rem; border:1px solid var(--bs-border-color); border-left-width:.25rem; border-radius:.25rem; }
+    .bd-callout-info { border-left-color: var(--bs-info-border-subtle); }
+    .bd-callout-success { border-left-color: var(--bs-success-border-subtle); }
+    .bd-callout-warning { border-left-color: var(--bs-warning-border-subtle); }
+    .bd-callout-danger { border-left-color: var(--bs-danger-border-subtle); }
+    .code-title { font-size:.9rem; opacity:.8; }
+    .anchor-offset { scroll-margin-top: 80px; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top border-bottom">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-semibold" href="#indice">Selenium — EPI</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="#1-o-que-e-o-selenium-webdriver">O que é</a></li>
+        <li class="nav-item"><a class="nav-link" href="#2-como-o-selenium-funciona">Como funciona</a></li>
+        <li class="nav-item"><a class="nav-link" href="#3-instalacao-e-primeiro-teste">Instalação</a></li>
+        <li class="nav-item"><a class="nav-link" href="#5-page-objects-estrutura-recomendada">Page Objects</a></li>
+        <li class="nav-item"><a class="nav-link" href="#7-aplicando-no-sistema-de-controle-de-epi">Aplicando</a></li>
+        <li class="nav-item"><a class="nav-link" href="#8-mapa-dos-20-testes-e-equivalentes-em-selenium">Mapa 20 testes</a></li>
+      </ul>
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="themeSwitch">
+        <label class="form-check-label" for="themeSwitch">Tema claro</label>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container py-5" style="max-width: 1100px;">
+  <div class="pt-4"></div>
+
+  <header class="mb-4">
+    <h1 class="display-6 fw-bold">Guia Didático — Selenium WebDriver no Sistema de Controle de EPI</h1>
+    <p class="text-secondary">Última atualização: <strong>14/10/2025</strong> • Escopo: Introdução prática da ferramenta <strong>Selenium WebDriver</strong> no projeto Django + Pytest.</p>
+    <p class="lead">Objetivo: ensinar passo a passo como instalar, configurar e aplicar o Selenium em fluxos reais (login, CRUDs, relatórios, etc.).</p>
+  </header>
+
+  <section id="indice" class="mb-4 anchor-offset">
+    <h2 class="h4">Índice</h2>
+    <ol class="toc ps-3">
+      <li><a href="#1-o-que-e-o-selenium-webdriver">O que é o Selenium WebDriver</a></li>
+      <li><a href="#2-como-o-selenium-funciona">Como o Selenium funciona</a></li>
+      <li><a href="#3-instalacao-e-primeiro-teste">Instalação e primeiro teste</a></li>
+      <li><a href="#4-boas-praticas-para-iniciantes">Boas práticas para iniciantes</a></li>
+      <li><a href="#5-page-objects-estrutura-recomendada">Page Objects (estrutura recomendada)</a></li>
+      <li><a href="#6-rodando-no-ci-github-actions">Rodando no CI (GitHub Actions)</a></li>
+      <li><a href="#7-aplicando-no-sistema-de-controle-de-epi">Aplicando no Sistema de Controle de EPI</a></li>
+      <li><a href="#8-mapa-dos-20-testes-e-equivalentes-em-selenium">Mapa dos 20 testes e equivalentes em Selenium</a></li>
+      <li><a href="#9-suite-de-exemplo-pronta-tests_selenium">Suite de exemplo pronta (tests_selenium)</a></li>
+      <li><a href="#10-conclusao">Conclusão</a></li>
+    </ol>
+    <hr class="opacity-25">
+  </section>
+
+  <section id="1-o-que-e-o-selenium-webdriver" class="anchor-offset">
+    <h2 class="h3">1. O que é o Selenium WebDriver</h2>
+    <p>O <strong>Selenium WebDriver</strong> automatiza navegadores como se fosse um usuário real: abrir URL, clicar, digitar, ler textos, tirar captura de tela e validar comportamentos.</p>
+    <div class="bd-callout bd-callout-info">
+      <h6 class="mb-2">Principais usos</h6>
+      <ul class="mb-0">
+        <li><strong>Testes funcionais</strong> e de <strong>regressão</strong>.</li>
+        <li><strong>Validação de interface</strong> e navegação entre módulos.</li>
+        <li>Execução em <strong>CI/CD</strong> para prevenir quebras.</li>
+      </ul>
+    </div>
+    <p class="mb-0"><a href="#indice">🔝 Voltar ao Índice</a></p>
+  </section>
+
+  <hr>
+
+  <section id="2-como-o-selenium-funciona" class="anchor-offset">
+    <h2 class="h3">2. Como o Selenium funciona</h2>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Componentes</h5>
+            <table class="table table-sm table-striped">
+              <thead><tr><th>Componente</th><th>Função</th></tr></thead>
+              <tbody>
+                <tr><td>WebDriver</td><td>Envia comandos ao navegador (abrir, clicar, digitar...)</td></tr>
+                <tr><td>Browser Driver</td><td>Ponte entre Selenium e o navegador (ChromeDriver, GeckoDriver)</td></tr>
+                <tr><td>Test Runner</td><td>Executor dos testes — aqui usamos <strong>Pytest</strong></td></tr>
+              </tbody>
+            </table>
+            <p class="mb-0"><small><em>Fluxo:</em> Test → Selenium WebDriver → ChromeDriver → Chrome</small></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Selenium 4</h5>
+            <p class="mb-1">O <em>Selenium Manager</em> resolve o driver automaticamente na maioria dos casos.</p>
+            <p class="mb-0">Prefira localizadores estáveis (<code>By.ID</code>, <code>data-testid</code>), e use <code>WebDriverWait</code> para esperas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="mt-2 mb-0"><a href="#indice">🔝 Voltar ao Índice</a></p>
+  </section>
+
+  <hr>
+
+  <section id="3-instalacao-e-primeiro-teste" class="anchor-offset">
+    <h2 class="h3">3. Instalação e primeiro teste</h2>
+
+<div class="card card-body">
+<div class="code-title">Shell</div>
+<pre><code># 1. Ambiente virtual
+python -m venv .venv
+# Windows
+.venv\Scriptsctivate
+# Linux/Mac
+source .venv/bin/activate
+
+# 2. Dependências
+pip install selenium pytest pytest-django webdriver-manager
+</code></pre>
+
+<div class="code-title">Teste simples — <code>tests_selenium/test_smoke.py</code></div>
+<pre><code>from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+def test_abrir_home():
+    driver = webdriver.Chrome()  # Selenium Manager cuida do driver
+    driver.get("http://localhost:8000/")
+    assert "Sistema" in driver.title or "EPI" in driver.page_source
+    driver.quit()
+</code></pre>
+</div>
+
+    <p class="mt-2 mb-0"><a href="#indice">🔝 Voltar ao Índice</a></p>
+  </section>
+
+  <hr>
+
+  <section id="4-boas-praticas-para-iniciantes" class="anchor-offset">
+    <h2 class="h3">4. Boas práticas para iniciantes</h2>
+    <ul>
+      <li>Evite <code>time.sleep()</code>; use <code>WebDriverWait</code> (esperas explícitas).</li>
+      <li>Centralize localizadores e fluxos com Page Objects.</li>
+      <li>Use headless no CI; com GUI em desenvolvimento local.</li>
+      <li>Capture screenshots de falhas: <code>driver.save_screenshot("falha.png")</code>.</li>
+      <li>Mantenha testes curtos, independentes e estáveis.</li>
+      <li>Prefira IDs fixos ou <code>data-testid</code> no HTML.</li>
+    </ul>
+    <p class="mb-0"><a href="#indice">🔝 Voltar ao Índice</a></p>
+  </section>
+
+  <hr>
+
+  <section id="5-page-objects-estrutura-recomendada" class="anchor-offset">
+    <h2 class="h3">5. Page Objects (estrutura recomendada)</h2>
+<div class="card card-body">
+<div class="code-title">Arquivo — <code>tests_selenium/pages/login_page.py</code></div>
+<pre><code>from selenium.webdriver.common.by import By
+
+class LoginPage:
+    URL = "http://localhost:8000/accounts/login/"
+    USER = (By.ID, "id_username")
+    PASS = (By.ID, "id_password")
+    SUBMIT = (By.CSS_SELECTOR, "button[type='submit']")
+
+    def __init__(self, driver):
+        self.driver = driver
+
+    def open(self):
+        self.driver.get(self.URL)
+
+    def login(self, username, password):
+        self.driver.find_element(*self.USER).send_keys(username)
+        self.driver.find_element(*self.PASS).send_keys(password)
+        self.driver.find_element(*self.SUBMIT).click()
+</code></pre>
+</div>
+    <p class="mt-2 mb-0"><a href="#indice">🔝 Voltar ao Índice</a></p>
+  </section>
+  
+  <section id="7-aplicando-no-sistema-de-controle-de-epi" class="anchor-offset">
+    <h2 class="h3">7. Aplicando no Sistema de Controle de EPI</h2>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <h6 class="text-uppercase small text-secondary">Módulos e rotas</h6>
+          <ul class="mb-0">
+            <li><code>/</code> — Home (app_core)</li>
+            <li><code>/colaboradores/</code> — Lista e autenticação</li>
+            <li><code>/epis/</code> — Catálogo de EPIs</li>
+            <li><code>/entregas/</code> — Solicitar/registrar entregas</li>
+            <li><code>/relatorios/</code> — Relatórios e exportações</li>
+          </ul>
+        </div></div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100"><div class="card-body">
+          <h6 class="text-uppercase small text-secondary">Exemplos rápidos</h6>
+<pre><code># Home responde 200
+def test_home_responde_200(driver):
+    driver.get("http://localhost:8000/")
+    assert "Sistema" in driver.title
+
+# Login e acessar lista de colaboradores
+from tests_selenium.pages.login_page import LoginPage
+def test_login_e_lista_colaboradores(driver):
+    page = LoginPage(driver); page.open()
+    page.login("admin", "admin123")
+    driver.get("http://localhost:8000/colaboradores/")
+    assert "Colaboradores" in driver.page_source
+</code></pre>
+        </div></div>
+      </div>
+    </div>
+    <p class="mt-2 mb-0"><a href="#indice">🔝 Voltar ao Índice</a></p>
+  </section>
+
+  <hr>
+
+  <section id="8-mapa-dos-20-testes-e-equivalentes-em-selenium" class="anchor-offset">
+    <h2 class="h3">8. Mapa dos 20 testes e equivalentes em Selenium</h2>
+    <p>Baseado no arquivo <code>tests/test_aaa_testes_imersao.py</code>, mapeamos os testes unitários/integração para seus equivalentes funcionais com Selenium.</p>
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm align-middle">
+        <thead class="table-secondary">
+          <tr><th>Grupo</th><th>Teste (pytest)</th><th>Objetivo</th><th>Equivalente Selenium</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Core</td><td>home (unit)</td><td>Namespace/URLs corretos</td><td>Acessar <code>/</code> e validar título/conteúdo</td></tr>
+          <tr><td>Core</td><td>home responde 200 (integração)</td><td>Disponibilidade</td><td>Acessar <code>/</code> → assert em título/HTML</td></tr>
+          <tr><td>Core</td><td>teste_mensagens redireciona</td><td>Mensagem "Sucesso"</td><td>Acessar <code>/teste-mensagens/</code> e verificar flash</td></tr>
+          <tr><td>Colaboradores</td><td>__str__ formatado</td><td>Modelo</td><td>(opcional UI) validar texto em células da tabela</td></tr>
+          <tr><td>Colaboradores</td><td>form recusa matrícula duplicada</td><td>Regra de negócio</td><td>Submeter formulário com matrícula repetida e checar erro</td></tr>
+          <tr><td>Colaboradores</td><td>lista sem login redireciona</td><td>Proteção</td><td>Acessar <code>/colaboradores/</code> sem login → URL de login</td></tr>
+          <tr><td>Colaboradores</td><td>lista com permissão → 200</td><td>Acesso</td><td>Login → acessar <code>/colaboradores/</code> → conteúdo</td></tr>
+          <tr><td>EPIs</td><td>model/estoque negativo</td><td>Regra do model</td><td>(UI) tentar salvar com estoque negativo e validar alerta</td></tr>
+          <tr><td>EPIs</td><td>form recusa estoque negativo</td><td>Validação</td><td>Submeter form com -1 e checar mensagem</td></tr>
+          <tr><td>EPIs</td><td>lista responde 200</td><td>Disponibilidade</td><td>Acessar <code>/epis/</code> e validar tabela</td></tr>
+          <tr><td>Entregas</td><td>service _mov_value</td><td>Regra de movimento</td><td>(UI) fluxo de emprestar/devolver e conferir saldos</td></tr>
+          <tr><td>Entregas</td><td>SolicitacaoForm quantidade &lt; 1</td><td>Validação</td><td>Submeter quantidade 0 e checar erro</td></tr>
+          <tr><td>Entregas</td><td>lista responde 200</td><td>Disponibilidade</td><td>Acessar <code>/entregas/</code> e validar conteúdo</td></tr>
+          <tr><td>Entregas</td><td>criar sem login redireciona</td><td>Proteção</td><td>Acessar <code>/entregas/novo/</code> sem login → login</td></tr>
+          <tr><td>Relatórios</td><td>form período inválido</td><td>Validação</td><td>Preencher datas invertidas e checar erro em <code>data_ate</code></td></tr>
+          <tr><td>Relatórios</td><td>form campos opcionais</td><td>Permite filtro vazio</td><td>Acessar UI sem filtros e processar OK</td></tr>
+          <tr><td>Relatórios</td><td>index exige login</td><td>Proteção</td><td>Acessar <code>/relatorios/</code> sem login → login</td></tr>
+          <tr><td>Relatórios</td><td>exportar exige login</td><td>Proteção</td><td>Acessar <code>/relatorios/exportar/</code> sem login → login</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small text-secondary">Observação: alguns testes unitários não possuem 1:1 na UI, mas podem inspirar cenários funcionais.</p>
+    <p class="mb-0"><a href="#indice">🔝 Voltar ao Índice</a></p>
+  </section>
+
+  <hr>
+
+  <section id="9-suite-de-exemplo-pronta-tests_selenium" class="anchor-offset">
+    <h2 class="h3">9. Suite de exemplo pronta (<code>tests_selenium</code>)</h2>
+
+<div class="card card-body mb-3">
+<div class="code-title">Estrutura sugerida</div>
+<pre><code>tests_selenium/
+├── conftest.py
+├── pages/
+│   ├── login_page.py
+│   ├── colaboradores_page.py
+│   ├── epis_page.py
+│   ├── entregas_page.py
+│   └── relatorios_page.py
+├── test_app_core.py
+├── test_colaboradores.py
+├── test_epis.py
+├── test_entregas.py
+└── test_relatorios.py
+</code></pre>
+</div>
+
+<div class="card card-body mb-3">
+<div class="code-title">conftest.py</div>
+<pre><code>import os
+import pytest
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+@pytest.fixture
+def driver():
+    opts = Options()
+    if os.getenv("HEADLESS", "1") == "1":
+        opts.add_argument("--headless=new")
+        opts.add_argument("--no-sandbox")
+        opts.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(options=opts)
+    driver.set_window_size(1366, 900)
+    yield driver
+    driver.quit()
+</code></pre>
+</div>
+
+<div class="card card-body mb-3">
+<div class="code-title">test_app_core.py</div>
+<pre><code>def test_home(driver):
+    driver.get("http://localhost:8000/")
+    assert "Sistema" in driver.title or "EPI" in driver.page_source
+
+def test_teste_mensagens(driver):
+    driver.get("http://localhost:8000/teste-mensagens/")
+    assert "Sucesso" in driver.page_source
+</code></pre>
+</div>
+
+<div class="card card-body mb-3">
+<div class="code-title">test_colaboradores.py</div>
+<pre><code>from tests_selenium.pages.login_page import LoginPage
+
+def test_lista_sem_login_redireciona(driver):
+    driver.get("http://localhost:8000/colaboradores/")
+    assert "login" in driver.current_url
+
+def test_lista_com_login_ok(driver):
+    page = LoginPage(driver); page.open()
+    page.login("admin","admin123")
+    driver.get("http://localhost:8000/colaboradores/")
+    assert "Colaboradores" in driver.page_source
+</code></pre>
+</div>
+
+<div class="card card-body mb-3">
+<div class="code-title">test_epis.py</div>
+<pre><code>def test_lista_epis(driver):
+    driver.get("http://localhost:8000/epis/")
+    assert "EPI" in driver.page_source or "Listar" in driver.page_source
+</code></pre>
+</div>
+
+<div class="card card-body mb-3">
+<div class="code-title">test_entregas.py</div>
+<pre><code>def test_criar_sem_login_redireciona(driver):
+    driver.get("http://localhost:8000/entregas/novo/")
+    assert "login" in driver.current_url
+</code></pre>
+</div>
+
+<div class="card card-body mb-3">
+<div class="code-title">test_relatorios.py</div>
+<pre><code>def test_relatorios_exige_login(driver):
+    driver.get("http://localhost:8000/relatorios/")
+    assert "login" in driver.current_url
+
+def test_exportar_exige_login(driver):
+    driver.get("http://localhost:8000/relatorios/exportar/")
+    assert "login" in driver.current_url
+</code></pre>
+</div>
+
+    <p class="mb-0"><a href="#indice">🔝 Voltar ao Índice</a></p>
+  </section>
+
+  <hr>
+
+  <section id="10-conclusao" class="anchor-offset">
+    <h2 class="h3">10. Conclusão</h2>
+    <p>O Selenium WebDriver complementa os testes unitários e de integração do projeto, validando a experiência do usuário de ponta a ponta.</p>
+    <p>Com a suíte <code>tests_selenium</code> você garante cobertura dos fluxos críticos (login, CRUDs, relatórios), prevenindo regressões e melhorando a qualidade do <em>Sistema de Controle de EPI</em>.</p>
+    <p class="mb-0"><a href="#indice">🔝 Voltar ao Índice</a></p>
+  </section>
+
+  <hr class="mt-5">
+  <footer class="text-center text-secondary small pb-5">
+    <p class="mb-1">© 2025 — Guia Selenium WebDriver (Sistema de Controle de EPI)</p>
+    <p class="mb-0">Compatível com Bootstrap 5 — imprima em PDF via navegador.</p>
+  </footer>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Theme toggle (dark/light)
+(function() {
+  const key = 'selenium-epi-theme';
+  const saved = localStorage.getItem(key);
+  const root = document.documentElement;
+  const checkbox = document.getElementById('themeSwitch');
+  if (saved === 'light') {
+    root.setAttribute('data-bs-theme','light');
+    checkbox.checked = true;
+  }
+  checkbox.addEventListener('change', function() {
+    const to = this.checked ? 'light' : 'dark';
+    root.setAttribute('data-bs-theme', to);
+    localStorage.setItem(key, to);
+  });
+})();
+</script>
+</body>
+</html>
