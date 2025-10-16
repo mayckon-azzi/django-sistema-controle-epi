@@ -84,7 +84,6 @@ class EPIForm(forms.ModelForm):
         cleaned = super().clean()
         est = cleaned.get("estoque")
         min_ = cleaned.get("estoque_minimo")
-        # marque o campo correto como inválido
         if est is not None and est < 0:
             self.add_error("estoque", "Valores não podem ser negativos.")
         if min_ is not None and min_ < 0:

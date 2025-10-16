@@ -86,6 +86,7 @@ jobs:
       - name: Pytest (coverage xml + term-missing + html)
         run: |
           pytest \
+            --ignore=tests_selenium \
             --cov=. \
             --cov-branch \
             --cov-report=xml:coverage.xml \

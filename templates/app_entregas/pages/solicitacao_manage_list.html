@@ -63,16 +63,16 @@
                     {% if s.status == "PENDENTE" %}
                       <form method="post" action="{% url 'app_entregas:aprovar_solicitacao' s.pk %}">
                         {% csrf_token %}
-                        <button class="btn btn-sm btn-success" data-confirm="Aprovar esta solicitação?" type="submit">Aprovar</button>
+                        <button class="btn btn-sm btn-success" id="btn-aprovar-solicitacao-epi-enviada" data-confirm="Aprovar esta solicitação?" type="submit">Aprovar</button>
                       </form>
                       <form method="post" action="{% url 'app_entregas:reprovar_solicitacao' s.pk %}">
                         {% csrf_token %}
-                        <button class="btn btn-sm btn-outline-danger" data-confirm="Reprovar esta solicitação?" type="submit">Reprovar</button>
+                        <button class="btn btn-sm btn-outline-danger" id="btn-reprovar-solicitacao-epi-enviada" data-confirm="Reprovar esta solicitação?" type="submit">Reprovar</button>
                       </form>
                     {% endif %}
 
                     {% if s.status == "PENDENTE" or s.status == "APROVADA" %}
-                      <a class="btn btn-sm btn-outline-primary" href="{% url 'app_entregas:atender_solicitacao' s.pk %}">Atender</a>
+                      <a class="btn btn-sm btn-outline-primary" id="btn-atender-solicitacao-epi-enviada" href="{% url 'app_entregas:atender_solicitacao' s.pk %}">Atender</a>
                     {% endif %}
                   </div>
                 </td>
