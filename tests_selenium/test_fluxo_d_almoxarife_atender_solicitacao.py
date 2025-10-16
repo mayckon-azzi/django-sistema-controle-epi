@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from app_colaboradores.models import Colaborador
-from app_entregas.models import Entrega
+from app_entregas.models import Entrega, Solicitacao
 from app_epis.models import EPI, CategoriaEPI
 
 
@@ -46,6 +46,8 @@ def test_almoxarife_aprova_e_atende_solicitacao(
         matricula=f"B{salt.upper()}",
         ativo=True,
     )
+
+    Solicitacao.objects.create(colaborador=solicitante, epi=epi, quantidade=1)
 
     url_login = live_server.url + reverse("app_colaboradores:entrar")
     url_gerenciar = live_server.url + reverse("app_entregas:solicitacoes_gerenciar")
