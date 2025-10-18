@@ -90,7 +90,7 @@
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
                     {% if perms.app_epis.change_epi %}
-                      <a class="btn btn-sm btn-outline-primary" href="{% url 'app_epis:editar' e.pk %}">Editar</a>
+                      <a class="btn btn-sm btn-outline-primary" id="btn-editar-epi" href="{% url 'app_epis:editar' e.pk %}">Editar</a>
                     {% endif %}
                     {% if perms.app_epis.delete_epi %}
                       <!-- Botão abre modal -->
